@@ -1,0 +1,27 @@
+{
+  "/_blazor": {
+    "target": "http://localhost:5047",
+    "secure": false,
+    "ws": true,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/_framework": {
+    "target": "http://localhost:5047",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/_content": {
+    "target": "http://localhost:5047",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/api": {
+    "target": "http://localhost:5047",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
