@@ -1,0 +1,21 @@
+{
+  "/blazor": {
+    "target": "http://localhost:5139",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": { "^/blazor": "" }
+  },
+  "/_framework": {
+    "target": "http://localhost:5139",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  },
+  "/_content": {
+    "target": "http://localhost:5139",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
