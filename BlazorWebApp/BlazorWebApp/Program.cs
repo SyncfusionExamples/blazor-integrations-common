@@ -7,12 +7,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
-
+builder.Services.AddSignalR(o => { o.MaximumReceiveMessageSize = 102400000; });
 
 builder.Services.AddMemoryCache();
 //Add Syncfusion Blazor service to the container
 builder.Services.AddSyncfusionBlazor();
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
