@@ -7,7 +7,7 @@ import { GridModule } from '@syncfusion/ej2-angular-grids';
   standalone: true,
   imports: [CommonModule, GridModule],
   template: `
-    <ejs-grid [dataSource]="data" [allowPaging]="true" [allowSorting]="true">
+    <ejs-grid [dataSource]="data" >
       <e-columns>
         <e-column field="OrderID" headerText="Order ID" width="120" textAlign="Right"></e-column>
         <e-column field="CustomerID" headerText="Customer ID" width="150"></e-column>
