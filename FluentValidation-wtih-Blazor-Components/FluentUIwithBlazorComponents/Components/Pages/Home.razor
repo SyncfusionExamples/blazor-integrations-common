@@ -1,10 +1,10 @@
 ﻿@page "/"
 
-@using Syncfusion.Blazor.DataForm
 @using System.ComponentModel.DataAnnotations
 @using Syncfusion.Blazor.Inputs
 @using Syncfusion.Blazor.Buttons
 @using Microsoft.FluentUI.AspNetCore.Components
+@using Syncfusion.Blazor.Popups
 
 <div class="form-container">
     <h2>Registration Form</h2>
@@ -13,7 +13,8 @@
         <DataAnnotationsValidator />
         <FluentValidationSummary Model="@RegistrationModel.FirstName" />
         <div class="form-group">
-            <SfTextArea @bind-Value="@RegistrationModel.FirstName"
+            <label>First Name:</label>
+            <SfTextBox @bind-Value="@RegistrationModel.FirstName"
                         Label="First Name"
                         Placeholder="Enter your first name"
                         Required="true"
@@ -22,9 +23,10 @@
         </div>
 
         <div class="form-group">
-            <SfTextArea @bind-Value="@RegistrationModel.Email"
+            <label>E-mail Id:</label>
+            <SfTextBox @bind-Value="@RegistrationModel.Email"
                         Label="Email Address"
-                        Type="email"
+                        Type="InputType.Email"
                         Placeholder="your.email@example.com"
                         Required="true"
                         aria-label="Email Address" />
@@ -32,9 +34,10 @@
         </div>
 
         <div class="form-group">
-            <SfTextArea @bind-Value="@RegistrationModel.Password"
+            <label>Password:</label>
+            <SfTextBox @bind-Value="@RegistrationModel.Password"
                         Label="Password"
-                        Type="password"
+                        Type="InputType.Password"
                         Placeholder="Enter a strong password"
                         Required="true"
                         aria-label="Password" />
@@ -52,22 +55,38 @@
             <SfButton Type="ButtonType.Submit" Appearance="Appearance.Accent">
                 Register
             </SfButton>
+             
             <SfButton Type="ButtonType.Button" Appearance="Appearance.Neutral" OnClick="@ResetForm">
                 Clear
             </SfButton>
         </div>
+        <SfDialog Target="#target" @ref="DialogObj" Width="300px" Visible="false" ShowCloseIcon="true">
+            <DialogTemplates>
+                <Header>Status</Header>
+                <Content>@DialogContent</Content>
+            </DialogTemplates>
+            <DialogButtons>
+                <DialogButton Content="OK" IsPrimary="true" OnClick="@OnOkClick" />
+            </DialogButtons>
+        </SfDialog>
     </EditForm>
 </div>
 
 @code {
     private RegistrationFormModel RegistrationModel = new();
-
-    private void HandleValidSubmit()
+    private SfDialog DialogObj { get; set; }
+    private string DialogContent { get; set; } = "Loading...";
+    private void OnOkClick()
     {
-        // Handle form submission
-        Console.WriteLine("Form submitted successfully!");
+        // Place your OK logic here
+        RegistrationModel = new();
     }
 
+    private async Task HandleValidSubmit()
+    {
+        DialogContent = "Form Submitted Successfully!";
+        await DialogObj.ShowAsync();
+    }
     private void ResetForm()
     {
         RegistrationModel = new();
@@ -103,6 +122,7 @@
     }
 
     .form-group {
+        margin-top:20px;
         margin-bottom: 1.5rem;
     }
 
