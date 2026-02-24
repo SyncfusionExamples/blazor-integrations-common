@@ -1,0 +1,62 @@
+@page "/"
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Spreadsheet
+
+<h3>Simple Blazor WASM: DataGrid ➜ Spreadsheet Preview (No Backend)</h3>
+
+<div class="mb-2">
+    <SfButton CssClass="e-primary" @onclick="PreviewGridInSpreadsheet">Preview Grid in Spreadsheet</SfButton>
+    <span class="ms-3 text-muted">(Use Spreadsheet Ribbon → File to Open/Save as XLSX/CSV)</span>
+</div>
+
+<SfGrid TItem="Order" @ref="GridRef" DataSource="Orders" AllowPaging="true" Height="280"  AllowExcelExport="true">
+    <GridColumns>
+        <GridColumn Field="@nameof(Order.OrderID)" HeaderText="Order ID"  Width="120" IsPrimaryKey="true" />
+        <GridColumn Field="@nameof(Order.CustomerID)" HeaderText="Customer" Width="150" />
+        <GridColumn Field="@nameof(Order.Freight)" HeaderText="Freight" Width="120" Format="C2"  />
+        <GridColumn Field="@nameof(Order.ShipCity)" HeaderText="Ship City" Width="150" />
+    </GridColumns>
+</SfGrid>
+
+
+
+    <div class="mt-3">
+        <SfSpreadsheet DataSource="@SpreadsheetBytes"
+                       AllowNumberFormatting="true"
+                       AllowCellFormatting="true"
+                       AllowAutofill="true"
+                       >
+            <SpreadsheetRibbon></SpreadsheetRibbon>
+        </SfSpreadsheet>
+    </div>
+
+
+@code {
+    private SfGrid<Order>? GridRef;
+    private byte[]? SpreadsheetBytes;
+
+    // simple demo data
+    private List<Order> Orders = new()
+    {
+        new() { OrderID = 10001, CustomerID = "ALFKI", Freight = 2.30, ShipCity = "Denmark" },
+        new() { OrderID = 10002, CustomerID = "ANATR", Freight = 3.30, ShipCity = "Brazil" },
+        new() { OrderID = 10003, CustomerID = "ANTON", Freight = 4.30, ShipCity = "Germany" },
+    };
+
+    public class Order
+    {
+        public int OrderID { get; set; }
+        public string CustomerID { get; set; } = "";
+        public double Freight { get; set; }
+        public string ShipCity { get; set; } = "";
+    }
+
+    // Build an XLSX in-memory (client-side) using Syncfusion XlsIO
+    private async Task PreviewGridInSpreadsheet()
+    {
+        await GridRef.ExportToExcelAsync();
+               
+    }
+}
