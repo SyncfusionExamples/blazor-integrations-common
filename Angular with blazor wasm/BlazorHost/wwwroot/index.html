@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BlazorHost</title>
+    <base href="/" />
+    <link rel="preload" id="webassembly" />
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="BlazorHost.styles.css" rel="stylesheet" />
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="/lib/sf-grid/styles.css">
+<!-- <script>
+  window.waitForSfGrid = new Promise((resolve) => {
+    if (customElements.get('sf-grid')) { resolve(); return; }
+    const obs = new MutationObserver(() => {
+      if (customElements.get('sf-grid')) { resolve(); obs.disconnect(); }
+    });
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+    // Fallback resolve in case element registers later but mutation not caught
+    setTimeout(() => { if (customElements.get('sf-grid')) resolve(); }, 1000);
+  });
+</script> -->
+<script src="/lib/sf-grid/main.js" defer></script>
+
+</head>
+
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="." class="reload">Reload</a>
+        <span class="dismiss">🗙</span>
+    </div>
+    <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
+</body>
+
+</html>
