@@ -1,17 +1,11 @@
 ﻿@page "/"
 
-@using System.ComponentModel.DataAnnotations
-@using Syncfusion.Blazor.Inputs
-@using Syncfusion.Blazor.Buttons
-@using Microsoft.FluentUI.AspNetCore.Components
-@using Syncfusion.Blazor.Popups
-
 <div class="form-container">
     <h2>Registration Form</h2>
 
     <EditForm Model="@RegistrationModel" OnValidSubmit="@HandleValidSubmit">
         <DataAnnotationsValidator />
-        <FluentValidationSummary Model="@RegistrationModel.FirstName" />
+        <FluentValidationSummary Model="@RegistrationModel" />
         <div class="form-group">
             <label>First Name:</label>
             <SfTextBox @bind-Value="@RegistrationModel.FirstName"
@@ -60,9 +54,9 @@
                 Clear
             </SfButton>
         </div>
-        <SfDialog Target="#target" @ref="DialogObj" Width="300px" Visible="false" ShowCloseIcon="true">
+        <SfDialog @ref="DialogObj" Width="300px" Visible="false" ShowCloseIcon="true">
             <DialogTemplates>
-                <Header>Status</Header>
+                <Header>Form Submission Status</Header>
                 <Content>@DialogContent</Content>
             </DialogTemplates>
             <DialogButtons>
@@ -75,35 +69,56 @@
 @code {
     private RegistrationFormModel RegistrationModel = new();
     private SfDialog DialogObj { get; set; }
-    private string DialogContent { get; set; } = "Loading...";
+    private string DialogContent { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Closes the dialog and resets the form model.
+    /// </summary>
     private void OnOkClick()
     {
         // Place your OK logic here
         RegistrationModel = new();
     }
 
+    /// <summary>
+    /// Handles successful form submission after all validations pass.
+    /// </summary>
     private async Task HandleValidSubmit()
     {
-        DialogContent = "Form Submitted Successfully!";
+        try
+        {            
+            DialogContent = "Form submitted successfully! Your registration has been processed.";
+        }
+        catch (Exception ex)
+        {
+            DialogContent = $"An error occurred: {ex.Message}";
+        }
         await DialogObj.ShowAsync();
     }
+
+    /// <summary>
+    /// Resets all form fields to empty values.
+    /// </summary>
     private void ResetForm()
     {
         RegistrationModel = new();
     }
 
+    /// <summary>
+    /// Data model for the registration form with validation attributes.
+    /// </summary>
     public class RegistrationFormModel
     {
         [Required(ErrorMessage = "First name is required")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "First name must be between 2 and 50 characters")]
         public string FirstName { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Email is required")]
+        [Required(ErrorMessage = "Email address is required")]
         [EmailAddress(ErrorMessage = "Invalid email address")]
         public string Email { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Password is required")]
-        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters")]
+        [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
         public string Password { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "You must agree to the terms")]
@@ -117,18 +132,32 @@
         margin: 2rem auto;
         padding: 2rem;
         /* border: 1px solid #e1e4e8; */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         border-radius: 8px;
         /* background-color: #f6f8fa; */
     }
 
+    h2 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
     .form-group {
         margin-top:20px;
         margin-bottom: 1.5rem;
+    }
+
+    .form-group:focus-within {
+        outline: 2px solid transparent;
     }
 
     .form-actions {
         display: flex;
         gap: 1rem;
         margin-top: 2rem;
+        justify-content: center;
     }
+
+    .form-actions ::deep button {
+        min-width: 100px;
 </style>
