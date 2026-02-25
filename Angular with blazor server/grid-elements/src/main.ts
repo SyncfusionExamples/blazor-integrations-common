@@ -2,7 +2,7 @@
 import { createApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { createCustomElement } from '@angular/elements';
-import { SfGridComponent } from './app/sf-grid/sf-grid.component';
+import { App } from './app/app';
 
 (async () => {
   try {
@@ -10,7 +10,7 @@ import { SfGridComponent } from './app/sf-grid/sf-grid.component';
       providers: [ provideHttpClient() ]
     });
 
-    const element = createCustomElement(SfGridComponent, { injector: app.injector });
+    const element = createCustomElement(App, { injector: app.injector });
     if (!customElements.get('sf-grid')) {
       customElements.define('sf-grid', element);
     }

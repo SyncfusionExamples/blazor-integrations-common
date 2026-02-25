@@ -13,19 +13,7 @@
     <link href="BlazorHost.styles.css" rel="stylesheet" />
     <script type="importmap"></script>
     <link rel="stylesheet" href="/lib/sf-grid/styles.css">
-<!-- <script>
-  window.waitForSfGrid = new Promise((resolve) => {
-    if (customElements.get('sf-grid')) { resolve(); return; }
-    const obs = new MutationObserver(() => {
-      if (customElements.get('sf-grid')) { resolve(); obs.disconnect(); }
-    });
-    obs.observe(document.documentElement, { childList: true, subtree: true });
-    // Fallback resolve in case element registers later but mutation not caught
-    setTimeout(() => { if (customElements.get('sf-grid')) resolve(); }, 1000);
-  });
-</script> -->
-<script src="/lib/sf-grid/main.js" defer></script>
-
+    <script src="/lib/sf-grid/main.js" defer></script>
 </head>
 
 <body>
