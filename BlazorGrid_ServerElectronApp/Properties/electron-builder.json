@@ -1,0 +1,15 @@
+{
+  "compression": "maximum",
+  "win": {
+    "icon": "Assets/app.ico",
+    "target": [ "nsis", "portable" ]
+  },
+  "linux": {
+    "icon": "Assets/app.png",
+    "target": [ "AppImage", "deb" ]
+  },
+  "mac": {
+    "icon": "Assets/app.icns",
+    "target": [ "dmg", "zip" ]
+  }
+}
