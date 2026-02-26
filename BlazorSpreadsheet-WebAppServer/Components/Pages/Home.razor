@@ -7,7 +7,7 @@
 @using Syncfusion.Blazor.Grids
 @using Syncfusion.Blazor.Spreadsheet
 
-<h3>Simple Blazor DataGrid ➜ Spreadsheet Preview</h3>
+<h3>Blazor DataGrid ➜ Spreadsheet Preview</h3>
 
 <div class="mb-2">
     <SfButton CssClass="e-primary" @onclick="PreviewGridInSpreadsheet">Export Grid in Excel</SfButton>
@@ -15,7 +15,7 @@
 </div>
 
     <h5>DataGrid</h5>
-    <SfGrid TItem="Order" @ref="GridRef" DataSource="Orders" AllowPaging="true" AllowExcelExport="true">
+    <SfGrid TItem="Order" @ref="GridRef" DataSource="@Orders" AllowPaging="true" AllowExcelExport="true">
         <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" />
         <GridColumns>
             <GridColumn Field="@nameof(Order.OrderID)" HeaderText="Order ID"  Width="120" IsPrimaryKey="true" />
