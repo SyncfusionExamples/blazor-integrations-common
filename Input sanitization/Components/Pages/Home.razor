@@ -1,0 +1,132 @@
+@page "/"
+
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.RichTextEditor
+@using Microsoft.AspNetCore.Components.Forms
+@inject ILogger<Home> Logger
+
+<h3> Textbox sanitization </h3>
+
+<SfTextBox @bind-Value="topUserName" MaxLength="24" Placeholder="Alphanumeric and underscore only" />
+
+<h3> Rich Text Editor </h3>
+<SfRichTextEditor EnableHtmlSanitizer="true" Height="220px" />
+
+<h3>DataGrid Sanitized Editing</h3>
+
+<EditForm EditContext="@editContext" OnValidSubmit="@OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <SfGrid TItem="UserRecord"
+            DataSource="@Users"
+            AllowPaging="true"
+            Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" })">
+        <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Normal"></GridEditSettings>
+
+        <GridColumns>
+
+            <GridColumn Field=@nameof(UserRecord.Id)
+                        HeaderText="ID"
+                        IsPrimaryKey="true"
+                        TextAlign="TextAlign.Right"
+                        Width="90"
+                        AllowEditing="false" />
+
+            <GridColumn Field=@nameof(UserRecord.UserName)
+                        HeaderText="Username"
+                        Width="160">
+                <EditTemplate Context="editContextItem">
+                    @{
+                        var ctx = (UserRecord)editContextItem;
+                    }
+                    <SfTextBox @bind-Value="ctx.UserName"
+                               MaxLength="24"
+                               Placeholder="Alphanumeric/underscore only" />
+                </EditTemplate>
+            </GridColumn>
+
+            <GridColumn Field=@nameof(UserRecord.Email)
+                        HeaderText="Email"
+                        Width="220" />
+
+            <GridColumn Field=@nameof(UserRecord.NotesHtml)
+                        HeaderText="Notes"
+                        Width="300">
+
+                <EditTemplate Context="editNotesItem">
+                    @{
+                        var ctx = (UserRecord)editNotesItem;
+                    }
+                    <SfRichTextEditor @bind-Value="ctx.NotesHtml"
+                                      EnableHtmlSanitizer="true"
+                                      Height="180px">
+                        <RichTextEditorToolbarSettings Items="@(new List<ToolbarItemModel>
+                        {
+                            new ToolbarItemModel { Command = ToolbarCommand.Bold },
+                            new ToolbarItemModel { Command = ToolbarCommand.Italic },
+                            new ToolbarItemModel { Command = ToolbarCommand.Underline },
+                            new ToolbarItemModel { Command = ToolbarCommand.OrderedList },
+                            new ToolbarItemModel { Command = ToolbarCommand.UnorderedList },
+                            new ToolbarItemModel { Command = ToolbarCommand.CreateLink },
+                            new ToolbarItemModel { Command = ToolbarCommand.ClearFormat }
+                        })" />
+                    </SfRichTextEditor>
+                </EditTemplate>
+
+                <Template Context="itemContext">
+                    @{
+                        var item = (UserRecord)itemContext;
+                        var sanitized = item?.NotesHtml ?? string.Empty; // rely on Syncfusion RTE sanitizer
+                    }
+                    <div title="Preview (sanitized at render)">
+                        @((MarkupString)sanitized)
+                    </div>
+                </Template>
+
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</EditForm>
+
+@code {
+    public class UserRecord
+    {
+        public int Id { get; set; }
+
+        [Required(ErrorMessage = "Username is required.")]
+        [StringLength(24, MinimumLength = 3, ErrorMessage = "Username must be 3–24 characters.")]
+        [RegularExpression(@"^[A-Za-z0-9_]+$", ErrorMessage = "Only letters, digits, and underscore are allowed.")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required, EmailAddress(ErrorMessage = "Enter a valid email address.")]
+        [StringLength(128)]
+        public string Email { get; set; } = string.Empty;
+
+        [StringLength(2000, ErrorMessage = "Notes cannot exceed 2000 characters.")]
+        public string? NotesHtml { get; set; }
+    }
+
+     private string topUserName { get; set; } = string.Empty;
+    private List<UserRecord> Users = new()
+    {
+        new UserRecord { Id = 1, UserName = "alice_01", Email = "alice@example.com", NotesHtml = "<p>Hello</p>" },
+        new UserRecord { Id = 2, UserName = "bob_02", Email = "bob@example.com", NotesHtml = "<p>Team lead</p>" }
+    };
+
+    private EditContext editContext;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(new UserRecord());
+    }
+
+    private Task OnValidSubmit()
+    {
+        // Server operations: canonicalize, validate, sanitize HTML again, then persist.
+        return Task.CompletedTask;
+    }
+}

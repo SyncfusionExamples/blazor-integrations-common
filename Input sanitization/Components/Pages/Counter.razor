@@ -1,0 +1,51 @@
+﻿@page "/counter"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.Inputs
+
+<h3> Edit form validation</h3>
+
+<EditForm EditContext="@editContext" OnValidSubmit="@OnSubmit">
+    <DataAnnotationsValidator />
+    
+
+    <SfTextBox @bind-Value="formModel.Email" Placeholder="Enter valid Email address" />
+    <ValidationMessage For="() => formModel.Email" />
+
+    <button type="submit">Save</button>
+</EditForm>
+
+
+@using Microsoft.AspNetCore.Components.Forms
+
+@code {
+    public class UserRecord
+    {
+        [Required]
+        [StringLength(24, MinimumLength = 3)]
+        [RegularExpression(@"^[A-Za-z0-9_]+$")]
+        public string UserName { get; set; } = string.Empty;
+
+        [Required, EmailAddress]
+        [StringLength(128)]
+        public string Email { get; set; } = string.Empty;
+    }
+
+    // The model instance used by the form
+    private UserRecord formModel { get; } = new();
+
+    // The EditContext wrapping the model
+    private EditContext editContext = default!;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(formModel);
+    }
+
+    private Task OnSubmit()
+    {
+        // formModel has the validated values
+        return Task.CompletedTask;
+    }
+}

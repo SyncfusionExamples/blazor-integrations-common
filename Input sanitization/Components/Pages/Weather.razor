@@ -1,0 +1,92 @@
+﻿@page "/weather"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+@using Syncfusion.Blazor.Inputs
+@rendermode InteractiveServer
+
+<EditForm Model="@employee" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+    <DataAnnotationsValidator />
+    <div class="form-group">
+        <SfTextBox @bind-Value="employee.EmpID"></SfTextBox>
+        <ValidationMessage For="() => employee.EmpID" />
+    </div>
+
+    <div class="form-group">
+        <SfUploader @ref="UploadObj"
+                    ID="UploadFiles"
+                    AllowMultiple="false"  AllowedExtensions=".jpg,.jpeg,.png,.gif"
+                    AutoUpload="false">
+            <UploaderEvents ValueChange="OnChange"
+                            OnRemove="OnRemove"
+                            FileSelected="OnSelect">
+            </UploaderEvents>
+        </SfUploader>
+        <ValidationMessage For="() => employee.files" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit</button>
+</EditForm>
+
+@code {
+    // Make sure the type name matches the component (no namespace mismatch)
+    private SfUploader UploadObj;
+
+    public class Employee
+    {
+        [Required(ErrorMessage = "Please enter your name")]
+        public string EmpID { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Please upload a file")]
+        public List<UploaderUploadedFiles>? files { get; set; }
+    }
+
+    public Employee employee = new();
+
+    // Called when a file is selected
+    public void OnSelect(SelectedEventArgs args)
+    {
+        if (args.FilesData?.Count > 0)
+        {
+            employee.files = new List<UploaderUploadedFiles>
+            {
+                new UploaderUploadedFiles {
+                    Name = args.FilesData[0].Name,
+                    Type = args.FilesData[0].Type,
+                    Size = args.FilesData[0].Size
+                }
+            };
+        }
+    }
+
+    // Called when the file list changes; save files to disk here
+    private async Task OnChange(UploadChangeEventArgs args)
+    {
+        foreach (var file in args.Files)
+        {
+            if (file.FileInfo is not null && file.File is not null)
+            {
+                var path = file.FileInfo.Name; // ✅ Consider a safe path: Path.Combine(_env.WebRootPath, "uploads", file.FileInfo.Name)
+                using var filestream = new FileStream(path, FileMode.Create, FileAccess.Write);
+                await file.File.OpenReadStream(long.MaxValue).CopyToAsync(filestream);
+            }
+        }
+    }
+
+    // Called when the user removes a file
+    public void OnRemove(RemovingEventArgs _)
+    {
+        employee.files = null;
+    }
+
+    public Task HandleValidSubmit()
+    {
+        // No programmatic Upload call needed; files are already saved in OnChange.
+        return Task.CompletedTask;
+    }
+
+    public Task HandleInvalidSubmit(EditContext _)
+    {
+        // No programmatic Upload call needed.
+        return Task.CompletedTask;
+    }
+}
