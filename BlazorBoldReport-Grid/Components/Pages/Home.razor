@@ -1,0 +1,82 @@
+@page "/"
+
+@using Syncfusion.Blazor.Grids
+@inject IJSRuntime JS
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<div class="container mt-5">
+    <h2>Orders Data Grid & Bold Reports Integration</h2>
+    
+    
+    <SfButton CssClass="e-primary mt-3" IsPrimary="true" OnClick="@OpenReport">
+        Open RDLC Report
+    </SfButton>
+    
+    <SfGrid DataSource="@Orders">
+    <GridColumns>
+        <GridColumn Field=@nameof(Order.OrderID) HeaderText="Order ID" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        <GridColumn Field=@nameof(Order.CustomerID) HeaderText="Customer ID" Width="150"></GridColumn>
+        <GridColumn Field=@nameof(Order.OrderDate) HeaderText=" Order Date" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Right" Width="130"></GridColumn>
+        <GridColumn Field=@nameof(Order.Freight) HeaderText="Freight" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+    </GridColumns>
+    </SfGrid>
+    
+    <div id="viewer" style="height:80vh; margin-top:20px;"></div>
+</div>
+
+<style>
+#viewer_OrdersTable, #viewer_ReportTitle {
+    padding-left:22px;
+}
+</style>
+
+@code{
+    public List<Order> Orders { get; set; } = [];
+   
+    protected override void OnInitialized()
+    {
+        Orders = Enumerable.Range(1, 10).Select(x => new Order()
+        {
+            OrderID = 1000 + x,
+            CustomerID = (new string[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" })[new Random().Next(5)] ?? "ALFKI",
+            Freight = 2 * x,
+            OrderDate = DateTime.Now.AddDays(-x),
+        }).ToList();
+    }
+    
+    public async Task OpenReport()
+    {  
+        
+        try
+        {
+              
+            // Step 1: Send the grid data to the server API
+            var dataModel = new { DataSources = Orders };
+            var baseUrl = Nav.BaseUri.TrimEnd('/');
+            var url = $"{baseUrl}/api/BoldReportsAPI/SetReportData".Replace("//api", "/api");
+            var response = await Http.PostAsJsonAsync(url, dataModel);
+                       
+            // Step 2: Render the viewer with the data
+            var viewerOptions = new
+            {
+                serviceUrl = "/api/BoldReportsAPI",
+                reportPath = "Orders.rdlc"
+            };
+
+            await JS.InvokeVoidAsync("BoldReports.renderViewer", "viewer", viewerOptions);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex}");
+        }
+       
+    }
+
+    public class Order {
+        public int? OrderID { get; set; }
+        public string? CustomerID { get; set; }
+        public DateTime? OrderDate { get; set; }
+        public double? Freight { get; set; }
+    }
+}
