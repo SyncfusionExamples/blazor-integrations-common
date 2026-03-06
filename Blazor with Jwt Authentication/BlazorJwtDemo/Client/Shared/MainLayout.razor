@@ -1,0 +1,14 @@
+﻿@using Microsoft.AspNetCore.Components.Routing
+@inherits LayoutComponentBase
+
+<div class="page">
+  <nav style="padding:.5rem; background:#f8f9fa">
+    <NavLink href="/" Match="NavLinkMatch.All">Home</NavLink> |
+    <NavLink href="/login">Login</NavLink> |
+    <NavLink href="/orders">Orders</NavLink>
+  </nav>
+
+  <main class="content px-4">
+    @Body
+  </main>
+</div>

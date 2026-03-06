@@ -1,0 +1,90 @@
+@page "/login"
+@using Microsoft.Extensions.DependencyInjection
+@using Syncfusion.Blazor.Navigations
+@inject IHttpClientFactory ClientFactory
+@inject Blazored.LocalStorage.ILocalStorageService Storage
+@inject NavigationManager Nav
+<div class="login-center">
+  <div class="card login-card">
+<h3>Login</h3>
+
+@if (!string.IsNullOrWhiteSpace(message))
+{
+    <div style="color:red">@message</div>
+}
+
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="card p-4" style="max-width:420px; font-size:1.25rem;">
+        <div class="mb-3">
+      <label class="form-label fw-semibold">Username</label>
+      <input @bind="username" class="form-control login-input" />
+    </div>
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Password</label>
+      <input @bind="password" type="password" class="form-control login-input" />
+    </div>
+    <br /><br/>
+    <div class="d-flex">
+      <button class="btn btn-primary login-btn me-2" @onclick="LoginAsync">Login</button>
+      <button class="btn btn-secondary login-btn" @onclick="Logout">Logout</button>
+    </div>
+</div></div>
+  </div>
+</div>
+@code {
+    private string? username;
+    private string? password;
+    private string? message;
+
+    private async Task Logout()
+    {
+        await Storage.RemoveItemAsync("jwtToken");
+        Nav.NavigateTo("/login", forceLoad: true);
+    }
+
+    private async Task LoginAsync()
+    {
+        try
+        {
+            var client = ClientFactory.CreateClient("ApiClient");
+            var resp = await client.PostAsJsonAsync("api/auth/login", new { Username = username, Password = password });
+            if (resp.IsSuccessStatusCode)
+            {
+                var json = await resp.Content.ReadFromJsonAsync<TokenResponse>();
+                if (!string.IsNullOrWhiteSpace(json?.token))
+                {
+                    await Storage.SetItemAsync("jwtToken", json!.token);
+                    Nav.NavigateTo("/orders", true);
+                    return;
+                }
+            }
+            message = "Invalid credentials";
+        }
+        catch (Exception ex)
+        {
+            message = ex.Message;
+        }
+    }
+
+    public class TokenResponse { public string? token { get; set; } }
+}
+<style>.login-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+.login-card {
+  max-width: 480px;
+  padding: 1.25rem;
+  font-size: 2.35rem;
+  border-radius: .5rem;
+}
+.login-input {
+  font-size: 2.05rem;
+  padding: .75rem .5rem;
+}
+.login-btn {
+  font-size: 2.05rem;
+  padding: .5rem 1rem;
+}</style>

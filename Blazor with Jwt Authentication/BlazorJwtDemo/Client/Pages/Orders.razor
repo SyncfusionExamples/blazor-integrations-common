@@ -1,0 +1,39 @@
+@page "/orders"
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Data
+@using Syncfusion.Blazor.Grids
+@using System.Net.Http
+@using System.Net.Http.Json
+@using Microsoft.Extensions.DependencyInjection
+@inject IHttpClientFactory ClientFactory
+
+<h3>Orders (JWT protected)</h3>
+
+<SfGrid TValue="Order" AllowPaging="true" AllowSorting="true" Height="400px">
+
+
+<SfDataManager Url="api/orders"
+               Adaptor="Adaptors.UrlAdaptor"
+               HttpClientInstance="@_apiClient" />
+
+    <GridColumns>
+        <GridColumn Field="OrderID"     HeaderText="Order ID"   TextAlign="TextAlign.Center" Width="120"></GridColumn>
+        <GridColumn Field="CustomerID"  HeaderText="Customer"   Width="150"></GridColumn>
+        <GridColumn Field="ShipCountry" HeaderText="Country"    Width="150"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    private HttpClient? _apiClient;
+
+    protected override void OnInitialized()
+        => _apiClient = ClientFactory.CreateClient("ApiClient");
+
+    // <<< IMPORTANT: Model must be visible + property names match Field exactly >>>
+    public class Order
+    {
+        public int    OrderID      { get; set; }
+        public string? CustomerID  { get; set; }
+        public string? ShipCountry { get; set; }
+    }
+}
