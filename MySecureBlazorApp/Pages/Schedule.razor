@@ -1,16 +1,13 @@
 ﻿@page "/schedule"
 @using Syncfusion.Blazor.Schedule
 @using Syncfusion.Blazor.Data
-@using System.Net.Http.Headers
-@inject AuthenticationStateProvider AuthStateProvider
-@inject IHttpContextAccessor HttpContextAccessor
-@inject HttpClient Http
-@using System.Net.Http.Json
+@inject IConfiguration Configuration
 
 <AuthorizeView>
     <Authorized>
         <SfSchedule TValue="AppointmentData" Height="550px" SelectedDate="@currentDate" Readonly="true">
-            <ScheduleEventSettings TValue="AppointmentData" DataSource="@appointments">
+            <ScheduleEventSettings TValue="AppointmentData">
+                <SfDataManager Url="https://blazor.syncfusion.com/services/production/api/schedule" Headers="@HeaderData" Adaptor="Adaptors.WebApiAdaptor"></SfDataManager>
                 <ScheduleViews>
                     <ScheduleView Option="View.Month"></ScheduleView>
                 </ScheduleViews>
@@ -25,24 +22,13 @@
 
 @code {
     DateTime currentDate = DateTime.Today;
-   // Use a local list and fetch from the proxy in OnInitializedAsync.
-   private Dictionary<string, string> HeaderData { get; } = new Dictionary<string, string>();
-   private List<AppointmentData> appointments = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        try
+       private Dictionary<string, string> HeaderData { get; } = new Dictionary<string, string>();
+   
+        protected override void OnInitialized()
         {
-            // Our proxy returns the schedule array (or extracts it), so fetch and bind directly.
-            var result = await Http.GetFromJsonAsync<List<AppointmentData>>("http://localhost:5287/api/proxy/Schedule");
-            if (result != null) appointments = result;
+            var token = Configuration["ExternalApi:BearerToken"];
+            if (!string.IsNullOrEmpty(token)) HeaderData["Authorization"] = $"Bearer {token}";
         }
-        catch (Exception ex)
-        {
-            // Log to server console for now
-            Console.WriteLine($"Failed loading schedule: {ex.Message}");
-        }
-    }
 
 
     public class AppointmentData
