@@ -1,47 +1,47 @@
-﻿          @page "/grid"
+﻿@page "/grid"
 
-            @using Syncfusion.Blazor.Grids
-            @using Syncfusion.Blazor.Data
-            @inject IConfiguration Configuration
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Data
+@inject IConfiguration Configuration
 
-            <h3> DataGrid</h3>
+<h3> DataGrid</h3>
 
-            <AuthorizeView>
-                <Authorized Context="authContext">
-                        <SfGrid TValue="Order" AllowPaging="true">
-                           <SfDataManager Url="https://blazor.syncfusion.com/services/production/api/Orders/" Adaptor="Adaptors.WebApiAdaptor" Headers="@HeaderData"></SfDataManager>
-                            <GridPageSettings PageSize="10"></GridPageSettings>
-                            <GridColumns>
-                                <GridColumn Field="@nameof(Order.OrderID)" HeaderText="Order ID" IsPrimaryKey="true" Width="120"></GridColumn>
-                                <GridColumn Field="@nameof(Order.CustomerID)" HeaderText="Customer Name" Width="150"></GridColumn>
-                                <GridColumn Field="@nameof(Order.OrderDate)" HeaderText="Order Date" Format="d" Type="ColumnType.Date" Width="130"></GridColumn>
-                                <GridColumn Field="@nameof(Order.Freight)" HeaderText="Freight" Format="C2" Width="120"></GridColumn>
-                            </GridColumns>
-                        </SfGrid>
+<AuthorizeView>
+    <Authorized Context="authContext">
+            <SfGrid TValue="Order" AllowPaging="true">
+            <SfDataManager Url="https://blazor.syncfusion.com/services/production/api/Orders/" Adaptor="Adaptors.WebApiAdaptor" Headers="@HeaderData"></SfDataManager>
+                <GridPageSettings PageSize="10"></GridPageSettings>
+                <GridColumns>
+                    <GridColumn Field="@nameof(Order.OrderID)" HeaderText="Order ID" IsPrimaryKey="true" Width="120"></GridColumn>
+                    <GridColumn Field="@nameof(Order.CustomerID)" HeaderText="Customer Name" Width="150"></GridColumn>
+                    <GridColumn Field="@nameof(Order.OrderDate)" HeaderText="Order Date" Format="d" Type="ColumnType.Date" Width="130"></GridColumn>
+                    <GridColumn Field="@nameof(Order.Freight)" HeaderText="Freight" Format="C2" Width="120"></GridColumn>
+                </GridColumns>
+            </SfGrid>
 
-                    <p>Hello, @authContext.User.Identity?.Name!</p>
-                </Authorized>
-                <NotAuthorized>
-                    <p>Please log in to view the DataGrid.</p>
-                    <a href="Identity/Account/Login">Log in</a>
-                </NotAuthorized>
-            </AuthorizeView>
+        <p>Hello, @authContext.User.Identity?.Name!</p>
+    </Authorized>
+    <NotAuthorized>
+        <p>Please log in to view the DataGrid.</p>
+        <a href="Identity/Account/Login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
 
-            @code {
-                private Dictionary<string, string> HeaderData { get; } = new Dictionary<string, string>();
+@code {
+    private Dictionary<string, string> HeaderData { get; } = new Dictionary<string, string>();
 
-                protected override Task OnInitializedAsync()
-                {
-                    var token = Configuration["ExternalApi:BearerToken"];
-                    if (!string.IsNullOrEmpty(token)) HeaderData["Authorization"] = $"Bearer {token}";
-                    return base.OnInitializedAsync();
-                }
-                 
-                public class Order
-                {
-                    public int? OrderID { get; set; }
-                    public string? CustomerID { get; set; }
-                    public DateTime? OrderDate { get; set; }
-                    public double? Freight { get; set; }
-                }
-            }
+    protected override Task OnInitializedAsync()
+    {
+        var token = Configuration["ExternalApi:BearerToken"];
+        if (!string.IsNullOrEmpty(token)) HeaderData["Authorization"] = $"Bearer {token}";
+        return base.OnInitializedAsync();
+    }
+    
+    public class Order
+    {
+        public int? OrderID { get; set; }
+        public string? CustomerID { get; set; }
+        public DateTime? OrderDate { get; set; }
+        public double? Freight { get; set; }
+    }
+}
