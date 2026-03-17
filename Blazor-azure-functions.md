@@ -1,7 +1,7 @@
 --- 
 layout: post
-title: Blazor with Azure Functions | Syncfusion
-description: Step-by-step guide to use Azure Functions as a serverless backend for Blazor WebAssembly with Syncfusion components (Grid, Scheduler, DatePicker, Toast).
+title: Blazor WebAssembly with Azure Functions | Syncfusion
+description: Step-by-step guide to use Azure Functions as a serverless backend for Blazor WebAssembly with Syncfusion components (Grid, Scheduler, DatePicker).
 platform: Blazor
 control: Common
 documentation: ug
@@ -9,7 +9,11 @@ documentation: ug
 
 # Blazor with Azure Functions
 
-This guide shows how to build a runnable Blazor WebAssembly app that uses Azure Functions as a serverless backend and integrates Syncfusion Blazor components (`SfGrid`, `SfSchedule`, `SfDatePicker`, `SfToast`). It focuses on practical steps for local development, security options (Function keys and Entra ID / EasyAuth), calling functions from Blazor, CORS, error/retry handling, and a compact example (Orders list + Scheduler).
+This guide shows how to build a runnable Blazor WebAssembly app that uses Azure Functions as a serverless backend and integrates Syncfusion Blazor components (`SfGrid`, `SfSchedule`, `SfDatePicker`). It focuses on practical steps for local development, security options (Function keys and Entra ID / EasyAuth), calling functions from Blazor, CORS, error/retry handling, and a compact example (Orders list + Scheduler).
+
+## What is Azure Functions
+
+Azure Functions is a serverless compute service that lets you run small pieces of code (“functions”) without managing servers. You write only the logic you need, and Azure automatically handles scaling, hosting, and infrastructure. Functions run on‑demand triggered by HTTP requests, timers, queues, events, or other Azure services making them ideal for lightweight APIs, background jobs, integrations, and event-driven workflows.
 
 ## Why use Azure Functions with Blazor?
 
@@ -17,42 +21,414 @@ Azure Functions are serverless, cost-efficient, and scale independently from the
 
 ## Prerequisites
 
-You need an Azure subscription, .NET 10 SDK, Azure Functions Core Tools, Azure CLI, Visual Studio or VS Code, and a Syncfusion license key (register in `Program.cs`). Optionally create an Entra ID app registration if you plan to use token-based authentication for user-level access.
+* .NET 10 SDK (latest 10.x recommended)
+* Azure Functions Core Tools (use the version compatible with the .NET isolated worker you target)
+* Azure CLI (latest stable)
+* Visual Studio 2022/2023 or VS Code with C# extension
+
+See the official install docs for Functions Core Tools and .NET SDK compatibility before starting.
 
 ## Secure Azure Functions
 
-Protect endpoints using Function keys for simple, quick authorization or Microsoft Entra ID for token-based, per-user authorization and auditing. EasyAuth lets Azure validate tokens for you; validate JWTs in function code when you need custom claims or fine-grained control.
+Protect endpoints using Function keys for simple, quick authorization or Microsoft Entra ID for token-based, per-user authorization and auditing. EasyAuth lets Azure validate tokens for you. For server-side validation in isolated worker functions use `Microsoft.IdentityModel.Tokens` and `System.IdentityModel.Tokens.Jwt` (or Microsoft.Identity.Web for richer features). EasyAuth (App Service Authentication) can handle token validation at the platform level so your functions don't need to parse JWTs.
 
 ### Function-level authorization
 
-Function keys are a shared-secret model and are sent as `?code={functionKey}` or via header `x-functions-key`. They are easy to use for trusted callers and prototypes but are not suitable for per-user access control in production.
+Function keys are simple shared secrets passed via `?code=` or the `x-functions-key` header, but they offer no user identity or fine‑grained access control, so they shouldn’t be used as production‑level authorization. Never embed function keys in Blazor WebAssembly or any client-side code doing so exposes them publicly and gives anyone unrestricted access to your functions.
+
+For secure, production scenarios, use Microsoft Entra ID (EasyAuth) or other token-based authentication, and reserve function keys only for trusted server-to-server or internal automation workflows.
+
+N> Do not store function keys in client-side code. Use Microsoft Entra ID (with PKCE for browser clients) or platform-managed identities for production scenarios.
 
 ### EasyAuth / Entra ID
 
 Register an application in Entra ID and configure the Function App Authentication provider (EasyAuth) to require tokens, or keep EasyAuth off and validate JWTs inside functions with Microsoft.IdentityModel libraries. For production, Entra ID and managed identities provide better security and auditability than function keys.
 
+Refer [Microsoft Entra ID App Registration](https://learn.microsoft.com/azure/active-directory/develop/quickstart-register-app).
+
 ## Calling Azure Functions from Blazor
 
-Blazor WebAssembly runs in the browser and calls Functions over HTTPS, so you must configure CORS and use `HttpClient` with either a function key or a bearer token. For Blazor Server, prefer server-to-server flows (managed identity or confidential client) to avoid exposing tokens to the browser.
+Blazor WebAssembly runs in the browser and calls Functions over HTTPS (or HTTP in local dev), so you must configure CORS and use `HttpClient` with either a function key or a bearer token. 
+
+For Blazor Server prefer server-to-server flows (managed identity or confidential client) to avoid exposing tokens to the browser.
 
 ## Using HttpClient with Auth Headers
 
-Register `HttpClient` in the Blazor `Program.cs` and, when using Entra ID, acquire tokens with MSAL (`AddMsalAuthentication`) and `IAccessTokenProvider`. Attach `Authorization: Bearer {token}` to requests before calling protected Function endpoints.
+Avoid clearing or mutating `HttpClient.DefaultRequestHeaders` on a shared instance and avoid mixing absolute URLs with a configured BaseAddress. Instead, use a named or typed HttpClient for your Functions API, set a BaseAddress, and send relative URIs. For auth, attach headers per request (e.g., via `HttpRequestMessage` or a delegating handler) rather than changing global defaults. This keeps calls isolated, predictable, and easy to test.
 
 ## Enabling CORS
 
-Configure CORS on the Function App (Azure Portal → API → CORS) and whitelist the exact Blazor origin(s) used in development and production (e.g., `https://localhost:5001`). Do not use `*` in production to avoid exposing endpoints to arbitrary origins.
+Configure CORS on the Function App (Azure Portal → API → CORS) and whitelist the exact Blazor origin(s) used in development and production. Do not use `*` in production to avoid exposing endpoints to arbitrary origins. For local development this guide uses http://localhost:5298 as the Functions host; add the Blazor origin (for example https://localhost:5001) to the Function App CORS list or use the Functions host's CORS configuration.
 
 ## Working with Function Apps in a Real‑World Blazor App
 
-This sample exposes `GET /api/orders` and `POST /api/orders`. The Blazor page uses `SfDatePicker` to select date ranges, `SfGrid` to list orders, `SfSchedule` to show order events, and `SfToast` for notifications. Keep functions single-purpose, persist real data in storage, and enable Application Insights for telemetry.
+This sample exposes `GET /api/orders` and `POST /api/orders`. The Blazor page uses `SfDatePicker` to select date ranges, `SfGrid` to list orders, `SfSchedule` to show order events. Keep functions single-purpose, persist real data in storage, and enable Application Insights for telemetry.
 
-## Error & Retry Handling
+### Azure function with Blazor Components example
 
-Distinguish 4xx client errors from transient 5xx or network failures. Retry transient failures with exponential backoff and surface user-friendly messages in the UI using `SfToast`. Use Durable Functions or queues for long-running or guaranteed processing.
+**Create solution and projects**
 
-## Best Practices
+Create a working folder and solution, then add Blazor WASM client and isolated Azure Functions project.
 
-Prefer Entra ID and managed identities in production, whitelist CORS origins, store secrets in Key Vault, and enable Application Insights. For Syncfusion controls, lazy-load scripts/styles and use virtualization or paging for large datasets to keep UI responsive.
+```
+dotnet new blazorwasm -o Client -f net10.0
+func init Functions --worker-runtime dotnet-isolated
+cd Functions
+func new --name OrdersApi --template "HTTP trigger" --authlevel function
+```
 
-## Azure function with Blazor Components example
+### Add NuGet packages (client and functions)
+
+**Client: Syncfusion and optional MSAL for Entra ID auth**
+
+```
+cd Client
+dotnet add package Syncfusion.Blazor
+dotnet add package Microsoft.Authentication.WebAssembly.Msal
+cd ..
+```
+
+**Functions: worker and HTTP extension (if missing)**
+
+```
+cd Functions
+dotnet add package Microsoft.Azure.Functions.Worker
+dotnet add package Microsoft.Azure.Functions.Worker.Extensions.Http
+cd ..
+```
+
+## Add Required Namespaces
+
+Open the `Client/_Imports.razor` file and import the below namespaces.
+
+{% tabs %}
+{% highlight razor tabtitle="~/_Imports.razor" %}
+
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Schedule
+
+{% endhighlight %}
+{% endtabs %}
+
+## Register Syncfusion Blazor Service
+
+Register the Syncfusion Blazor Service in the `Client/Program.cs` file of your Blazor App.
+
+```cs
+
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Client;
+using Syncfusion.Blazor;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
+builder.Services.AddSyncfusionBlazor();
+// Register MSAL authentication so IAccessTokenProvider is available to components.
+// Replace or configure the 'AzureAd' section in appsettings or provide ProviderOptions as needed.
+builder.Services.AddMsalAuthentication(options =>
+{
+	builder.Configuration.Bind("AzureAd", options.ProviderOptions.Authentication);
+	// Example: options.ProviderOptions.DefaultAccessTokenScopes.Add("api://<your-api-client-id>/access_as_user");
+});
+
+// Use local Functions host during development so the client can call the API directly.
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("http://localhost:5298/") });
+await builder.Build().RunAsync();
+
+```
+
+## Add Stylesheet and Script Resources
+
+Add the Syncfusion theme CSS and required scripts to the `wwwroot/index.html` file. 
+
+{% tabs %}
+{% highlight html  %}
+
+<head>
+     <!-- Syncfusion theme style sheet -->
+    <link href="_content/Syncfusion.Blazor.Themes/bootstrap5.css" rel="stylesheet" />
+</head>
+
+<body>
+    <!-- Syncfusion Blazor DataGrid component's script reference -->
+    <script src="_content/Syncfusion.Blazor.Core/scripts/syncfusion-blazor.min.js"></script>
+</body>
+
+{% endhighlight %}
+{% endtabs %}
+
+### Implement simple Azure Functions endpoints
+
+This example shows two minimal HTTP-triggered functions: GET /api/orders returns demo orders filtered by optional from/to query parameters (format yyyy‑MM‑dd), and POST /api/orders accepts and echoes a JSON payload. The functions include development-only CORS handling and basic logging; configure CORS and authentication in Azure for production.
+
+```cs
+using System.Text.Json;
+using Microsoft.Extensions.Logging;
+using Microsoft.Azure.Functions.Worker;
+using Microsoft.Azure.Functions.Worker.Http;
+using System.Globalization;
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
+
+public static class OrdersApi
+{
+    [Function("GetOrders")]
+    public static async Task<HttpResponseData> GetOrders(
+        [HttpTrigger(AuthorizationLevel.Function, "get", "options", Route = "orders")] HttpRequestData req,
+        FunctionContext ctx)
+    {
+        // Handle CORS preflight
+        if (req.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+        {
+            var preflight = req.CreateResponse(HttpStatusCode.NoContent);
+            preflight.Headers.Add("Access-Control-Allow-Origin", "http://localhost:5298");
+            preflight.Headers.Add("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+            preflight.Headers.Add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+            return preflight;
+        }
+
+        var baseDate = DateTime.UtcNow.Date;
+
+        // Generate demo orders
+        var allOrders = Enumerable.Range(1, 10).Select(i => new OrderDto
+        {
+            Id = i,
+            Date = baseDate.AddDays(-(i % 7)),
+            Customer = i % 3 == 0 ? "Contoso" : i % 2 == 0 ? "Tailspin" : "ACME",
+            Total = Math.Round(20 + i * 15.75, 2)
+        }).ToArray();
+
+        // Parse optional query parameters (expected yyyy-MM-dd)
+        DateTime? from = null; DateTime? to = null;
+        try
+        {
+            var query = (req.Url.Query ?? string.Empty).TrimStart('?');
+            if (!string.IsNullOrEmpty(query))
+            {
+                var pairs = query.Split('&', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var p in pairs)
+                {
+                    var kv = p.Split('=', 2);
+                    if (kv.Length == 0) continue;
+                    var key = WebUtility.UrlDecode(kv[0]).Trim();
+                    var val = kv.Length > 1 ? WebUtility.UrlDecode(kv[1]).Trim() : string.Empty;
+                    if (string.Equals(key, "from", StringComparison.OrdinalIgnoreCase) && DateTime.TryParse(val, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var f))
+                        from = f.Date;
+                    if (string.Equals(key, "to", StringComparison.OrdinalIgnoreCase) && DateTime.TryParse(val, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var t))
+                        to = t.Date;
+                }
+            }
+        }
+        catch
+        {
+            // ignore parse errors and return unfiltered results
+        }
+
+        var orders = allOrders.Where(o =>
+            (!from.HasValue || o.Date.Date >= from.Value) &&
+            (!to.HasValue || o.Date.Date <= to.Value)).ToArray();
+
+        try
+        {
+            var logger = ctx.GetLogger("GetOrders");
+            logger.LogInformation($"Returning {orders.Length} orders (from={from?.ToString("yyyy-MM-dd") ?? ""}, to={to?.ToString("yyyy-MM-dd") ?? ""})");
+        }
+        catch
+        {
+            // ignore logging failures
+        }
+
+        var resp = req.CreateResponse(HttpStatusCode.OK);
+        resp.Headers.Add("Content-Type", "application/json;charset=utf-8");
+        resp.Headers.Add("Access-Control-Allow-Origin", "*");
+        await resp.WriteStringAsync(JsonSerializer.Serialize(orders));
+        return resp;
+    }
+
+    [Function("PostOrder")]
+    public static async Task<HttpResponseData> PostOrder(
+        [HttpTrigger(AuthorizationLevel.Function, "post", "options", Route = "orders/add")] HttpRequestData req,
+        FunctionContext ctx)
+    {
+        if (req.Method.Equals("OPTIONS", StringComparison.OrdinalIgnoreCase))
+        {
+            var preflight = req.CreateResponse(HttpStatusCode.NoContent);
+            preflight.Headers.Add("Access-Control-Allow-Origin", "*");
+            preflight.Headers.Add("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+            preflight.Headers.Add("Access-Control-Allow-Headers", "Content-Type,Authorization");
+            return preflight;
+        }
+
+        var body = await new StreamReader(req.Body).ReadToEndAsync();
+        object? order = null;
+        try
+        {
+            order = JsonSerializer.Deserialize<object>(body);
+        }
+        catch
+        {
+            // keep behavior: if deserialization fails, return the raw body as string
+            order = body;
+        }
+
+        try
+        {
+            var logger = ctx.GetLogger("PostOrder");
+            logger.LogInformation("Received PostOrder request");
+        }
+        catch
+        {
+        }
+
+        var resp = req.CreateResponse(HttpStatusCode.Created);
+        resp.Headers.Add("Access-Control-Allow-Origin", "*");
+        await resp.WriteStringAsync(JsonSerializer.Serialize(order));
+        return resp;
+    }
+
+    private sealed class OrderDto
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public string? Customer { get; set; }
+        public double Total { get; set; }
+    }
+}
+
+```
+N>  The CORS response code above is explicitly for local development. For production, configure origins in the Function App CORS settings and remove per-response CORS headers from your function code.
+
+### Create the Blazor page using Syncfusion components
+
+This example demonstrates using Syncfusion controls: two SfDatePicker components to choose a range, an SfGrid to list orders, and an SfSchedule to show events. It expects HttpClient to be configured with the Functions host as BaseAddress and uses JSON binding to populate the grid and scheduler.
+
+{% tabs %}
+{% highlight razor  %}
+
+@page "/"
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Notifications
+@using Syncfusion.Blazor.Schedule
+
+<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+  <SfDatePicker TValue="DateTime?" @bind-Value="From" Placeholder="From" />
+  <SfDatePicker TValue="DateTime?" @bind-Value="To" Placeholder="To" />
+  <button class="e-control e-btn" @onclick="Load">Load</button>
+</div>
+
+<SfGrid DataSource="@OrdersList" AllowPaging="true" Height="300">
+  <GridColumns>
+    <GridColumn Field="Id" HeaderText="ID" Width="80"></GridColumn>
+    <GridColumn Field="Date" HeaderText="Date" Format="d" Width="150"></GridColumn>
+    <GridColumn Field="Customer" HeaderText="Customer" Width="200"></GridColumn>
+    <GridColumn Field="Total" HeaderText="Total" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+  </GridColumns>
+</SfGrid>
+
+<SfSchedule TValue="EventItem" Height="300px" SelectedDate="@DateTime.Today">
+  <ScheduleEventSettings DataSource="@EventItems"></ScheduleEventSettings>
+</SfSchedule>
+
+@code {
+  
+  private List<Order> OrdersList = new();
+  private List<EventItem> EventItems = new();
+  private DateTime? From = DateTime.Today.AddDays(-7);
+  private DateTime? To = DateTime.Today;
+
+  class Order { public int Id { get; set; } public DateTime Date { get; set; } public string? Customer { get; set; } public double Total { get; set; } }
+  // Use property names expected by Syncfusion Schedule (StartTime/EndTime/Subject)
+  class EventItem { public DateTime StartTime { get; set; } public DateTime EndTime { get; set; } public string? Subject { get; set; } }
+
+  private async Task Load()
+  {
+    try
+    {
+      string[] portsToTry = new[] { "5298"};
+      string body = string.Empty;
+      HttpResponseMessage resp = null!;
+      bool found = false;
+      foreach (var port in portsToTry)
+      {
+        var tryUrl = $"http://localhost:{port}/api/orders?from={From:yyyy-MM-dd}&to={To:yyyy-MM-dd}";
+        try
+        {
+          resp = await Http.GetAsync(tryUrl);
+          body = await resp.Content.ReadAsStringAsync();
+          if (resp.IsSuccessStatusCode)
+          {
+            var trimmed = (body ?? string.Empty).TrimStart();
+            if (trimmed.StartsWith("[") || trimmed.StartsWith("{"))
+            {
+              // valid JSON response
+              try
+              {
+                OrdersList = System.Text.Json.JsonSerializer.Deserialize<List<Order>>(trimmed) ?? new List<Order>();
+                found = true;
+                break;
+              }
+              catch (Exception jex)
+              {
+                
+              }
+            }
+          }
+        }
+        catch (Exception e)
+        {
+          
+        }
+      }
+
+      if (!found)
+      {
+        OrdersList = new List<Order>();
+        Console.WriteLine("No valid response received from local Functions host on tested ports.");
+      }
+      EventItems = OrdersList.Select(o => new EventItem { StartTime = o.Date, EndTime = o.Date.AddHours(1), Subject = $"{o.Customer} ({o.Total:C2})" }).ToList();
+      StateHasChanged();
+    }
+    catch (Exception ex)
+    {
+  
+    }
+  }
+}
+
+{% endhighlight %}
+{% endtabs %}
+
+For browser calls, add the Blazor origin to Function App CORS (Azure Portal → Function App → API → CORS).
+
+## Run locally and test
+
+**Start Functions:**
+
+```
+cd Functions
+func start
+```
+
+**Run client:**
+
+```
+cd ../Client
+dotnet run
+```
+
+**Output:**
+
+* Open the client URL
+* Select a date range and click Load — the grid fills with demo orders and the schedule shows one event per order.
+
+
+Blazor components with Azure Function
