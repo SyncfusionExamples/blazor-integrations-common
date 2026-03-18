@@ -1,0 +1,44 @@
+﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization  @* needed for <AuthorizeView> *@
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4 d-flex align-items-center">
+            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+
+            <!-- Right-aligned auth menu -->
+            <div class="ms-auto d-flex gap-3">
+                <AuthorizeView>
+                    <Authorized>
+                        <span class="navbar-text">Hello @context.User.Identity?.Name</span>
+
+                        <!-- Manage (Identity UI) -->
+                        <a class="nav-link text-dark" href="/Identity/Account/Manage/Index" title="Manage">Manage</a>
+
+                        <!-- Logout via Identity's confirmation page (then POST with antiforgery) -->
+                        <a class="nav-link text-dark" href="/Identity/Account/Logout">Logout</a>
+                    </Authorized>
+
+                    <NotAuthorized>
+                        <a class="nav-link text-dark" href="/Identity/Account/Login">Login</a>
+                        <a class="nav-link text-dark" href="/Identity/Account/Register">Register</a>
+                    </NotAuthorized>
+                </AuthorizeView>
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>

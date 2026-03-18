@@ -1,0 +1,26 @@
+﻿@page "/secure-chart"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Secure Chart</PageTitle>
+<h1>Monthly Sales (authorized users only)</h1>
+
+<SfChart Title="Sales (USD)">
+    <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"></ChartPrimaryXAxis>
+    <ChartSeriesCollection>
+        <ChartSeries DataSource="Data"
+                     XName="Month" YName="Amount"
+                     Type="Syncfusion.Blazor.Charts.ChartSeriesType.Column"
+                     Name="Sales" />
+    </ChartSeriesCollection>
+</SfChart>
+
+@code {
+    public List<Point> Data { get; set; } = new()
+    {
+        new("Jan", 42500), new("Feb", 39100), new("Mar", 45900),
+        new("Apr", 54400), new("May", 49350), new("Jun", 61200)
+    };
+
+    public record Point(string Month, double Amount);
+}
