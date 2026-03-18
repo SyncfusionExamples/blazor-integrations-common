@@ -1,0 +1,23 @@
+@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using OAuth.Components.Pages
+
+<PageTitle>Home</PageTitle>
+
+<div class="container mt-4">
+	<AuthorizeView>
+		<Authorized>
+            <h1>DataGrid</h1>
+			<!-- Render grid inline on the home page when authenticated -->
+			<SecureGrid />
+		</Authorized>
+		<NotAuthorized>
+            <h1>Welcome!</h1>
+            <p>
+                Click the Login button below to sign in with GitHub.
+                Once you’re logged in, the Syncfusion DataGrid will be displayed.
+            </p>
+			<a class="btn btn-primary" href="/account/login?returnUrl=/">Login with GitHub</a>
+		</NotAuthorized>
+	</AuthorizeView>
+</div>

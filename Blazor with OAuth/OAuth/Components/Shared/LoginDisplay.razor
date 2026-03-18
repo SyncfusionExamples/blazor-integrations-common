@@ -1,0 +1,27 @@
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
+
+<AuthorizeView>
+    <Authorized>
+        <div class="d-flex align-items-center">
+            <span class="me-2">@context.User.Identity?.Name</span>
+            <a class="btn btn-outline-secondary btn-sm" href="/account/logout">Logout</a>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <a class="btn btn-primary btn-sm" href="/account/login?returnUrl=/secure-grid">Login with GitHub</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private void Login()
+    {
+        // Redirect to our account login endpoint which challenges the GitHub OAuth handler
+        Navigation.NavigateTo("/account/login?returnUrl=/secure-grid", true);
+    }
+
+    private void Logout()
+    {
+        Navigation.NavigateTo("/account/logout", true);
+    }
+}
