@@ -1,0 +1,4 @@
+﻿@page "/admin"
+@attribute [Authorize(Roles = "Admin")]
+<h3>Admin Dashboard</h3>
+<p>Only users in the Cognito group <strong>Admin</strong> can access this page.</p>
