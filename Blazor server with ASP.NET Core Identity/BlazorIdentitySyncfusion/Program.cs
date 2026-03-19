@@ -14,6 +14,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services
     .AddDefaultIdentity<IdentityUser>(options =>
     {
+        // WARNING: Email confirmation is disabled for demo purposes only.
+        // In production, set SignIn.RequireConfirmedAccount = true and configure
+        // an email sender to prevent unauthorized account access.
         options.SignIn.RequireConfirmedAccount = false;
     })
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -24,7 +27,7 @@ builder.Services.AddRazorPages();
 // Blazor auth state for <CascadingAuthenticationState>/<AuthorizeRouteView>
 builder.Services.AddCascadingAuthenticationState();
 
-// Syncfusion
+// Register Syncfusion Blazor services
 builder.Services.AddSyncfusionBlazor();
 
 // Blazor components (interactive server)
@@ -33,7 +36,7 @@ builder.Services.AddRazorComponents()
 
 var app = builder.Build();
 
-// Pipeline
+// Configure the HTTP request pipeline
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
@@ -44,11 +47,11 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// Identity + Authorization
+// Authentication & Authorization middleware (order matters!)
 app.UseAuthentication();
 app.UseAuthorization();
 
-// .NET 8 antiforgery middleware (required when endpoints have antiforgery metadata)
+// Antiforgery middleware (required for Identity Razor Pages login/logout forms in .NET 8+)
 app.UseAntiforgery();
 
 // Map endpoints
