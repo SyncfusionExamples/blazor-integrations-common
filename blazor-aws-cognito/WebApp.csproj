@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>0f0e7667-9bf9-487f-984c-2bd330723929</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="10.*" />
+    <PackageReference Include="Syncfusion.Blazor" Version="32.2.3" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="32.2.3" />
+  </ItemGroup>
+
+</Project>

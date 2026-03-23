@@ -1,0 +1,37 @@
+﻿
+@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using Syncfusion.Blazor.Grids
+
+<h3>Welcome</h3>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="mb-3">
+            <a class="btn btn-outline-secondary" href="/signout">Sign out</a>
+        </div>
+
+        <SfGrid DataSource="@_orders" AllowPaging="true" AllowSorting="true">
+            <GridColumns>
+                <GridColumn Field="Id" HeaderText="ID" Width="120"></GridColumn>
+                <GridColumn Field="Item" HeaderText="Item"></GridColumn>
+                <GridColumn Field="Qty" HeaderText="Qty"></GridColumn>
+                <GridColumn Field="Price" HeaderText="Price" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </Authorized>
+    <NotAuthorized>
+        <p>Please sign in to view the grid.</p>
+        <a class="btn btn-primary" href="/signin">Sign in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private record Order(int Id, string Item, int Qty, decimal Price);
+
+    private readonly List<Order> _orders = new()
+    {
+        new Order(1, "Laptop", 1, 1299.00m),
+        new Order(2, "Mouse", 2, 49.99m)
+    };
+}
