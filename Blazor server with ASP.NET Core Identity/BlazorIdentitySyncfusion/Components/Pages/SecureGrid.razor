@@ -1,0 +1,37 @@
+﻿@page "/secure-grid"
+@attribute [Authorize]
+@rendermode InteractiveServer
+
+<PageTitle>Secure Grid</PageTitle>
+<h1>Orders (authorized users only)</h1>
+
+<SfGrid DataSource="@Orders">
+    <GridColumns>
+        <GridColumn Field=@nameof(Order.OrderID) HeaderText="Order ID" TextAlign="TextAlign.Right" Width="120" />
+        <GridColumn Field=@nameof(Order.CustomerID) HeaderText="Customer" Width="150" />
+        <GridColumn Field=@nameof(Order.OrderDate) HeaderText="Order Date" Format="d" Type="ColumnType.Date" Width="140" />
+        <GridColumn Field=@nameof(Order.Freight) HeaderText="Freight" Format="C2" TextAlign="TextAlign.Right" Width="120" />
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public List<Order> Orders { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        Orders = Enumerable.Range(1, 12).Select(i => new Order {
+            OrderID = 1000 + i,
+            CustomerID = new[] { "ALFKI","ANATR","ANTON","BLONP","BOLID" }[Random.Shared.Next(5)],
+            OrderDate = DateTime.Today.AddDays(-i),
+            Freight = Math.Round(25 + 15 * Random.Shared.NextDouble(), 2)
+        }).ToList();
+    }
+
+    public class Order
+    {
+        public int OrderID { get; set; }
+        public string? CustomerID { get; set; }
+        public DateTime OrderDate { get; set; }
+        public double Freight { get; set; }
+    }
+}
