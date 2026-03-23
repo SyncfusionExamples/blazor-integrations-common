@@ -1,0 +1,79 @@
+@page "/"
+
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Data
+@using BlazorJWT.Models
+
+@inject HttpClient Http
+@inject NavigationManager Nav
+
+<h3>JWT + Syncfusion Grid (Click to Load)</h3>
+
+<button class="btn btn-primary" @onclick="LoadGridWithToken"> Load GridData </button>
+
+
+<!-- Grid is always visible, but no data is fetched until the button is clicked -->
+<SfGrid TValue="OrdersDetails" @ref="grid" AllowPaging="true" AllowSorting="true" Width="100%">
+
+	@* Only render the DataManager after the token is fetched and user clicks the button *@
+	@if (isDataManagerEnabled)
+	{
+		<SfDataManager Url="api/grid" Adaptor="Adaptors.UrlAdaptor" Headers="HeaderData" />
+	}
+
+	<GridColumns>
+		<GridColumn Field=@nameof(OrdersDetails.OrderID) HeaderText="Order ID" Width="120" TextAlign="TextAlign.Center" />
+		<GridColumn Field=@nameof(OrdersDetails.CustomerID) HeaderText="Customer" Width="150" />
+		<GridColumn Field=@nameof(OrdersDetails.ShipCity) HeaderText="City" Width="150" />
+	</GridColumns>
+</SfGrid>
+
+@code {
+	private SfGrid<OrdersDetails>? grid;
+
+	// Control flag: Grid is always visible, but DataManager (and thus data fetching) is enabled only after click.
+	private bool isDataManagerEnabled = false;
+	private string? jwt;
+	private string? error;
+
+	private IDictionary<string, string> HeaderData => new Dictionary<string, string>
+	{
+		["Authorization"] = string.IsNullOrEmpty(jwt) ? "" : $"Bearer {jwt}"
+	};
+
+	private async Task LoadGridWithToken()
+	{
+		error = null;
+
+		try
+		{
+			var baseUri = new Uri(Nav.BaseUri);
+
+
+
+			// Adjust this call as per your API.
+			var tokenRes = await Http.PostAsync(new Uri(baseUri, "api/auth/token?user=username"), content: null);
+			tokenRes.EnsureSuccessStatusCode();
+
+			var json = await tokenRes.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+			jwt = json!["token"];
+
+			// Now enable DataManager so the grid can fetch from the server.
+			isDataManagerEnabled = true;
+
+			StateHasChanged();
+			await Task.Yield();
+
+			if (grid is not null)
+			{
+				await grid.Refresh(); // triggers the first data request using the DataManager and headers
+			}
+		}
+		catch (Exception ex)
+		{
+			error = ex.Message;
+			isDataManagerEnabled = false;
+		}
+	}
+}
