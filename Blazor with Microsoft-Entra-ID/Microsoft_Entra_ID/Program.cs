@@ -20,11 +20,7 @@ builder.Services.Configure<OpenIdConnectOptions>(OpenIdConnectDefaults.Authentic
     options.CallbackPath = new PathString("/signin-oidc");
 });
 
-builder.Services.AddAuthorization(options =>
-{
-  // Example role policy; ensure roles are configured in the Azure app manifest or via groups
-  options.AddPolicy("RequireAdmin", policy => policy.RequireRole("Admin"));
-});
+builder.Services.AddAuthorization();
 
 // Register Syncfusion Blazor services
 builder.Services.AddSyncfusionBlazor();
