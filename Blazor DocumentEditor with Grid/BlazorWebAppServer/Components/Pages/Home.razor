@@ -1,30 +1,100 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 
-<h1>DocumentEditor</h1>
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DocumentEditor
 
-<SfDocumentEditorContainer EnableToolbar=true></SfDocumentEditorContainer>
+<h4 class="mt-4">Invoice Generator</h4>
 
-<SfGrid DataSource="@Orders" />
+<SfGrid TItem="Order" DataSource="@Orders" AllowPaging="true">
 
-@code{
-    public List<Order> Orders { get; set; }
+    <GridColumns>
+        <GridColumn Field="@nameof(Order.OrderID)" HeaderText="Order ID" Width="120" />
+        <GridColumn Field="@nameof(Order.CustomerID)" HeaderText="Customer" Width="150" />
+        <GridColumn Field="@nameof(Order.Freight)" HeaderText="Freight" Width="120" Format="C2" />
+        <GridColumn Field="@nameof(Order.ShipCity)" HeaderText="City" Width="150" />
 
-    protected override void OnInitialized()
+        <GridColumn HeaderText="Invoice" Width="130">
+            <Template>
+                @{
+                    var row = context as Order;
+                }
+                <button class="btn btn-success btn-sm" @onclick="@(() => GenerateInvoice(row))">
+                    Generate Invoice
+                </button>
+            </Template>
+        </GridColumn>
+    </GridColumns>
+
+</SfGrid>
+
+<h4 class="mt-4">Invoice Preview</h4>
+
+<SfDocumentEditorContainer @ref="EditorContainer" EnableToolbar="true">
+</SfDocumentEditorContainer>
+
+@code {
+    private SfDocumentEditorContainer? EditorContainer;
+
+    private List<Order> Orders = new()
     {
-        Orders = Enumerable.Range(1, 10).Select(x => new Order()
-        {
-            OrderID = 1000 + x,
-            CustomerID = (new string[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" })[new Random().Next(5)],
-            Freight = 2 * x,
-            OrderDate = DateTime.Now.AddDays(-x),
-        }).ToList();
+        new() { OrderID = 10001, CustomerID = "ALFKI", Freight = 110.50, ShipCity = "Denmark" },
+        new() { OrderID = 10002, CustomerID = "ANATR", Freight = 220.00, ShipCity = "Brazil" },
+        new() { OrderID = 10003, CustomerID = "ANTON", Freight = 330.75, ShipCity = "Germany" },
+        new() { OrderID = 10004, CustomerID = "BLONP", Freight = 180.90, ShipCity = "USA" },
+        new() { OrderID = 10005, CustomerID = "BOLID", Freight = 440.00, ShipCity = "Brazil" }
+    };
+
+    public class Order
+    {
+        public int OrderID { get; set; }
+        public string CustomerID { get; set; } = "";
+        public double Freight { get; set; }
+        public string ShipCity { get; set; } = "";
     }
 
-    public class Order {
-        public int? OrderID { get; set; }
-        public string CustomerID { get; set; }
-        public DateTime? OrderDate { get; set; }
-        public double? Freight { get; set; }
+    private async Task GenerateInvoice(Order order)
+    {
+        if (EditorContainer?.DocumentEditor == null)
+            return;
+        
+        var sfdt = BuildInvoice(order);
+        await EditorContainer.DocumentEditor.OpenAsync(sfdt);
+    }
+
+    private string BuildInvoice(Order o)
+    {
+        // Generate the invoice in SFDT format.
+        return $$"""
+        {
+            "sections": [
+                {
+                    "blocks": [
+                        { "paragraphFormat": { "textAlignment": "Center" },
+                        "inlines": [ { "text": "My Orders PVT LTD", "bold": true, "fontSize": 24 } ] },
+                        
+                        { "paragraphFormat": { "textAlignment": "Center" },
+                        "inlines": [ { "text": "No.123, Main Street, Business City" } ] },
+                        
+                        { "paragraphFormat": { "textAlignment": "Center" },
+                        "inlines": [ { "text": "Phone: +1 234 567 8900\n" } ] },
+                        
+                        { "inlines": [ { "text": "INVOICE", "bold": true, "fontSize": 22 } ] },
+                        { "inlines": [ { "text": "Invoice No: INV-{{o.OrderID}}" } ] },
+                        { "inlines": [ { "text": "Customer ID: {{o.CustomerID}}" } ] },
+                        { "inlines": [ { "text": "City: {{o.ShipCity}}" } ] },
+                        { "inlines": [ { "text": "Date: {{DateTime.Now:dd-MMM-yyyy}}" } ] },
+                        { "inlines": [ { "text": "Amount: ${{o.Freight:F2}}" } ] },
+                        { "inlines": [ { "text": "Notes: Thank you for your business." } ] },
+                        
+                        { "inlines": [ { "text": "\n" } ] },
+                        
+                        { "inlines": [ { "text": "Authorized Signature", "bold": true } ] },
+                        { "inlines": [ { "text": "______________________________" } ] }
+                    ]
+                }
+            ]
+        }
+        """;
     }
 }
