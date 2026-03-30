@@ -1,0 +1,105 @@
+@page "/"
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Calendars
+@using Syncfusion.Blazor.Notifications
+@using Syncfusion.Blazor.Schedule
+
+<div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+  <SfDatePicker TValue="DateTime?" @bind-Value="From" Placeholder="From" />
+  <SfDatePicker TValue="DateTime?" @bind-Value="To" Placeholder="To" />
+  <button class="e-control e-btn" @onclick="Load">Load</button>
+</div>
+
+<SfGrid DataSource="@OrdersList" AllowPaging="true" Height="300">
+  <GridColumns>
+    <GridColumn Field="Id" HeaderText="ID" Width="80"></GridColumn>
+    <GridColumn Field="Date" HeaderText="Date" Format="d" Width="150"></GridColumn>
+    <GridColumn Field="Customer" HeaderText="Customer" Width="200"></GridColumn>
+    <GridColumn Field="Total" HeaderText="Total" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+  </GridColumns>
+</SfGrid>
+
+<SfSchedule TValue="EventItem" Height="300px" SelectedDate="@DateTime.Today">
+  <ScheduleEventSettings DataSource="@EventItems"></ScheduleEventSettings>
+</SfSchedule>
+
+@code {
+  
+  private List<Order> OrdersList = new();
+  private List<EventItem> EventItems = new();
+  private DateTime? From = DateTime.Today.AddDays(-7);
+  private DateTime? To = DateTime.Today;
+
+  class Order { public int Id { get; set; } public DateTime Date { get; set; } public string? Customer { get; set; } public double Total { get; set; } }
+  // Use property names expected by Syncfusion Schedule (StartTime/EndTime/Subject)
+  class EventItem { public DateTime StartTime { get; set; } public DateTime EndTime { get; set; } public string? Subject { get; set; } }
+
+  private async Task Load()
+  {
+    try
+    {
+      // Bypass authentication for local dev; ensure no Authorization header is set.
+      Http.DefaultRequestHeaders.Authorization = null;
+
+      string[] portsToTry = new[] { "5298", "7071" };
+      string body = string.Empty;
+      HttpResponseMessage resp = null!;
+      bool found = false;
+      foreach (var port in portsToTry)
+      {
+        var tryUrl = $"http://localhost:{port}/api/orders?from={From:yyyy-MM-dd}&to={To:yyyy-MM-dd}";
+        try
+        {
+          resp = await Http.GetAsync(tryUrl);
+          Console.WriteLine($"GET {tryUrl} => {(int)resp.StatusCode} {resp.ReasonPhrase}");
+          body = await resp.Content.ReadAsStringAsync();
+          Console.WriteLine($"Response body (truncated): {body?.Substring(0, Math.Min(400, body.Length))}");
+          if (resp.IsSuccessStatusCode)
+          {
+            var trimmed = (body ?? string.Empty).TrimStart();
+            if (trimmed.StartsWith("[") || trimmed.StartsWith("{"))
+            {
+              // valid JSON response
+              try
+              {
+                OrdersList = System.Text.Json.JsonSerializer.Deserialize<List<Order>>(trimmed) ?? new List<Order>();
+                found = true;
+                break;
+              }
+              catch (Exception jex)
+              {
+                Console.WriteLine($"JSON parse failed from {tryUrl}: {jex}");
+              }
+            }
+            else
+            {
+              Console.WriteLine($"Response from {tryUrl} does not appear to be JSON.");
+            }
+          }
+        }
+        catch (Exception e)
+        {
+          Console.WriteLine($"Request to {tryUrl} failed: {e.Message}");
+        }
+      }
+
+      if (!found)
+      {
+        OrdersList = new List<Order>();
+        Console.WriteLine("No valid response received from local Functions host on tested ports.");
+      }
+      EventItems = OrdersList.Select(o => new EventItem { StartTime = o.Date, EndTime = o.Date.AddHours(1), Subject = $"{o.Customer} ({o.Total:C2})" }).ToList();
+      StateHasChanged();
+      Console.WriteLine($"Orders loaded: {OrdersList.Count}");
+    }
+    catch (Exception ex)
+    {
+      Console.WriteLine($"Load failed: {ex}");
+    }
+  }
+
+
+}
