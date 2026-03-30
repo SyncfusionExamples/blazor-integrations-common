@@ -1,0 +1,52 @@
+@page "/"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageTitle>Home</PageTitle>
+
+<AuthorizeView>
+	<NotAuthorized>
+		<div class="text-center mt-5">
+			<h1>Welcome!</h1>
+			<p>
+				Click the Login button below to sign in with Microsoft Entra ID.
+				Once you’re logged in, the Syncfusion DataGrid will be displayed below.
+			</p>
+			<a class="btn btn-primary" href="/MicrosoftIdentity/Account/SignIn">Login with Microsoft</a>
+		</div>
+	</NotAuthorized>
+	<Authorized>
+		<div class="d-flex justify-content-between align-items-center">
+			<h1>DataGrid</h1>
+			<a class="btn btn-secondary" href="/MicrosoftIdentity/Account/SignOut">Logout</a>
+		</div>
+
+		<SfGrid DataSource="@Orders" AllowPaging="true" AllowSorting="true">
+			<GridColumns>
+				<GridColumn Field="@nameof(Order.OrderID)" HeaderText="Order ID" Width="120" IsPrimaryKey="true">
+				</GridColumn>
+				<GridColumn Field="@nameof(Order.CustomerID)" HeaderText="Customer ID" Width="150"></GridColumn>
+			</GridColumns>
+		</SfGrid>
+
+@code {
+	public List<Order> Orders { get; set; } = new List<Order>();
+
+	protected override void OnInitialized()
+	{
+		var customerIds = new[] { "ALFKI", "ANANTR", "ANTON", "BLONP", "BOLID" };
+		Orders = Enumerable.Range(1, 5).Select(x => new Order
+		{
+			OrderID = x,
+			CustomerID = customerIds[Random.Shared.Next(5)]
+		}).ToList();
+	}
+
+	public class Order
+	{
+		public int OrderID { get; set; }
+		public string CustomerID { get; set; }
+	}
+}
+</Authorized>
+</AuthorizeView>
