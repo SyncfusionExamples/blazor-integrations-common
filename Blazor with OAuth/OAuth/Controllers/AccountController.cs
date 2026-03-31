@@ -20,7 +20,6 @@ namespace OAuth.Controllers
         {
             // Sign out of the cookie and the OpenID Connect provider (if used)
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignOutAsync();
             return Redirect("/");
         }
     }
