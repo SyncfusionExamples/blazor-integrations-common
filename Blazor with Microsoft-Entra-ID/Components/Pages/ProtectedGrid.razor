@@ -1,0 +1,47 @@
+@page "/protected-grid"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<h3>Protected Syncfusion DataGrid</h3>
+
+<p>Welcome, @userName</p>
+
+<SfGrid TValue="Person" DataSource="@People" AllowPaging="true">
+    <GridColumns>
+        <GridColumn Field="Id" HeaderText="ID" Width="80" TextAlign="TextAlign.Center"></GridColumn>
+        <GridColumn Field="FirstName" HeaderText="First name" Width="150"></GridColumn>
+        <GridColumn Field="LastName" HeaderText="Last name" Width="150"></GridColumn>
+        <GridColumn Field="Email" HeaderText="Email" Width="250"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState> AuthenticationStateTask { get; set; } = default!;
+
+    private string userName = "";
+
+    private List<Person> People = new()
+    {
+        new Person{ Id=1, FirstName="Jon", LastName="Doe", Email="jon.doe@example.com" },
+        new Person{ Id=2, FirstName="Jane", LastName="Smith", Email="jane.smith@example.com" },
+        new Person{ Id=3, FirstName="Bob", LastName="Johnson", Email="bob.johnson@example.com" },
+        new Person{ Id=4, FirstName="Alice", LastName="Williams", Email="alice.williams@example.com" },
+        new Person{ Id=5, FirstName="Eve", LastName="Davis", Email="eve.davis@example.com" },
+        new Person{ Id=6, FirstName="Charlie", LastName="Brown", Email="charlie.brown@example.com" }
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateTask;
+        var user = authState.User;
+        userName = user.Identity?.Name ?? user.FindFirst("preferred_username")?.Value ?? "(unknown)";
+    }
+
+    private class Person
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+    }
+}
