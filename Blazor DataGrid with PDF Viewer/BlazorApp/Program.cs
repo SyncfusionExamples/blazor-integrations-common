@@ -1,10 +1,7 @@
 using BlazorApp.Components;
 using Syncfusion.Blazor;
-using Syncfusion.Licensing;
 var builder = WebApplication.CreateBuilder(args);
 
-// Register Syncfusion license key
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JHaF5cWWdCekx0Q3xbf1x2ZFdMYVRbQXNPMyBoS35RcEVgW3hecnVcR2dUVkVwVEFe");
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
