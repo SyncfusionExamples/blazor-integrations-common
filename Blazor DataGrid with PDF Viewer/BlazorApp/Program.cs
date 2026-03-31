@@ -2,14 +2,13 @@ using BlazorApp.Components;
 using Syncfusion.Blazor;
 var builder = WebApplication.CreateBuilder(args);
 
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+// Configure SignalR to support large PDF file transfers
 builder.Services.AddSignalR(o => { o.MaximumReceiveMessageSize = 102400000; });
-
-builder.Services.AddMemoryCache();
 //Add Syncfusion Blazor service to the container.
+builder.Services.AddMemoryCache();
 builder.Services.AddSyncfusionBlazor();
 var app = builder.Build();
 

@@ -1,0 +1,149 @@
+﻿@page "/"
+@rendermode InteractiveServer
+
+@* Inject IWebHostEnvironment to access the web root path for locating PDF files *@
+@inject IWebHostEnvironment WebHostEnvironment
+
+<PageTitle>Dynamic PDF Viewer</PageTitle>
+
+<div class="container-fluid">
+    <h2 class="mb-4">Order Management System</h2>
+
+    <!-- DataGrid Section -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <h4>Orders - DataGrid</h4>
+            <p class="text-muted">Click on any row to view detailed order information in the PDF viewer below</p>
+            
+            <!-- Syncfusion DataGrid with single row selection enabled -->
+            <SfGrid DataSource="@Orders" TValue="Order" AllowSelection="true">
+                <GridSelectionSettings Type="SelectionType.Single"></GridSelectionSettings>
+                <!-- Event handler triggered when a row is selected -->
+                <GridEvents TValue="Order" RowSelected="OnRowSelected"></GridEvents>
+                <GridColumns>
+                    <GridColumn Field="OrderID" HeaderText="Order ID" Width="120"></GridColumn>
+                    <GridColumn Field="CustomerName" HeaderText="Customer" Width="150"></GridColumn>
+                    <GridColumn Field="EmployeeName" HeaderText="Sales Rep" Width="150"></GridColumn>
+                    <GridColumn Field="OrderDate" HeaderText="Order Date" Format="d" Width="130"></GridColumn>
+                    <GridColumn Field="ShipCity" HeaderText="Ship City" Width="120"></GridColumn>
+                    <GridColumn Field="ShippingCost" HeaderText="Shipping Cost" Format="C2" Width="120"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+    </div>
+
+    <!-- PDF Viewer Section -->
+    <div class="row">
+        <div class="col-12">
+            <h4>Order Details - PDF Viewer</h4>
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger">@ErrorMessage</div>
+            }
+            <!-- Syncfusion PDF Viewer component for displaying order PDFs -->
+            <SfPdfViewer2 @ref="PdfViewer" Height="600px" Width="100%"></SfPdfViewer2>
+        </div>
+    </div>
+</div>
+
+@code {
+    // Reference to the PDF Viewer component for programmatic access
+    private SfPdfViewer2? PdfViewer;
+    
+    // Collection of orders to display in the grid
+    public List<Order> Orders { get; set; } = new();
+    
+    // Error message for user feedback
+    private string ErrorMessage = string.Empty;
+
+    // Initialize sample order data on component load
+    protected override void OnInitialized()
+    {
+        // Define customer names
+        string[] customers = { 
+            "Alfreds Futterkiste", 
+            "Ana Trujillo Emparedados", 
+            "Antonio Moreno Taquería", 
+            "Blondel père et fils", 
+            "Bólido Comidas preparadas" 
+        };
+
+        // Define cities
+        string[] cities = { "Berlin", "Madrid", "Paris", "London", "Rome" };
+
+        // Define employee names for sales representatives
+        string[] employees = { "John Smith", "Jane Doe", "Bob Wilson", "Alice Brown", "Mike Johnson" };
+        
+        // Create 5 sample orders with sequential data
+        // Create 5 sample orders
+        Orders = Enumerable.Range(1, 5).Select(x => new Order()
+        {
+            OrderID = 1000 + x,
+            CustomerName = customers[x - 1],
+            EmployeeName = employees[x - 1],
+            OrderDate = DateTime.Now.AddDays(-x * 2),
+            ShipCity = cities[x - 1],
+            ShippingCost = Math.Round(15.5 + (x * 8.25), 2),
+            PdfFileName = $"Order_{1000 + x}.pdf"
+        }).ToList();
+    }
+
+    // Event handler for grid row selection - loads the corresponding PDF file
+    private async Task OnRowSelected(RowSelectEventArgs<Order> args)
+    {
+        // Clear any previous error messages
+        ErrorMessage = string.Empty;
+        
+        try
+        {
+            // Construct the full path to the PDF file
+            // Note: PDF files should be placed in the wwwroot/PDFs folder of your Blazor project
+            // The filename must match the PdfFileName property value from the selected order
+            string pdfFilePath = Path.Combine(WebHostEnvironment.WebRootPath, "PDFs", args.Data.PdfFileName);
+            
+            // Check if the PDF file exists before attempting to load
+            if (File.Exists(pdfFilePath))
+            {
+                // Read the PDF file as a byte array
+                var pdfBytes = await File.ReadAllBytesAsync(pdfFilePath);
+                
+                // Create a memory stream from the PDF bytes
+                using var pdfStream = new MemoryStream(pdfBytes);
+                
+                // Load the PDF into the viewer component
+                if (PdfViewer != null)
+                {
+                    await PdfViewer.LoadAsync(pdfStream);
+                }
+            }
+            else
+            {
+                // Display error if PDF file is not found
+                ErrorMessage = $"PDF file not found: {args.Data.PdfFileName}";
+                // For production apps, use ILogger instead of Console.WriteLine
+                Console.WriteLine($"PDF file not found: {pdfFilePath}");
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle and display any errors during PDF loading
+            ErrorMessage = $"Error loading PDF: {ex.Message}";
+            // For production apps, use ILogger instead of Console.WriteLine
+            Console.WriteLine($"Error loading PDF: {ex.Message}");
+        }
+    }
+
+    // Data model representing an order with shipping and customer details
+    public class Order
+    {
+        public int OrderID { get; set; }
+        public string CustomerName { get; set; } = "";
+        public string EmployeeName { get; set; } = "";
+        public DateTime OrderDate { get; set; }
+        public string ShipCity { get; set; } = "";
+        public double ShippingCost { get; set; }
+        // PDF filename that corresponds to this order
+        // Important: The actual PDF file with this name must exist in wwwroot/PDFs folder
+        public string PdfFileName { get; set; } = "";
+    }
+}

@@ -8,10 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SkiaSharp.Views.Blazor" Version="3.119.2" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="32.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.SfPdfViewer" Version="32.2.5" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="32.2.5" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="33.1.45" />
+    <PackageReference Include="Syncfusion.Blazor.SfPdfViewer" Version="33.1.45" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="33.1.45" />
   </ItemGroup>
 
 </Project>
