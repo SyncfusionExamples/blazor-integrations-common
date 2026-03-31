@@ -12,16 +12,3 @@
         <a class="btn btn-primary btn-sm" href="/account/login?returnUrl=/secure-grid">Login with GitHub</a>
     </NotAuthorized>
 </AuthorizeView>
-
-@code {
-    private void Login()
-    {
-        // Redirect to our account login endpoint which challenges the GitHub OAuth handler
-        Navigation.NavigateTo("/account/login?returnUrl=/secure-grid", true);
-    }
-
-    private void Logout()
-    {
-        Navigation.NavigateTo("/account/logout", true);
-    }
-}
