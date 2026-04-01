@@ -1,19 +1,16 @@
 using OAuth.Components;
 using Microsoft.AspNetCore.Authentication.Cookies;
-// OpenID Connect removed; using GitHub OAuth only
 using Microsoft.AspNetCore.Authentication;
 using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddRazorComponents()
   .AddInteractiveServerComponents();
 
-// Register Syncfusion Blazor services
 builder.Services.AddSyncfusionBlazor();
 
-// Configure authentication (Cookies + GitHub OAuth). GitHub is the default challenge.
+// Configure authentication (Cookies + GitHub OAuth).
 builder.Services.AddAuthentication(options =>
 {
   options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
@@ -22,8 +19,8 @@ builder.Services.AddAuthentication(options =>
   .AddCookie()
   .AddOAuth("GitHub", options =>
   {
-    options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"] ?? "your-github-client-id";
-    options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"] ?? "your-github-client-secret";
+    options.ClientId = builder.Configuration["Authentication:GitHub:ClientId"] ?? throw new InvalidOperationException("GitHub ClientId is not configured. Set 'Authentication:GitHub:ClientId' in appsettings or user secrets.");
+    options.ClientSecret = builder.Configuration["Authentication:GitHub:ClientSecret"] ?? throw new InvalidOperationException("GitHub ClientSecret is not configured. Set 'Authentication:GitHub:ClientSecret' in appsettings or user secrets.");
     options.CallbackPath = "/signin-github";
     options.AuthorizationEndpoint = "https://github.com/login/oauth/authorize";
     options.TokenEndpoint = "https://github.com/login/oauth/access_token";
@@ -48,14 +45,14 @@ builder.Services.AddAuthentication(options =>
 
         var response = await context.Backchannel.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, context.HttpContext.RequestAborted);
         response.EnsureSuccessStatusCode();
-        var payload = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        using var payload = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         context.RunClaimActions(payload.RootElement);
       }
     };
   });
 
 builder.Services.AddAuthorization();
-// Add support for API controllers (used to proxy calls to protected APIs)
+// Add support for API controllers 
 builder.Services.AddControllers();
 // Register IHttpClientFactory for outbound HTTP calls
 builder.Services.AddHttpClient();
@@ -70,21 +67,12 @@ if (!app.Environment.IsDevelopment())
   app.UseHsts();
 }
 app.UseHttpsRedirection();
-
-app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.UseAntiforgery();
-
-// Map API controllers
 app.MapControllers();
-
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
   .AddInteractiveServerRenderMode();
-
 app.Run();
