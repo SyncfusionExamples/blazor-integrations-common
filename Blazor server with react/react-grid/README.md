@@ -1,13 +1,22 @@
+---
+title: Blazor-React Integration | Syncfusion
+label: blazor-react-syncfusion
+description: A minimal sample showing how to embed a Syncfusion Blazor DataGrid (hosted by a Blazor Server app) inside a React application built with Vite. Includes proxy configuration to forward Blazor static assets and SignalR endpoints from the Blazor host to the React dev server.
+---
+
 # Integrating Blazor Components (Syncfusion DataGrid) into React + Vite
 
 ## Overview
+
 This project demonstrates embedding a Blazor Server component (Syncfusion Blazor DataGrid) inside a React application built with Vite.
 
 ## Prerequisites
+
 * [.NET 10 SDK](https://dotnet.microsoft.com/en-us/download/dotnet)
 * [Node.js 18 or later](https://nodejs.org/en/download/)
 
 ## Project Structure
+
 - BlazorServerHost — Blazor Server app that hosts the Syncfusion DataGrid component
 - react-grid — React + Vite app that embeds the Blazor UI
 
