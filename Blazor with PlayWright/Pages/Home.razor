@@ -1,0 +1,21 @@
+﻿@page "/"
+
+@using Syncfusion.Blazor.Buttons
+@using Microsoft.AspNetCore.Components.Web
+
+<PageTitle>Syncfusion Demo</PageTitle>
+
+<h1>Syncfusion Demo</h1>
+
+<SfButton Content="Click Sync" OnClick="@OnSyncClick"></SfButton>
+
+<p id="sync-result">@result</p>
+
+@code {
+    private string result = "Not clicked";
+
+    private void OnSyncClick(MouseEventArgs args)
+    {
+        result = "Clicked";
+    }
+}
