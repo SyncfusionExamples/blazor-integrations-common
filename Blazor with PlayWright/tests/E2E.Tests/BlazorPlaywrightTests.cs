@@ -13,13 +13,12 @@ namespace E2E.Tests
         private Process? _serverProcess;
         private IPlaywright? _playwright;
         private IBrowser? _browser;
-        private string _url = "http://localhost:5002";  // Replace with your app URL and port from launchSettings.json.
-
+        private string _url = "http://localhost:5002";
 
         [OneTimeSetUp]
         public async Task OneTimeSetup()
         {
-            var projectPath = @"<Absolute path to your Blazor application's .csproj file>";
+            var projectPath = @"c:\\Users\\GayathriPalanivel\\SfBlazorApp\\SfBlazorApp.csproj";
             var psi = new ProcessStartInfo("dotnet", $"run --project \"{projectPath}\" --urls {_url}")
             {
                 RedirectStandardOutput = true,
@@ -30,23 +29,30 @@ namespace E2E.Tests
 
             _serverProcess = Process.Start(psi);
 
-            // wait for server to respond
-            var http = new HttpClient();
-            var started = false;
-            for (int i = 0; i < 30; i++)
+ 
+        // wait for server to respond
+        using var client = new HttpClient();
+
+        var started = false;
+        for (int i = 0; i < 30; i++)
+        {
+            try
             {
-                try
+                var response = await client.GetAsync(_url);
+                if (response.IsSuccessStatusCode)
                 {
-                    var r = await http.GetAsync(_url);
-                    if (r.IsSuccessStatusCode)
-                    {
-                        started = true;
-                        break;
-                    }
+                    started = true;
+                    break;
                 }
-                catch { }
-                await Task.Delay(1000);
             }
+            catch
+            {
+                // Ignore connection errors while waiting for app to start
+            }
+
+            await Task.Delay(1000);
+        }
+
 
             if (!started)
             {
