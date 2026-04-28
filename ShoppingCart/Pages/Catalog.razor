@@ -1,0 +1,79 @@
+@page "/catalog"
+
+@using ShoppingCart.Services
+@inject IProductService ProductService
+@inject ICartService CartService
+@using ShoppingCart
+
+
+<PageTitle>Product Catalog</PageTitle>
+
+<div class="container-fluid py-5">
+    <div class="row mb-4">
+        <div class="col">
+            <h1>🛍️ Our Products</h1>
+        </div>
+        <div class="col-auto">
+            <div class="input-group">
+                <label class="input-group-text">Filter by Category:</label>
+                <SfComboBox T="string" 
+                           Placeholder="All Categories"
+                           DataSource="@categories"
+                           AllowFiltering="true"
+                           @bind-Value="selectedCategory" />
+            </div>
+        </div>
+    </div>
+
+    @if (products == null)
+    {
+         <SfSpinner Visible=true>
+            </SfSpinner>
+    }
+    else if (!filteredProducts.Any())
+    {
+        <div class="alert alert-info">
+            No products found. <a href="/catalog" @onclick="ClearFilter">Clear filter</a>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var product in filteredProducts)
+            {
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                    <ProductCard Product="product" OnAddToCart="HandleAddToCart" />
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Product>? products;
+    private List<string> categories = new();
+    private string? selectedCategory;
+    
+    private List<Product> filteredProducts =>
+    (string.IsNullOrEmpty(selectedCategory) || selectedCategory == "All Categories")
+        ? products ?? new List<Product>()
+        : products?.Where(p => p.Category == selectedCategory).ToList()
+            ?? new List<Product>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        products = await ProductService.GetProductsAsync();
+        categories = await ProductService.GetCategoriesAsync();
+        categories.Insert(0, "All Categories");
+    }
+
+    private void HandleAddToCart(Product product)
+    {
+        CartService.AddItem(product);
+    }
+
+    private void ClearFilter()
+    {
+        selectedCategory = "All Categories";
+    }
+}

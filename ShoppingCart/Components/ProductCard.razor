@@ -1,0 +1,79 @@
+@using ShoppingCart.Models
+@using ShoppingCart.Services
+
+@* <div class="card h-100 shadow-sm">
+    <img src="@Product.ImageUrl" class="card-img-top" alt="@Product.Name" 
+         style="height: 200px; object-fit: cover;" />
+    <div class="card-body">
+        <h5 class="card-title">@Product.Name</h5>
+        <p class="card-text text-muted small">@Product.Description</p>
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="badge bg-warning text-dark">⭐ @Product.Rating</span>
+                <small class="text-muted">(@Product.ReviewCount)</small>
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="text-primary mb-0">@Product.Price.ToString("C")</h4>
+        </div>
+    </div>
+    <div class="card-footer bg-white border-0">
+        @if (Product.IsInStock)
+        {
+            <SfButton Content="Add to Cart" 
+                      IconCss="e-icons e-shopping-cart" 
+                      OnClick="() => OnAddToCart.InvokeAsync(Product)"
+                      cssClass="e-primary e-block w-100" />
+        }
+        else
+        {
+            <button class="btn btn-secondary w-100" disabled>Out of Stock</button>
+        }
+    </div>
+</div> *@
+
+<SfCard CssClass="h-100 shadow-sm">
+
+    <CardContent>
+        <img src="@Product.ImageUrl"
+             class="img-fluid mb-2"
+             alt="@Product.Name"
+             style="height:200px; object-fit:cover" />
+
+        <h5>@Product.Name</h5>
+        <p class="text-muted small">@Product.Description</p>
+
+        <span class="badge bg-warning text-dark">
+            ⭐ @Product.Rating (@Product.ReviewCount)
+        </span>
+
+        <h5 class="text-primary mt-2">
+            @Product.Price.ToString("C")
+        </h5>
+    </CardContent>
+
+    <CardFooter>
+        @if (Product.IsInStock)
+        {
+            <SfButton Content="Add to Cart"
+                      CssClass="e-primary e-block w-100"
+                      OnClick="() => OnAddToCart.InvokeAsync(Product)" />
+        }
+        else
+        {
+            <SfButton Content="Out of Stock"
+                      Disabled="true"
+                      CssClass="e-secondary e-block w-100" />
+        }
+    </CardFooter>
+
+</SfCard>
+
+@code {
+    [Parameter] public Product Product { get; set; } = null!;
+    [Parameter] public EventCallback<Product> OnAddToCart { get; set; }
+}
+
+

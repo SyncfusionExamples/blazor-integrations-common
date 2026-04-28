@@ -1,0 +1,23 @@
+@using ShoppingCart.Services
+@implements IDisposable
+
+<a href="/cart" class="position-relative text-decoration-none">
+    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+        @CartService.ItemCount
+    </span>
+    <i class="bi bi-cart" style="font-size: 1.5rem;">🛒</i>
+</a>
+
+@code {
+    [Inject] ICartService CartService { get; set; } = null!;
+
+    protected override void OnInitialized()
+    {
+        CartService.OnCartChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        CartService.OnCartChanged -= StateHasChanged;
+    }
+}

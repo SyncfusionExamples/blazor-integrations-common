@@ -1,0 +1,100 @@
+@page "/cart"
+@inject ICartService CartService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Shopping Cart</PageTitle>
+
+<div class="container-fluid py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h1>🛒 Shopping Cart</h1>
+            
+            @if (!CartService.Items.Any())
+            {
+                <div class="alert alert-info mt-4">
+                    <h5>Your cart is empty</h5>
+                    <p>Start shopping by visiting our <a href="/catalog" class="btn btn-primary">Product Catalog</a></p>
+                </div>
+            }
+            else
+            {
+                @foreach (var item in CartService.Items)
+                {
+                    <CartItem Item="item" />
+                }
+            }
+        </div>
+        
+        <div class="col-md-4">
+            <SfCard CssClass="sticky-top" style="top:20px">
+    <CardHeader>
+        <h4 class="mb-0">Order Summary</h4>
+    </CardHeader>
+
+    <CardContent>
+        <div class="d-flex justify-content-between mb-2">
+            <span>Items (@CartService.ItemCount)</span>
+            <span>@CartService.Total.ToString("C")</span>
+        </div>
+        <hr />
+        <div class="d-flex justify-content-between fw-bold">
+            <span>Total</span>
+            <span class="text-primary fs-5">
+                @CartService.Total.ToString("C")
+            </span>
+        </div>
+    </CardContent>
+
+    <CardFooter>
+        <SfButton Content="Proceed to Checkout"
+                  CssClass="e-primary e-block w-100 mb-2"
+                  OnClick="NavigateToCheckout" />
+
+        <SfButton Content="Continue Shopping"
+                  CssClass="e-outline e-block w-100"
+                  OnClick="NavigateToCatalog" />
+    </CardFooter>
+</SfCard>
+
+            @* <div class="card sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Items (@CartService.ItemCount)</span>
+                        <span>@CartService.Total.ToString("C")</span>
+                    </div>
+                    <div class="d-flex justify-content-between text-muted mb-3">
+                        <span>Shipping</span>
+                        <span>Calculated at checkout</span>
+                    </div>
+                    <hr />
+                    <div class="d-flex justify-content-between fw-bold mb-3">
+                        <span>Total</span>
+                        <span class="text-primary fs-5">@CartService.Total.ToString("C")</span>
+                    </div>
+                    
+                    @if (CartService.Items.Any())
+                    {
+                        <SfButton Content="Proceed to Checkout" 
+                                 CssClass="e-primary e-block w-100 mb-2"
+                                 OnClick="NavigateToCheckout" />
+                    }
+                    
+                    <SfButton Content="Continue Shopping"
+          CssClass="e-outline e-block w-100"
+          OnClick="NavigateToCatalog" />
+                </div>
+            </div> *@
+        </div>
+    </div>
+</div>
+
+@code {
+    private void NavigateToCheckout() => NavigationManager.NavigateTo("/checkout");
+    
+ private void NavigateToCatalog() =>
+        NavigationManager.NavigateTo("/catalog");
+
+}

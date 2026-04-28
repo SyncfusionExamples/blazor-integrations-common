@@ -1,0 +1,40 @@
+@using ShoppingCart.Models
+@using ShoppingCart.Services
+
+<div class="card mb-3">
+    <div class="row g-0">
+        <div class="col-md-2">
+            <img src="@Item.ImageUrl" class="img-fluid rounded-start" 
+                 alt="@Item.ProductName" style="height: 150px; object-fit: cover;" />
+        </div>
+        <div class="col-md-6">
+            <div class="card-body">
+                <h5 class="card-title">@Item.ProductName</h5>
+                <p class="card-text">
+                    <span class="text-muted">@Item.UnitPrice.ToString("C")</span> each
+                </p>
+                <div class="d-flex align-items-center gap-2">
+                    <SfButton Content="−" Size="Small" CssClass="e-outline"
+                             OnClick="() => DecreaseQty()" />
+                    <span class="px-3 fw-bold">@Item.Quantity</span>
+                    <SfButton Content="+" Size="Small" CssClass="e-outline"
+                             OnClick="() => IncreaseQty()" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 text-end d-flex flex-column justify-content-center pe-3">
+            <h5 class="text-primary">@Item.Subtotal.ToString("C")</h5>
+            <SfButton Content="Remove" CssClass="e-outline e-danger mt-2"
+                     OnClick="() => CartService.RemoveItem(Item.ProductId)" />
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Models.CartItem Item { get; set; } = null!;
+    [Inject] ICartService CartService { get; set; } = null!;
+
+    private void IncreaseQty() => CartService.UpdateQuantity(Item.ProductId, Item.Quantity + 1);
+    private void DecreaseQty() => CartService.UpdateQuantity(Item.ProductId, Item.Quantity - 1);
+    
+}
