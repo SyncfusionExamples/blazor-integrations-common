@@ -17,6 +17,7 @@ builder.Services.AddSyncfusionBlazor();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IWishlistService, WishlistService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

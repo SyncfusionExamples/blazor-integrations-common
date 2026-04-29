@@ -1,0 +1,39 @@
+@page "/wishlist"
+@using ShoppingCart
+@using Syncfusion.Blazor.Buttons
+@inject IWishlistService WishlistService
+
+<PageTitle>Wishlist</PageTitle>
+
+<h3 class="mb-3">My Wishlist</h3>
+
+@if (!WishlistService.GetItems().Any())
+{
+    <p>Your wishlist is empty.</p>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var product in WishlistService.GetItems())
+        {
+            <div class="col-12 col-md-4 col-lg-3">
+                <SfCard CssClass="h-100">
+                    <CardContent>
+                        <h6>@product.Name</h6>
+                        <p class="small text-muted">@product.Description</p>
+
+                        <strong>
+                            @product.Price.ToString("C")
+                        </strong>
+                    </CardContent>
+
+                    <CardFooter>
+                        <SfButton Content="Remove"
+                                  CssClass="e-outline e-danger e-small"
+                                  OnClick="() => WishlistService.Remove(product)" />
+                    </CardFooter>
+                </SfCard>
+            </div>
+        }
+    </div>
+}

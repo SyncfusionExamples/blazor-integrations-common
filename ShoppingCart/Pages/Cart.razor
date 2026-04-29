@@ -1,100 +1,139 @@
 @page "/cart"
+@using ShoppingCart.Models
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@implements IDisposable
 @inject ICartService CartService
 @inject NavigationManager NavigationManager
 
 <PageTitle>Shopping Cart</PageTitle>
 
-<div class="container-fluid py-5">
+<div class="container-fluid py-4">
     <div class="row">
-        <div class="col-md-8">
-            <h1>🛒 Shopping Cart</h1>
-            
+        <div class="col-lg-8">
+            <h3 class="mb-3">🛒 Shopping Cart</h3>
+
             @if (!CartService.Items.Any())
             {
-                <div class="alert alert-info mt-4">
-                    <h5>Your cart is empty</h5>
-                    <p>Start shopping by visiting our <a href="/catalog" class="btn btn-primary">Product Catalog</a></p>
-                </div>
+                <p>Your cart is empty.</p>
             }
             else
             {
-                @foreach (var item in CartService.Items)
-                {
-                    <CartItem Item="item" />
-                }
+                <SfGrid TItem="CartItem"
+                        DataSource="@CartService.Items"
+                        AllowPaging="false">
+
+                    <GridColumns>
+
+                        <!-- Product -->
+                        <GridColumn HeaderText="Item" Width="220">
+                            <Template Context="context">
+                                @{
+                                    var item = (CartItem)context;
+                                }
+                                <div style="display:flex;align-items:center;gap:10px">
+                                    <img src="@item.ImageUrl"
+                                         style="height:50px;width:50px;object-fit:cover" />
+                                    <span>@item.ProductName</span>
+                                </div>
+                            </Template>
+                        </GridColumn>
+
+                        <!-- Price -->
+                        <GridColumn HeaderText="Price" Width="100">
+                            <Template Context="context">
+                                @{
+                                    var item = (CartItem)context;
+                                }
+                                @item.UnitPrice.ToString("C")
+                            </Template>
+                        </GridColumn>
+
+                        <!-- Quantity -->
+                        <GridColumn HeaderText="Qty" Width="150">
+                            <Template Context="context">
+                                @{
+                                    var item = (CartItem)context;
+                                }
+                                <div style="display:flex;align-items:center;gap:5px">
+                                    <SfButton Content="−"
+                                              CssClass="e-outline e-small"
+                                              OnClick="@(() => Decrease(item))" />
+                                    <span style="min-width:25px;text-align:center">
+                                        @item.Quantity
+                                    </span>
+                                    <SfButton Content="+"
+                                              CssClass="e-outline e-small"
+                                              OnClick="@(() => Increase(item))" />
+                                </div>
+                            </Template>
+                        </GridColumn>
+
+                        <!-- Subtotal -->
+                        <GridColumn HeaderText="Subtotal" Width="120">
+                            <Template Context="context">
+                                @{
+                                    var item = (CartItem)context;
+                                }
+                                <strong>@item.Subtotal.ToString("C")</strong>
+                            </Template>
+                        </GridColumn>
+
+                        <!-- Remove -->
+                        <GridColumn HeaderText="" Width="100">
+                            <Template Context="context">
+                                @{
+                                    var item = (CartItem)context;
+                                }
+                                <SfButton Content="Remove"
+                                          CssClass="e-outline e-danger e-small"
+                                          OnClick="@(() => Remove(item))" />
+                            </Template>
+                        </GridColumn>
+
+                    </GridColumns>
+                </SfGrid>
             }
         </div>
-        
-        <div class="col-md-4">
-            <SfCard CssClass="sticky-top" style="top:20px">
-    <CardHeader>
-        <h4 class="mb-0">Order Summary</h4>
-    </CardHeader>
 
-    <CardContent>
-        <div class="d-flex justify-content-between mb-2">
-            <span>Items (@CartService.ItemCount)</span>
-            <span>@CartService.Total.ToString("C")</span>
-        </div>
-        <hr />
-        <div class="d-flex justify-content-between fw-bold">
-            <span>Total</span>
-            <span class="text-primary fs-5">
-                @CartService.Total.ToString("C")
-            </span>
-        </div>
-    </CardContent>
-
-    <CardFooter>
-        <SfButton Content="Proceed to Checkout"
-                  CssClass="e-primary e-block w-100 mb-2"
-                  OnClick="NavigateToCheckout" />
-
-        <SfButton Content="Continue Shopping"
-                  CssClass="e-outline e-block w-100"
-                  OnClick="NavigateToCatalog" />
-    </CardFooter>
-</SfCard>
-
-            @* <div class="card sticky-top" style="top: 20px;">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Order Summary</h4>
-                </div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
+        <!-- Order Summary -->
+        <div class="col-lg-4">
+            <SfCard>
+                <CardHeader><h5>Order Summary</h5></CardHeader>
+                <CardContent>
+                    <div style="display:flex;justify-content:space-between">
                         <span>Items (@CartService.ItemCount)</span>
                         <span>@CartService.Total.ToString("C")</span>
                     </div>
-                    <div class="d-flex justify-content-between text-muted mb-3">
-                        <span>Shipping</span>
-                        <span>Calculated at checkout</span>
-                    </div>
-                    <hr />
-                    <div class="d-flex justify-content-between fw-bold mb-3">
-                        <span>Total</span>
-                        <span class="text-primary fs-5">@CartService.Total.ToString("C")</span>
-                    </div>
-                    
-                    @if (CartService.Items.Any())
-                    {
-                        <SfButton Content="Proceed to Checkout" 
-                                 CssClass="e-primary e-block w-100 mb-2"
-                                 OnClick="NavigateToCheckout" />
-                    }
-                    
-                    <SfButton Content="Continue Shopping"
-          CssClass="e-outline e-block w-100"
-          OnClick="NavigateToCatalog" />
-                </div>
-            </div> *@
+                </CardContent>
+            </SfCard>
         </div>
     </div>
 </div>
 
 @code {
-    private void NavigateToCheckout() => NavigationManager.NavigateTo("/checkout");
-    
- private void NavigateToCatalog() =>
-        NavigationManager.NavigateTo("/catalog");
+    private void Increase(CartItem item)
+        => CartService.UpdateQuantity(item.ProductId, item.Quantity + 1);
+
+    private void Decrease(CartItem item)
+        => CartService.UpdateQuantity(item.ProductId, item.Quantity - 1);
+
+    private void Remove(CartItem item)
+        => CartService.RemoveItem(item.ProductId);
+        
+  protected override void OnInitialized()
+    {
+        CartService.OnCartChanged += CartChanged;
+    }
+
+    private void CartChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        CartService.OnCartChanged -= CartChanged;
+    }
 
 }
