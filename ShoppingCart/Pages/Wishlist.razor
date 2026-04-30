@@ -2,6 +2,7 @@
 @using ShoppingCart
 @using Syncfusion.Blazor.Buttons
 @inject IWishlistService WishlistService
+@inject NavigationManager NavigationManager
 
 <PageTitle>Wishlist</PageTitle>
 
@@ -9,7 +10,21 @@
 
 @if (!WishlistService.GetItems().Any())
 {
-    <p>Your wishlist is empty.</p>
+    <div class="empty-wishlist-wrapper">
+        <SfCard CssClass="empty-wishlist-card">
+            <CardContent>
+                <div class="text-center py-4">
+                    <div class="wishlist-icon">♡</div>
+                    <h4 class="mt-2">Your wishlist is empty</h4>
+                    <p class="text-muted mb-3">Save products you like to come back to them later.</p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <SfButton CssClass="e-primary" OnClick="@(() => NavigateToCatalog())">Browse Catalog</SfButton>
+                        <SfButton CssClass="e-outline" OnClick="@(() => NavigateToPopular())">Popular Picks</SfButton>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+    </div>
 }
 else
 {
@@ -36,4 +51,21 @@ else
             </div>
         }
     </div>
+}
+
+<style>
+    .e-card.empty-wishlist-card {
+        border: 0px;
+        box-shadow: none;
+    }
+    .empty-wishlist-wrapper { display:flex; justify-content:center; padding:3rem 1rem; }
+    .empty-wishlist-card { max-width:700px; width:100%; border-radius:12px; }
+    .wishlist-icon { font-size:48px; width:84px; height:84px; display:inline-flex; align-items:center; justify-content:center; border-radius:50%; background:#fff6fb; color:#d6336c; margin:auto; }
+    @@media (max-width:576px){ .empty-wishlist-card{ padding:1rem } .wishlist-icon{ width:64px;height:64px;font-size:36px }}
+</style>
+
+@code {
+    private void NavigateToCatalog() => NavigationManager.NavigateTo("/catalog");
+
+    private void NavigateToPopular() => NavigationManager.NavigateTo("/catalog");
 }

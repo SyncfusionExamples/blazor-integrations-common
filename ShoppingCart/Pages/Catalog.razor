@@ -15,7 +15,6 @@
         </div>
         <div class="col-auto">
             <div class="input-group">
-                <label class="input-group-text">Filter by Category:</label>
                 <SfComboBox T="string" 
                            Placeholder="All Categories"
                            DataSource="@categories"
@@ -38,13 +37,15 @@
     }
     else
     {
-        <div class="row g-4">
-            @foreach (var product in filteredProducts)
-            {
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3">
-                    <ProductCard Item="product" OnAddToCart="HandleAddToCart" />
-                </div>
-            }
+        <div class="catalog-scroll">
+            <div class="row g-4">
+                @foreach (var product in filteredProducts)
+                {
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <ProductCard Item="product" OnAddToCart="HandleAddToCart" />
+                    </div>
+                }
+            </div>
         </div>
     }
 </div>
@@ -77,3 +78,32 @@
         selectedCategory = "All Categories";
     }
 }
+
+<style>
+    /* Hide outer page scrollbar while viewing catalog — only the catalog scrolls */
+    html, body {
+        overflow-y: hidden;
+    }
+
+    /* Show ~8 product cards before internal scrolling; adjust height if needed */
+    /* Prevent the page body from scrolling — keep scroll inside the catalog area */
+    article.content {
+        /* ensure the page content area does not create a browser scrollbar */
+        overflow: hidden;
+    }
+
+    .catalog-scroll {
+        /* use viewport height minus header/sidebar spacing so only this container scrolls */
+        max-height: calc(100vh - 140px);
+        overflow-y: auto;
+        padding-right: 8px; /* avoid content hiding behind scrollbar */
+    }
+
+    .catalog-scroll::-webkit-scrollbar { width: 10px; }
+    .catalog-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 6px; }
+
+    @@media (max-width: 768px) {
+        /* mobile: increase internal viewport so two columns fit visibly */
+        .catalog-scroll { max-height: calc(100vh - 160px); }
+    }
+</style>

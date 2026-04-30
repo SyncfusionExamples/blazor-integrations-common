@@ -15,18 +15,38 @@
 
             @if (!CartService.Items.Any())
             {
-                <p>Your cart is empty.</p>
+                <div class="empty-cart-wrapper">
+                    <SfCard CssClass="empty-cart-card">
+                        <CardContent>
+                            <div class="text-center py-4">
+                                <div class="empty-icon" aria-hidden="true">🛒</div>
+                                <h4 class="mt-2">Your cart is empty</h4>
+                                <p class="text-muted mb-3">Looks like you haven't added anything yet. Browse products and start shopping.</p>
+                                <div>
+                                    <SfButton CssClass="e-primary" OnClick="@(() => NavigateToCatalog())">
+                                        Browse Catalog
+                                    </SfButton>
+                                    <SfButton CssClass="e-outline ms-2" OnClick="@(() => NavigateToWishlist())">
+                                        View Wishlist
+                                    </SfButton>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </SfCard>
+                </div>
             }
             else
             {
-                <SfGrid TItem="CartItem"
+                <div class="table-responsive">
+                    <SfGrid @ref="cartGrid" TItem="CartItem"
                         DataSource="@CartService.Items"
-                        AllowPaging="false">
+                        AllowPaging="false"
+                    >
 
                     <GridColumns>
 
                         <!-- Product -->
-                        <GridColumn HeaderText="Item" Width="220">
+                        <GridColumn HeaderText="Item" Width="250px">
                             <Template Context="context">
                                 @{
                                     var item = (CartItem)context;
@@ -40,7 +60,7 @@
                         </GridColumn>
 
                         <!-- Price -->
-                        <GridColumn HeaderText="Price" Width="100">
+                        <GridColumn HeaderText="Price">
                             <Template Context="context">
                                 @{
                                     var item = (CartItem)context;
@@ -50,7 +70,7 @@
                         </GridColumn>
 
                         <!-- Quantity -->
-                        <GridColumn HeaderText="Qty" Width="150">
+                        <GridColumn HeaderText="Qty">
                             <Template Context="context">
                                 @{
                                     var item = (CartItem)context;
@@ -70,7 +90,7 @@
                         </GridColumn>
 
                         <!-- Subtotal -->
-                        <GridColumn HeaderText="Subtotal" Width="120">
+                        <GridColumn HeaderText="Subtotal">
                             <Template Context="context">
                                 @{
                                     var item = (CartItem)context;
@@ -80,7 +100,7 @@
                         </GridColumn>
 
                         <!-- Remove -->
-                        <GridColumn HeaderText="" Width="100">
+                        <GridColumn HeaderText="">
                             <Template Context="context">
                                 @{
                                     var item = (CartItem)context;
@@ -93,25 +113,58 @@
 
                     </GridColumns>
                 </SfGrid>
+                    </div>
             }
         </div>
 
-        <!-- Order Summary -->
-        <div class="col-lg-4">
-            <SfCard>
-                <CardHeader><h5>Order Summary</h5></CardHeader>
-                <CardContent>
-                    <div style="display:flex;justify-content:space-between">
-                        <span>Items (@CartService.ItemCount)</span>
-                        <span>@CartService.Total.ToString("C")</span>
-                    </div>
-                </CardContent>
-            </SfCard>
-        </div>
+        @if (CartService.Items.Any())
+        {
+            <!-- Order Summary -->
+            <div class="col-lg-4">
+                <SfCard CssClass="order-summary-card">
+                    <CardHeader>
+                        <div class="order-summary-header">
+                            <div>
+                                <h5 class="mb-0">Order Summary</h5>
+                                <p>Review your items before checkout</p>
+                            </div>
+                            <div class="order-total">@CartService.Total.ToString("C")</div>
+                        </div>
+                    </CardHeader>
+
+                    <CardContent>
+                        <div class="summary-top d-flex justify-content-between align-items-center mb-3">
+                            <div class="summary-items">Items <span class="badge bg-light text-muted">(@CartService.ItemCount)</span></div>
+                        </div>
+
+                        <div class="summary-list">
+                            @foreach (var item in CartService.Items)
+                            {
+                                <div class="summary-item d-flex align-items-center mb-2">
+                                    <img src="@item.ImageUrl" alt="" class="summary-thumb me-2" />
+                                    <div>
+                                        <div class="fw-semibold">@item.ProductName</div>
+                                        <div class="text-muted small">@item.Quantity x @item.UnitPrice.ToString("C")</div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </CardContent>
+
+                    <CardFooter>
+                        <div class="d-flex gap-2">
+                            <SfButton CssClass="e-primary e-block w-100" OnClick="@(() => NavigateToCheckout())">Checkout</SfButton>
+                            <SfButton CssClass="e-outline w-100" OnClick="@(() => NavigateToCatalog())">Continue Shopping</SfButton>
+                        </div>
+                    </CardFooter>
+                </SfCard>
+            </div>
+        }
     </div>
 </div>
 
 @code {
+    private Syncfusion.Blazor.Grids.SfGrid<CartItem>? cartGrid;
     private void Increase(CartItem item)
         => CartService.UpdateQuantity(item.ProductId, item.Quantity + 1);
 
@@ -126,9 +179,25 @@
         CartService.OnCartChanged += CartChanged;
     }
 
-    private void CartChanged()
+    // Refresh the grid when the cart changes so rows reflect removals/updates
+    private async void CartChanged()
     {
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(async () =>
+        {
+            if (cartGrid is not null)
+            {
+                try
+                {
+                    await cartGrid.Refresh();
+                }
+                catch
+                {
+                    // If Refresh isn't available for some reason, fall back to re-render
+                }
+            }
+
+            StateHasChanged();
+        });
     }
 
     public void Dispose()
@@ -136,4 +205,88 @@
         CartService.OnCartChanged -= CartChanged;
     }
 
+    private void NavigateToCatalog() => NavigationManager.NavigateTo("/catalog");
+
+    private void NavigateToWishlist() => NavigationManager.NavigateTo("/wishlist");
+
+    private void NavigateToCheckout() => NavigationManager.NavigateTo("/checkout");
+
 }
+
+<style>
+    .e-card {
+        border: 0px;
+        box-shadow: none;
+    }
+    .empty-cart-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 1rem;
+    }
+
+    .empty-cart-card {
+        max-width: 640px;
+        width: 100%;
+        border-radius: 12px;
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        background: #f1f7ff;
+        width: 84px;
+        height: 84px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    @@media (max-width: 576px) {
+        .empty-cart-card { padding: 1rem; }
+        .empty-icon { width: 64px; height:64px; font-size:36px; }
+    }
+
+
+    /* Order summary styles */
+    .order-summary-card { border-radius: 12px; overflow: hidden; }
+
+    .order-summary-header {
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:10px;
+        padding: 0.75rem 1rem;
+        background: rgb(15, 108, 189);
+        border: rgb(15, 108, 189);
+        color: white;
+    }
+
+    .order-summary-header small {
+        color: rgba(255,255,255,0.95);
+        opacity: 0.95;
+        display: block;
+    }
+
+    .order-total { font-weight:700; font-size:1.1rem; }
+
+    .summary-thumb { width:42px; height:42px; object-fit:cover; border-radius:6px; background:#fff; }
+
+    .summary-item .fw-semibold { font-size:0.95rem; }
+    .summary-items,  {     font-size: large;
+    font-weight: bold; }
+    @@media (max-width: 576px) {
+        .empty-cart-card { padding: 1rem; }
+        .empty-icon { width: 64px; height:64px; font-size:36px; }
+        .order-summary-header { padding:0.6rem; }
+    }
+
+    .summary-list {
+        max-height: 320px;
+        overflow-y: auto;
+        padding-right: 6px;
+    }
+
+    .summary-list::-webkit-scrollbar { width: 8px; }
+    .summary-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 6px; }
+</style>

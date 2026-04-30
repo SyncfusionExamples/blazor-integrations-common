@@ -5,13 +5,16 @@
 @using Syncfusion.Blazor.Inputs
 @inject IWishlistService WishlistService
 
-<SfCard CssClass="product-card h-100">
+<SfCard CssClass="product-card">
 
     <CardContent>
+        <div class="product-image">
+            <img class="card-img" src="/@Item.ImageUrl" alt="@Item.Name" />
+        </div>
         <h6 class="fw-bold">@Item.Name</h6>
 
         <SfRating Value="@Item.Rating"
-                  ReadOnly="true" />
+                  />
 
         <p class="small text-muted">
             @Item.Description
@@ -27,10 +30,10 @@
 
             <!-- RIGHT: Actions -->
             <div class="footer-actions">
-                <SfButton Content="Add"
+                <SfButton Content="Add Cart"
                           CssClass="e-outline e-primary e-small"
                           Disabled="@(!Item.IsInStock)"
-                          OnClick="() => OnAddToCart.InvokeAsync(Item)" />
+                          OnClick="AddToCart" />
 
                 <!-- ❤️ Wishlist Heart -->
                 <SfButton CssClass="e-outline e-small wishlist-btn"
@@ -40,7 +43,6 @@
         </div>
     </CardFooter>
 </SfCard>
-
 @code {
     [Parameter] public Product Item { get; set; } = default!;
     [Parameter] public EventCallback<Product> OnAddToCart { get; set; }
@@ -50,11 +52,20 @@
 
     private void ToggleWishlist()
         => WishlistService.Toggle(Item);
+
+    private Task AddToCart()
+    {
+        return OnAddToCart.InvokeAsync(Item);
+    }
 }
 <style>
     .product-card {
     border-radius: 10px;
     transition: box-shadow 0.2s ease;
+        width: 100%;
+        min-height: 360px;
+        box-sizing: border-box;
+       
 }
 
 .product-card:hover {
@@ -75,6 +86,25 @@
     object-fit: contain;
 }
 
+@@media (max-width: 576px) {
+    .product-card {
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .product-image {
+        height: 120px;
+    }
+
+    .price {
+        font-size: 0.95rem;
+    }
+
+    .wishlist-btn {
+        font-size: 20px;
+    }
+}
+
 
 .footer-row {
     display: flex;
@@ -92,7 +122,7 @@
 }
 
 .wishlist-btn {
-    font-size: 16px;
+    font-size: 25px;
     color: crimson;
 }
 

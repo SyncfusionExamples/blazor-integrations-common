@@ -4,6 +4,11 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* Prevent accidental horizontal scroll on small devices */
+html, body {
+    overflow-x: hidden;
+}
+
 h1:focus {
     outline: none;
 }
@@ -24,6 +29,24 @@ a, .btn-link {
 
 .content {
     padding-top: 1.1rem;
+}
+
+@media (max-width: 640px) {
+    .container-fluid {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .container {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+
+    /* Make Syncfusion cards and buttons fit smaller screens */
+    .product-card, .hero-card, .nav-card {
+        margin-left: 0;
+        margin-right: 0;
+    }
 }
 
 .valid.modified:not([type=checkbox]) {

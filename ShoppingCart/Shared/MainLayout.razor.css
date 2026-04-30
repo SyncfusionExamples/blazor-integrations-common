@@ -4,6 +4,11 @@
     flex-direction: column;
 }
 
+/* Ensure sidebar doesn't force a minimum width on small screens */
+.sidebar {
+    min-width: 0;
+}
+
 main {
     flex: 1;
 }
