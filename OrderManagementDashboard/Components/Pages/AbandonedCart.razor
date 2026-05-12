@@ -1,0 +1,38 @@
+@page "/abandoned-cart"
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@using OrderManagementDashboard.Models
+@using OrderManagementDashboard.Services
+@inject IAbandonedCartService AbandonedCartService
+
+<SfCard>
+    <CardHeader>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Abandoned cart</h2>
+            <SfButton CssClass="e-success">Export</SfButton>
+        </div>
+    </CardHeader>
+    <CardContent>
+        <SfGrid DataSource="@Items" AllowPaging="true" AllowSorting="true">
+            <GridPageSettings PageSize="10"></GridPageSettings>
+            <GridColumns>
+                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                <GridColumn Field="Id" HeaderText="ID" Width="100"></GridColumn>
+                <GridColumn Field="Date" HeaderText="Date" Width="150" Format="dd MMM, yyyy"></GridColumn>
+                <GridColumn Field="PlacedBy" HeaderText="Placed By" Width="200"></GridColumn>
+                <GridColumn Field="Amount" HeaderText="Amount" Width="100" Format="C"></GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </CardContent>
+</SfCard>
+
+@code {
+    private List<Models.AbandonedCart> Items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Items = await AbandonedCartService.GetAbandonedCartsAsync(1, 10);
+    }
+}

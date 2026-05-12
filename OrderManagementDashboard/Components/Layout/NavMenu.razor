@@ -1,0 +1,166 @@
+﻿@using Syncfusion.Blazor.Navigations
+
+<div class="nav-menu">
+    <div class="nav-header">
+        <h3>ORDER MANAGEMENT</h3>
+    </div>
+
+    <SfAccordion>
+        <AccordionItems>
+            <AccordionItem Expanded="true">
+                <HeaderTemplate>
+                    <div class="menu-item-header">
+                        <span class="menu-icon">🛒</span>
+                        <span>Orders</span>
+                        <span class="dropdown-icon">▼</span>
+                    </div>
+                </HeaderTemplate>
+                <ContentTemplate>
+                    <div class="submenu">
+                        <NavLink class="submenu-item" href="/dashboard">
+                            <span class="bullet">●</span>
+                            <span>All Orders</span>
+                        </NavLink>
+                        <NavLink class="submenu-item" href="/return-refund">
+                            <span class="bullet">●</span>
+                            <span>Return & Refund</span>
+                        </NavLink>
+                        <NavLink class="submenu-item" href="/abandoned-cart">
+                            <span class="bullet">●</span>
+                            <span>Abandoned Cart</span>
+                        </NavLink>
+                        <NavLink class="submenu-item" href="/transactions">
+                            <span class="bullet">●</span>
+                            <span>Transactions</span>
+                        </NavLink>
+                    </div>
+                </ContentTemplate>
+            </AccordionItem>
+        </AccordionItems>
+    </SfAccordion>
+
+    <div class="nav-footer">
+        <NavLink class="footer-link" href="/abandoned-cart">
+            <span class="menu-icon">🛒</span>
+            <span>Abandoned cart</span>
+        </NavLink>
+    </div>
+</div>
+
+<style>
+    .nav-menu {
+        background-color: #16535E;
+        color: white;
+        height: 100vh;
+        width: 250px;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .nav-header {
+        padding: 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-header h3 {
+        margin: 0;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    .e-accordion {
+        background: transparent;
+        border: none;
+    }
+
+    .e-accordion .e-acrdn-item {
+        border: none;
+        background: transparent;
+    }
+
+    .e-accordion .e-acrdn-header {
+        background: transparent;
+        color: white;
+        border: none;
+        padding: 15px 20px;
+    }
+
+    .e-accordion .e-acrdn-header:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .e-accordion .e-acrdn-panel {
+        background: transparent;
+        border: none;
+    }
+
+    .menu-item-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        color: white;
+        width: 100%;
+    }
+
+    .menu-icon {
+        font-size: 18px;
+    }
+
+    .dropdown-icon {
+        margin-left: auto;
+        font-size: 10px;
+    }
+
+    .submenu {
+        padding: 0;
+    }
+
+    .submenu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 20px 12px 50px;
+        color: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .submenu-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+    }
+
+    .submenu-item.active {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+
+    .bullet {
+        font-size: 8px;
+    }
+
+    .nav-footer {
+        margin-top: auto;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+        color: white;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .footer-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-link.active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+</style>

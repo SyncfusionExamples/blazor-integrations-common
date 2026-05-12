@@ -1,0 +1,29 @@
+﻿@inherits LayoutComponentBase
+
+<div class="main-layout">
+    <aside class="sidebar">
+        <NavMenu />
+    </aside>
+    <main class="content">
+        @Body
+    </main>
+</div>
+
+<style>
+    .main-layout {
+        display: flex;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .sidebar {
+        flex: 0 0 250px;
+        overflow-y: auto;
+    }
+
+    .content {
+        flex: 1;
+        overflow-y: auto;
+        background-color: #f5f5f5;
+    }
+</style>

@@ -1,0 +1,73 @@
+@page "/return-refund"
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@using OrderManagementDashboard.Models
+@using OrderManagementDashboard.Services
+@inject IReturnRefundService ReturnRefundService
+
+<SfCard>
+    <CardHeader>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h2>Return & Refund</h2>
+            <SfButton CssClass="e-success">Export</SfButton>
+        </div>
+    </CardHeader>
+    <CardContent>
+        <SfGrid DataSource="@Items" AllowPaging="true" ActionFailure="@OnActionFailure" 
+                Toolbar="@ToolbarItems" AllowSorting="true" AllowFiltering="true">
+            <GridPageSettings PageSize="10"></GridPageSettings>
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+            <GridColumns>
+                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                <GridColumn Field="Id" HeaderText="ID" Width="100"></GridColumn>
+                <GridColumn Field="OrderNumber" HeaderText="Order Number" Width="120"></GridColumn>
+                <GridColumn Field="Amount" HeaderText="Amount" Width="100" Format="C"></GridColumn>
+                <GridColumn Field="OrderDate" HeaderText="Order Date" Width="120" Format="dd MMM, yyyy"></GridColumn>
+                <GridColumn Field="Email" HeaderText="Mail" Width="150"></GridColumn>
+                <GridColumn Field="Reason" HeaderText="Reason" Width="200"></GridColumn>
+                <GridColumn Field="Status" HeaderText="Status" Width="100">
+                    <Template>
+                        @{
+                            var item = (Models.ReturnRefund)context;
+                            <span style="background-color: #e0f2f1; color: #1a5f66; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600;">
+                                @item.Status
+                            </span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="Date" HeaderText="Date" Width="120" Format="dd MMM, yyyy"></GridColumn>
+                <GridColumn HeaderText="Action" Width="100">
+                    <Template>
+                        <SfButton CssClass="e-small e-outline">✓</SfButton>
+                        <SfButton CssClass="e-small e-outline" style="margin-left: 5px;">✕</SfButton>
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </CardContent>
+</SfCard>
+
+@code {
+    private List<Models.ReturnRefund> Items = new();
+    private List<object> ToolbarItems = new List<object> { "Search", "ExcelExport", "PdfExport" };
+    private int TotalCount = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        Items = await ReturnRefundService.GetReturnRefundsAsync(1, 10);
+        TotalCount = await ReturnRefundService.GetTotalCountAsync();
+    }
+
+    private void OnActionFailure(FailureEventArgs args)
+    {
+        // Handle action failure
+    }
+}

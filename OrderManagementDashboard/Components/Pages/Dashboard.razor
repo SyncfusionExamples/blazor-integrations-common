@@ -1,0 +1,705 @@
+@page "/dashboard"
+@using OrderManagementDashboard.Models
+@using OrderManagementDashboard.Services
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Cards
+@inject IOrderService OrderService
+
+<PageTitle>Dashboard - Order Management</PageTitle>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h3 class="page-title">Total Orders</h3>
+        <SfButton CssClass="e-success" Content="Export"></SfButton>
+    </div>
+      <!-- KPI Cards Section -->
+    <div class="kpi-grid">
+        <SfCard CssClass="kpi-card kpi-blue">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Total Order</div>
+                        <div class="kpi-value">3823</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-yellow">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Pending Payment</div>
+                        <div class="kpi-value">934</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-cyan">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Processing</div>
+                        <div class="kpi-value">993</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-orange">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Shipped</div>
+                        <div class="kpi-value">536</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-pink">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Delivered</div>
+                        <div class="kpi-value">24392</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-lightorange">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Cancel</div>
+                        <div class="kpi-value">9372</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-green">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Returned</div>
+                        <div class="kpi-value">434</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-lightblue">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Failed</div>
+                        <div class="kpi-value">938</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="chart-container">
+    <div class="chart-header">
+        <h4>Profit margin</h4>
+        <div class="chart-filters">
+            <SfButton CssClass="@(selectedPeriod == "12months" ? "e-flat e-primary" : "e-flat")"
+                      Content="12 months"
+                      OnClick="@(() => SelectPeriod("12months"))" />
+            <SfButton CssClass="@(selectedPeriod == "30days" ? "e-flat e-primary" : "e-flat")"
+                      Content="30 days"
+                      OnClick="@(() => SelectPeriod("30days"))" />
+            <SfButton CssClass="@(selectedPeriod == "7days" ? "e-flat e-primary" : "e-flat")"
+                      Content="7 days"
+                      OnClick="@(() => SelectPeriod("7days"))" />
+            <SfButton CssClass="@(selectedPeriod == "24hours" ? "e-flat e-primary" : "e-flat")"
+                      Content="24 hours"
+                      OnClick="@(() => SelectPeriod("24hours"))" />
+        </div>
+    </div>
+
+    <div class="chart-wrapper">
+        <SfChart Width="100%" Height="450px">
+            <ChartArea>
+                <ChartAreaBorder Width="0" />
+            </ChartArea>
+
+            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                <ChartAxisMajorGridLines Width="0" />
+                <ChartAxisMinorGridLines Width="0" />
+            </ChartPrimaryXAxis>
+
+            <ChartPrimaryYAxis LabelFormat="{value}k" Minimum="0" Maximum="50" Interval="10">
+                <ChartAxisMajorGridLines Width="1" Color="#E0E0E0" />
+                <ChartAxisLineStyle Width="0" />
+            </ChartPrimaryYAxis>
+
+            <ChartTooltipSettings Enable="true" Shared="true"
+                                  Format="${point.x}<br/>Earnings: <b>${point.y},000</b>" />
+
+            <ChartCrosshairSettings Enable="true" LineType="LineType.Vertical">
+                <ChartCrosshairLine Width="1" Color="#9E9E9E" />
+            </ChartCrosshairSettings>
+
+            <ChartSeriesCollection>
+                <ChartSeries DataSource="@chartData"
+                             XName="Month"
+                             YName="Earnings"
+                             Name="Earnings"
+                             Type="ChartSeriesType.Line"
+                             Width="3"
+                             Fill="#008B8B">
+                    <ChartMarker Visible="true" Width="10" Height="10" Shape="ChartShape.Circle">
+                        <ChartMarkerBorder Width="3" Color="#008B8B" />
+                    </ChartMarker>
+                </ChartSeries>
+
+                <ChartSeries DataSource="@chartData"
+                             XName="Month"
+                             YName="TotalProfits"
+                             Name="Total Profits"
+                             Type="ChartSeriesType.Line"
+                             Width="3"
+                             Fill="#FFA500">
+                    <ChartMarker Visible="true" Width="10" Height="10" Shape="ChartShape.Circle">
+                        <ChartMarkerBorder Width="3" Color="#FFA500" />
+                    </ChartMarker>
+                </ChartSeries>
+            </ChartSeriesCollection>
+
+            <ChartLegendSettings Visible="true" Position="LegendPosition.Top">
+                <ChartLegendTextStyle Size="13px" Color="#666666" />
+            </ChartLegendSettings>
+        </SfChart>
+    </div>
+</div>
+
+    <!-- Grid Section -->
+    <div class="grid-container">
+        <div class="grid-toolbar">
+            <div class="search-box">
+                <SfTextBox Placeholder="Search..." @bind-Value="searchText" Input="@OnSearch" CssClass="search-input">
+                    <TextBoxEvents Input="@OnSearch"></TextBoxEvents>
+                </SfTextBox>
+            </div>
+            <div class="filter-dropdowns">
+                <SfDropDownList TValue="string" TItem="string" Placeholder="Payment status" DataSource="@paymentStatusList" CssClass="filter-dropdown">
+                    <DropDownListFieldSettings Text="Text" Value="Text"></DropDownListFieldSettings>
+                </SfDropDownList>
+                <SfDropDownList TValue="string" TItem="string" Placeholder="Received status" DataSource="@receivedStatusList" CssClass="filter-dropdown">
+                    <DropDownListFieldSettings Text="Text" Value="Text"></DropDownListFieldSettings>
+                </SfDropDownList>
+                <SfDropDownList TValue="string" TItem="string" Placeholder="Date" DataSource="@dateFilterList" CssClass="filter-dropdown">
+                    <DropDownListFieldSettings Text="Text" Value="Text"></DropDownListFieldSettings>
+                </SfDropDownList>
+            </div>
+        </div>
+
+        <SfGrid @ref="grid" DataSource="@orders" AllowPaging="true" AllowSorting="true" AllowSelection="true">
+            <GridPageSettings PageSize="6" PageSizes="@(new int[] {6, 10, 20, 50})"></GridPageSettings>
+            <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+            <GridColumns>
+                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+                <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" Width="100"></GridColumn>
+                <GridColumn Field="@nameof(Order.CustomerName)" HeaderText="Customer" Width="150"></GridColumn>
+                <GridColumn Field="@nameof(Order.Items)" HeaderText="Items" Width="100" TextAlign="TextAlign.Left"></GridColumn>
+                <GridColumn Field="@nameof(Order.Amount)" HeaderText="Amount" Width="120" Format="C0" TextAlign="TextAlign.Left"></GridColumn>
+                <GridColumn Field="@nameof(Order.PaymentStatus)" HeaderText="Payment status" Width="150">
+                    <Template>
+                        @{
+                            var order = (Order)context;
+                            var statusClass = order.PaymentStatus switch
+                            {
+                                PaymentStatus.Paid => "status-badge status-paid",
+                                PaymentStatus.Pending => "status-badge status-pending",
+                                PaymentStatus.Unpaid => "status-badge status-unpaid",
+                                _ => "status-badge"
+                            };
+                            <span class="@statusClass">@order.PaymentStatus.ToString().ToLower()</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(Order.ReceivedStatus)" HeaderText="Received status" Width="150">
+                    <Template>
+                        @{
+                            var order = (Order)context;
+                            var statusClass = order.ReceivedStatus switch
+                            {
+                                ReceivedStatus.Delivered => "status-badge status-delivered",
+                                ReceivedStatus.Processing => "status-badge status-processing",
+                                ReceivedStatus.Shipped => "status-badge status-shipped",
+                                _ => "status-badge"
+                            };
+                            <span class="@statusClass">@order.ReceivedStatus</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(Order.Date)" HeaderText="Date" Width="140" Format="dd MMM, yyyy" TextAlign="TextAlign.Left"></GridColumn>
+                <GridColumn HeaderText="Action" Width="100" TextAlign="TextAlign.Center">
+                    <Template>
+                        <button class="action-button" title="View details">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+<style>
+    .dashboard-container {
+        padding: 24px;
+        background-color: #f8f9fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .kpi-card {
+        border-radius: 12px;
+        box-shadow: none;
+        border: none;
+        overflow: hidden;
+    }
+
+    .kpi-card .e-card {
+        border: none;
+        box-shadow: none;
+    }
+
+    .kpi-card-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .kpi-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .kpi-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+    }
+
+    .kpi-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .kpi-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .kpi-label {
+        font-size: 13px;
+        color: #1a1a1a;
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    .kpi-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        line-height: 1;
+    }
+
+    .kpi-blue {
+        background: linear-gradient(135deg, #B8D4F1 0%, #A0C5EE 100%);
+    }
+
+    .kpi-yellow {
+        background: linear-gradient(135deg, #FFF4CC 0%, #FFEFB8 100%);
+    }
+
+    .kpi-cyan {
+        background: linear-gradient(135deg, #C8E6E6 0%, #B0DCDC 100%);
+    }
+
+    .kpi-orange {
+        background: linear-gradient(135deg, #FFD7C4 0%, #FFC8B0 100%);
+    }
+
+    .kpi-pink {
+        background: linear-gradient(135deg, #F5D4E0 0%, #F0C5D5 100%);
+    }
+
+    .kpi-lightorange {
+        background: linear-gradient(135deg, #FFDDB8 0%, #FFD0A0 100%);
+    }
+
+    .kpi-green {
+        background: linear-gradient(135deg, #D4F1D4 0%, #C0E8C0 100%);
+    }
+
+    .kpi-lightblue {
+        background: linear-gradient(135deg, #D4E8F5 0%, #C0DEF0 100%);
+    }
+
+    .chart-container {
+        width: 100%;
+        background: white;
+        padding: 24px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        box-sizing: border-box;
+    }
+
+    .chart-wrapper {
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    .chart-wrapper .e-control,
+    .chart-wrapper .e-chart,
+    .chart-wrapper .e-svg-chart,
+    .chart-wrapper svg {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block;
+    }
+
+    .profit-chart,
+    .profit-chart .e-chart,
+    .profit-chart .e-svg-chart,
+    .profit-chart svg {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: block;
+    }
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        flex-shrink: 0;
+    }
+
+    .chart-header h4 {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+        color: #1a1a1a;
+    }
+
+    .chart-filters {
+        display: flex;
+        gap: 8px;
+    }
+
+    .chart-filters .e-btn {
+        font-size: 13px;
+        padding: 6px 16px;
+        border-radius: 4px;
+        text-transform: none;
+        font-weight: 400;
+    }
+
+    .grid-container {
+        background: white;
+        padding: 24px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    .grid-toolbar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .search-box {
+        flex: 0 0 280px;
+    }
+
+    .search-input .e-input-group {
+        border-radius: 6px;
+    }
+
+    .filter-dropdowns {
+        display: flex;
+        gap: 12px;
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .filter-dropdown {
+        width: 170px;
+    }
+
+    .e-grid {
+        border: none;
+    }
+
+    .e-grid .e-gridheader {
+        background-color: #fafafa;
+        border-bottom: 1px solid #e0e0e0;
+    }
+
+    .e-grid .e-headercell {
+        font-weight: 600;
+        font-size: 13px;
+        color: #666;
+        padding: 12px 16px;
+    }
+
+    .e-grid .e-rowcell {
+        padding: 14px 16px;
+        font-size: 14px;
+        color: #333;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 14px;
+        font-size: 12px;
+        font-weight: 500;
+        display: inline-block;
+        text-transform: lowercase;
+    }
+
+    .status-paid {
+        background-color: #d4f4dd;
+        color: #1e7e34;
+        border: 1px solid #b8e6c3;
+    }
+
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffe69c;
+    }
+
+    .status-unpaid {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .status-delivered {
+        background-color: #d4f4dd;
+        color: #1e7e34;
+        border: 1px solid #b8e6c3;
+    }
+
+    .status-processing {
+        background-color: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffe69c;
+    }
+
+    .status-shipped {
+        background-color: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .action-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        color: #666;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        transition: background-color 0.2s;
+    }
+
+    .action-button:hover {
+        background-color: #f5f5f5;
+    }
+
+    .action-button svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .e-pager {
+        padding: 16px 0;
+        background-color: transparent;
+    }
+
+    .e-pager .e-numericitem {
+        border-radius: 6px;
+        margin: 0 3px;
+        min-width: 32px;
+        height: 32px;
+    }
+
+    .e-pager .e-currentitem {
+        background-color: #d4f4e2;
+        color: #1e7e34;
+        border-color: #b8e6c3;
+    }
+</style>
+
+
+@code {
+    private SfGrid<Order>? grid;
+    private List<Order> orders = new List<Order>();
+    private DashboardKpi kpiData = new DashboardKpi();
+    private string searchText = "";
+    private string selectedPeriod = "12months";
+    private List<ChartData> chartData = new List<ChartData>();
+    private List<string> paymentStatusList = new() { "All", "Paid", "Pending", "Unpaid" };
+    private List<string> receivedStatusList = new() { "All", "Delivered", "Processing", "Shipped" };
+    private List<string> dateFilterList = new() { "All", "Today", "Last 7 days", "Last 30 days" };
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetOrdersAsync(1, 200);
+        kpiData = await OrderService.GetKpiDataAsync();
+        InitializeChartData();
+    }
+
+    private void InitializeChartData()
+    {
+        chartData = new List<ChartData>
+        {
+            new ChartData { Month = "Jan", Earnings = 20, TotalProfits = 15 },
+            new ChartData { Month = "Feb", Earnings = 35, TotalProfits = 20 },
+            new ChartData { Month = "Mar", Earnings = 25, TotalProfits = 18 },
+            new ChartData { Month = "Apr", Earnings = 45, TotalProfits = 32 },
+            new ChartData { Month = "May", Earnings = 8, TotalProfits = 5 },
+            new ChartData { Month = "Jun", Earnings = 35, TotalProfits = 15 },
+            new ChartData { Month = "Jul", Earnings = 40, TotalProfits = 18 },
+            new ChartData { Month = "Aug", Earnings = 30, TotalProfits = 20 },
+            new ChartData { Month = "Sep", Earnings = 25, TotalProfits = 22 },
+            new ChartData { Month = "Oct", Earnings = 20, TotalProfits = 25 },
+            new ChartData { Month = "Nov", Earnings = 25, TotalProfits = 28 },
+            new ChartData { Month = "Dec", Earnings = 15, TotalProfits = 30 }
+        };
+    }
+
+    private async Task OnSearch(InputEventArgs args)
+    {
+        searchText = args.Value;
+        orders = await OrderService.GetOrdersAsync(1, 200, searchText);
+    }
+
+    private void SelectPeriod(string period)
+    {
+        selectedPeriod = period;
+        // In a real app, you would update the chart data based on the selected period
+    }
+
+    public class ChartData
+    {
+        public string Month { get; set; } = string.Empty;
+        public double Earnings { get; set; } = 0;
+        public double TotalProfits { get; set; } = 0;
+    }
+}
