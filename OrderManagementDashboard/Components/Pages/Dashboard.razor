@@ -1,4 +1,5 @@
 @page "/dashboard"
+
 @using OrderManagementDashboard.Models
 @using OrderManagementDashboard.Services
 @using Syncfusion.Blazor.Grids
@@ -7,6 +8,7 @@
 @using Syncfusion.Blazor.DropDowns
 @using Syncfusion.Blazor.Buttons
 @using Syncfusion.Blazor.Cards
+@using Syncfusion.Blazor.Popups
 @inject IOrderService OrderService
 
 <PageTitle>Dashboard - Order Management</PageTitle>
@@ -30,7 +32,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Total Order</div>
-                        <div class="kpi-value">3823</div>
+                        <div class="kpi-value">@kpiData.TotalOrders</div>
                     </div>
                 </div>
             </CardContent>
@@ -49,7 +51,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Pending Payment</div>
-                        <div class="kpi-value">934</div>
+                        <div class="kpi-value">@kpiData.PendingPayment</div>
                     </div>
                 </div>
             </CardContent>
@@ -67,7 +69,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Processing</div>
-                        <div class="kpi-value">993</div>
+                        <div class="kpi-value">@kpiData.Processing</div>
                     </div>
                 </div>
             </CardContent>
@@ -86,7 +88,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Shipped</div>
-                        <div class="kpi-value">536</div>
+                        <div class="kpi-value">@kpiData.Shipped</div>
                     </div>
                 </div>
             </CardContent>
@@ -104,7 +106,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Delivered</div>
-                        <div class="kpi-value">24392</div>
+                        <div class="kpi-value">@kpiData.Delivered</div>
                     </div>
                 </div>
             </CardContent>
@@ -122,7 +124,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Cancel</div>
-                        <div class="kpi-value">9372</div>
+                        <div class="kpi-value">@kpiData.Cancelled</div>
                     </div>
                 </div>
             </CardContent>
@@ -141,7 +143,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Returned</div>
-                        <div class="kpi-value">434</div>
+                        <div class="kpi-value">@kpiData.Returned</div>
                     </div>
                 </div>
             </CardContent>
@@ -161,7 +163,7 @@
                     </div>
                     <div class="kpi-text">
                         <div class="kpi-label">Failed</div>
-                        <div class="kpi-value">938</div>
+                        <div class="kpi-value">@kpiData.Failed</div>
                     </div>
                 </div>
             </CardContent>
@@ -199,7 +201,7 @@
                 <ChartAxisMinorGridLines Width="0" />
             </ChartPrimaryXAxis>
 
-            <ChartPrimaryYAxis LabelFormat="{value}k" Minimum="0" Maximum="50" Interval="10">
+            <ChartPrimaryYAxis LabelFormat="{value}k" Minimum="0" Maximum="@chartMaxValue" Interval="@chartInterval">
                 <ChartAxisMajorGridLines Width="1" Color="#E0E0E0" />
                 <ChartAxisLineStyle Width="0" />
             </ChartPrimaryYAxis>
@@ -244,36 +246,48 @@
     </div>
 </div>
 
-    <!-- Grid Section -->
+    <!-- ...existing grid section... -->
     <div class="grid-container">
         <div class="grid-toolbar">
             <div class="search-box">
-                <SfTextBox Placeholder="Search..." @bind-Value="searchText" Input="@OnSearch" CssClass="search-input">
+                <SfTextBox Placeholder="Search..." @bind-Value="searchText" CssClass="search-input">
                     <TextBoxEvents Input="@OnSearch"></TextBoxEvents>
                 </SfTextBox>
             </div>
             <div class="filter-dropdowns">
-                <SfDropDownList TValue="string" TItem="string" Placeholder="Payment status" DataSource="@paymentStatusList" CssClass="filter-dropdown">
-                    <DropDownListFieldSettings Text="Text" Value="Text"></DropDownListFieldSettings>
+                <SfDropDownList TValue="string" TItem="string" 
+                                Placeholder="Payment status" 
+                                DataSource="@paymentStatusList" 
+                                @bind-Value="@selectedPaymentStatus"
+                                CssClass="filter-dropdown">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="@OnPaymentStatusChange"></DropDownListEvents>
                 </SfDropDownList>
-                <SfDropDownList TValue="string" TItem="string" Placeholder="Received status" DataSource="@receivedStatusList" CssClass="filter-dropdown">
-                    <DropDownListFieldSettings Text="Text" Value="Text"></DropDownListFieldSettings>
+                <SfDropDownList TValue="string" TItem="string" 
+                                Placeholder="Received status" 
+                                DataSource="@receivedStatusList"
+                                @bind-Value="@selectedReceivedStatus" 
+                                CssClass="filter-dropdown">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="@OnReceivedStatusChange"></DropDownListEvents>
                 </SfDropDownList>
-                <SfDropDownList TValue="string" TItem="string" Placeholder="Date" DataSource="@dateFilterList" CssClass="filter-dropdown">
-                    <DropDownListFieldSettings Text="Text" Value="Text"></DropDownListFieldSettings>
+                <SfDropDownList TValue="string" TItem="string" 
+                                Placeholder="Date" 
+                                DataSource="@dateFilterList"
+                                @bind-Value="@selectedDateFilter" 
+                                CssClass="filter-dropdown">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="@OnDateFilterChange"></DropDownListEvents>
                 </SfDropDownList>
             </div>
         </div>
 
-        <SfGrid @ref="grid" DataSource="@orders" AllowPaging="true" AllowSorting="true" AllowSelection="true">
+        <SfGrid @ref="grid" DataSource="@filteredOrders" AllowPaging="true" AllowSorting="true" AllowSelection="true">
             <GridPageSettings PageSize="6" PageSizes="@(new int[] {6, 10, 20, 50})"></GridPageSettings>
             <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
             <GridColumns>
                 <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
                 <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" Width="100"></GridColumn>
                 <GridColumn Field="@nameof(Order.CustomerName)" HeaderText="Customer" Width="150"></GridColumn>
-                <GridColumn Field="@nameof(Order.Items)" HeaderText="Items" Width="100" TextAlign="TextAlign.Left"></GridColumn>
-                <GridColumn Field="@nameof(Order.Amount)" HeaderText="Amount" Width="120" Format="C0" TextAlign="TextAlign.Left"></GridColumn>
+                <GridColumn Field="@nameof(Order.Items)" HeaderText="Items" Width="100" TextAlign="TextAlign.Center"></GridColumn>
+                <GridColumn Field="@nameof(Order.Amount)" HeaderText="Amount" Width="120" Format="C0" TextAlign="TextAlign.Right"></GridColumn>
                 <GridColumn Field="@nameof(Order.PaymentStatus)" HeaderText="Payment status" Width="150">
                     <Template>
                         @{
@@ -298,6 +312,8 @@
                                 ReceivedStatus.Delivered => "status-badge status-delivered",
                                 ReceivedStatus.Processing => "status-badge status-processing",
                                 ReceivedStatus.Shipped => "status-badge status-shipped",
+                                ReceivedStatus.Cancelled => "status-badge status-cancelled",
+                                ReceivedStatus.Returned => "status-badge status-returned",
                                 _ => "status-badge"
                             };
                             <span class="@statusClass">@order.ReceivedStatus</span>
@@ -307,12 +323,15 @@
                 <GridColumn Field="@nameof(Order.Date)" HeaderText="Date" Width="140" Format="dd MMM, yyyy" TextAlign="TextAlign.Left"></GridColumn>
                 <GridColumn HeaderText="Action" Width="100" TextAlign="TextAlign.Center">
                     <Template>
-                        <button class="action-button" title="View details">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                                <circle cx="12" cy="12" r="3"></circle>
-                            </svg>
-                        </button>
+                        @{
+                            var order = (Order)context;
+                            <button class="action-button" title="View details" @onclick="@(() => ViewOrderDetails(order))">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        }
                     </Template>
                 </GridColumn>
             </GridColumns>
@@ -320,7 +339,96 @@
     </div>
 </div>
 
+<!-- ...existing order details dialog... -->
+<SfDialog @bind-Visible="@showOrderDetailsDialog" Width="600px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Order Details</Header>
+        <Content>
+            @if (selectedOrder != null)
+            {
+                <div style="padding: 20px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div>
+                            <strong>Order ID:</strong>
+                            <p>@selectedOrder.Id</p>
+                        </div>
+                        <div>
+                            <strong>Order Number:</strong>
+                            <p>@selectedOrder.OrderNumber</p>
+                        </div>
+                        <div>
+                            <strong>Customer:</strong>
+                            <p>@selectedOrder.CustomerName</p>
+                        </div>
+                        <div>
+                            <strong>Customer ID:</strong>
+                            <p>@selectedOrder.CustomerId</p>
+                        </div>
+                        <div>
+                            <strong>Email:</strong>
+                            <p>@selectedOrder.Email</p>
+                        </div>
+                        <div>
+                            <strong>Items:</strong>
+                            <p>@selectedOrder.Items</p>
+                        </div>
+                        <div>
+                            <strong>Amount:</strong>
+                            <p>@selectedOrder.Amount.ToString("C")</p>
+                        </div>
+                        <div>
+                            <strong>Order Date:</strong>
+                            <p>@selectedOrder.OrderDate.ToString("dd MMM, yyyy")</p>
+                        </div>
+                        <div>
+                            <strong>Payment Status:</strong>
+                            <p>
+                                @{
+                                    var statusClass = selectedOrder.PaymentStatus switch
+                                    {
+                                        PaymentStatus.Paid => "status-badge status-paid",
+                                        PaymentStatus.Pending => "status-badge status-pending",
+                                        PaymentStatus.Unpaid => "status-badge status-unpaid",
+                                        _ => "status-badge"
+                                    };
+                                    <span class="@statusClass">@selectedOrder.PaymentStatus.ToString().ToLower()</span>
+                                }
+                            </p>
+                        </div>
+                        <div>
+                            <strong>Received Status:</strong>
+                            <p>
+                                @{
+                                    var receivedClass = selectedOrder.ReceivedStatus switch
+                                    {
+                                        ReceivedStatus.Delivered => "status-badge status-delivered",
+                                        ReceivedStatus.Processing => "status-badge status-processing",
+                                        ReceivedStatus.Shipped => "status-badge status-shipped",
+                                        ReceivedStatus.Cancelled => "status-badge status-cancelled",
+                                        ReceivedStatus.Returned => "status-badge status-returned",
+                                        _ => "status-badge"
+                                    };
+                                    <span class="@receivedClass">@selectedOrder.ReceivedStatus</span>
+                                }
+                            </p>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <strong>Reason:</strong>
+                            <p>@selectedOrder.Reason</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Close" OnClick="@CloseOrderDetails" />
+    </DialogButtons>
+</SfDialog>
+
+<!-- ...existing styles... -->
 <style>
+    /* ...existing styles... */
     .dashboard-container {
         padding: 24px;
         background-color: #f8f9fa;
@@ -605,6 +713,18 @@
         border: 1px solid #bee5eb;
     }
 
+    .status-cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .status-returned {
+        background-color: #e2e3e5;
+        color: #383d41;
+        border: 1px solid #d6d8db;
+    }
+
     .action-button {
         background: none;
         border: none;
@@ -650,50 +770,224 @@
 @code {
     private SfGrid<Order>? grid;
     private List<Order> orders = new List<Order>();
+    private List<Order> filteredOrders = new List<Order>();
     private DashboardKpi kpiData = new DashboardKpi();
     private string searchText = "";
     private string selectedPeriod = "12months";
     private List<ChartData> chartData = new List<ChartData>();
+    private double chartMaxValue = 50;
+    private double chartInterval = 10;
     private List<string> paymentStatusList = new() { "All", "Paid", "Pending", "Unpaid" };
-    private List<string> receivedStatusList = new() { "All", "Delivered", "Processing", "Shipped" };
+    private List<string> receivedStatusList = new() { "All", "Delivered", "Processing", "Shipped", "Cancelled", "Returned" };
     private List<string> dateFilterList = new() { "All", "Today", "Last 7 days", "Last 30 days" };
+    
+    private string selectedPaymentStatus = "All";
+    private string selectedReceivedStatus = "All";
+    private string selectedDateFilter = "All";
+    
+    private bool showOrderDetailsDialog = false;
+    private Order? selectedOrder = null;
 
     protected override async Task OnInitializedAsync()
     {
         orders = await OrderService.GetOrdersAsync(1, 200);
+        filteredOrders = orders;
         kpiData = await OrderService.GetKpiDataAsync();
         InitializeChartData();
     }
 
     private void InitializeChartData()
     {
-        chartData = new List<ChartData>
-        {
-            new ChartData { Month = "Jan", Earnings = 20, TotalProfits = 15 },
-            new ChartData { Month = "Feb", Earnings = 35, TotalProfits = 20 },
-            new ChartData { Month = "Mar", Earnings = 25, TotalProfits = 18 },
-            new ChartData { Month = "Apr", Earnings = 45, TotalProfits = 32 },
-            new ChartData { Month = "May", Earnings = 8, TotalProfits = 5 },
-            new ChartData { Month = "Jun", Earnings = 35, TotalProfits = 15 },
-            new ChartData { Month = "Jul", Earnings = 40, TotalProfits = 18 },
-            new ChartData { Month = "Aug", Earnings = 30, TotalProfits = 20 },
-            new ChartData { Month = "Sep", Earnings = 25, TotalProfits = 22 },
-            new ChartData { Month = "Oct", Earnings = 20, TotalProfits = 25 },
-            new ChartData { Month = "Nov", Earnings = 25, TotalProfits = 28 },
-            new ChartData { Month = "Dec", Earnings = 15, TotalProfits = 30 }
-        };
+        chartData = GetChartDataForPeriod("12months");
     }
+
+   // ...existing code...
+
+private List<ChartData> GetChartDataForPeriod(string period)
+{
+    var data = new List<ChartData>();
+    
+    switch (period)
+    {
+        case "24hours":
+            var last24Hours = DateTime.Now.AddHours(-24);
+            for (int i = 0; i < 24; i += 4)
+            {
+                var hourStart = last24Hours.AddHours(i);
+                var hourEnd = hourStart.AddHours(4);
+                var ordersInPeriod = orders.Where(o => o.OrderDate >= hourStart && o.OrderDate < hourEnd).ToList();
+                var earnings = (double)ordersInPeriod.Sum(o => o.Amount) / 1000.0;
+                var profits = earnings * 0.7;
+                
+                data.Add(new ChartData 
+                { 
+                    Month = hourStart.ToString("h tt"),
+                    Earnings = Math.Round(earnings, 1),
+                    TotalProfits = Math.Round(profits, 1)
+                });
+            }
+            chartMaxValue = 30;
+            chartInterval = 5;
+            break;
+
+        case "7days":
+            var last7Days = DateTime.Now.AddDays(-7);
+            for (int i = 0; i < 7; i++)
+            {
+                var day = last7Days.AddDays(i);
+                var ordersInDay = orders.Where(o => o.OrderDate.Date == day.Date).ToList();
+                var earnings = (double)ordersInDay.Sum(o => o.Amount) / 1000.0;
+                var profits = earnings * 0.7;
+                
+                data.Add(new ChartData 
+                { 
+                    Month = day.ToString("ddd"),
+                    Earnings = Math.Round(earnings, 1),
+                    TotalProfits = Math.Round(profits, 1)
+                });
+            }
+            chartMaxValue = 50;
+            chartInterval = 10;
+            break;
+
+        case "30days":
+            var last30Days = DateTime.Now.AddDays(-30);
+            for (int i = 0; i < 4; i++)
+            {
+                var weekStart = last30Days.AddDays(i * 7);
+                var weekEnd = weekStart.AddDays(7);
+                var ordersInWeek = orders.Where(o => o.OrderDate >= weekStart && o.OrderDate < weekEnd).ToList();
+                var earnings = (double)ordersInWeek.Sum(o => o.Amount) / 1000.0;
+                var profits = earnings * 0.7;
+                
+                data.Add(new ChartData 
+                { 
+                    Month = $"Week {i + 1}",
+                    Earnings = Math.Round(earnings, 1),
+                    TotalProfits = Math.Round(profits, 1)
+                });
+            }
+            chartMaxValue = 80;
+            chartInterval = 20;
+            break;
+
+        default: // 12months
+            var months = new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+            var currentDate = DateTime.Now;
+            for (int i = 11; i >= 0; i--)
+            {
+                var monthDate = currentDate.AddMonths(-i);
+                var ordersInMonth = orders.Where(o => o.OrderDate.Year == monthDate.Year && o.OrderDate.Month == monthDate.Month).ToList();
+                var earnings = (double)ordersInMonth.Sum(o => o.Amount) / 1000.0;
+                var profits = earnings * 0.7;
+                
+                data.Add(new ChartData 
+                { 
+                    Month = months[monthDate.Month - 1],
+                    Earnings = Math.Round(earnings, 1),
+                    TotalProfits = Math.Round(profits, 1)
+                });
+            }
+            chartMaxValue = 100;
+            chartInterval = 20;
+            break;
+    }
+
+    return data;
+}
+
+// ...existing code...
 
     private async Task OnSearch(InputEventArgs args)
     {
         searchText = args.Value;
-        orders = await OrderService.GetOrdersAsync(1, 200, searchText);
+        await ApplyFilters();
+    }
+
+    private async Task OnPaymentStatusChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
+    {
+        selectedPaymentStatus = args.Value ?? "All";
+        await ApplyFilters();
+    }
+
+    private async Task OnReceivedStatusChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
+    {
+        selectedReceivedStatus = args.Value ?? "All";
+        await ApplyFilters();
+    }
+
+    private async Task OnDateFilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
+    {
+        selectedDateFilter = args.Value ?? "All";
+        await ApplyFilters();
+    }
+
+    private async Task ApplyFilters()
+    {
+        var result = orders.AsEnumerable();
+
+        // Search filter
+        if (!string.IsNullOrWhiteSpace(searchText))
+        {
+            result = result.Where(o => 
+                o.OrderNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase) || 
+                o.CustomerName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                o.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                o.Id.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Payment status filter
+        if (selectedPaymentStatus != "All")
+        {
+            if (Enum.TryParse<PaymentStatus>(selectedPaymentStatus, out var paymentStatus))
+            {
+                result = result.Where(o => o.PaymentStatus == paymentStatus);
+            }
+        }
+
+        // Received status filter
+        if (selectedReceivedStatus != "All")
+        {
+            if (Enum.TryParse<ReceivedStatus>(selectedReceivedStatus, out var receivedStatus))
+            {
+                result = result.Where(o => o.ReceivedStatus == receivedStatus);
+            }
+        }
+
+        // Date filter
+        if (selectedDateFilter != "All")
+        {
+            var today = DateTime.Now.Date;
+            result = selectedDateFilter switch
+            {
+                "Today" => result.Where(o => o.OrderDate.Date == today),
+                "Last 7 days" => result.Where(o => o.OrderDate.Date >= today.AddDays(-7)),
+                "Last 30 days" => result.Where(o => o.OrderDate.Date >= today.AddDays(-30)),
+                _ => result
+            };
+        }
+
+        filteredOrders = result.ToList();
+        await InvokeAsync(StateHasChanged);
     }
 
     private void SelectPeriod(string period)
     {
         selectedPeriod = period;
-        // In a real app, you would update the chart data based on the selected period
+        chartData = GetChartDataForPeriod(period);
+        StateHasChanged();
+    }
+
+    private void ViewOrderDetails(Order order)
+    {
+        selectedOrder = order;
+        showOrderDetailsDialog = true;
+    }
+
+    private void CloseOrderDetails()
+    {
+        showOrderDetailsDialog = false;
+        selectedOrder = null;
     }
 
     public class ChartData

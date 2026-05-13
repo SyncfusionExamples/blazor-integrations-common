@@ -27,6 +27,8 @@ namespace OrderManagementDashboard.Models
     {
         Delivered,
         Processing,
-        Shipped
+        Shipped,
+        Cancelled,
+        Returned
     }
 }
