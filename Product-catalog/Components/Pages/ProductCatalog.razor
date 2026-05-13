@@ -1,0 +1,627 @@
+@page "/product-catalog"
+@rendermode InteractiveServer
+@inject CartService CartService
+@inject WishlistService WishlistService
+@inject NavigationManager Navigation
+@using BlazorProductGrid.Models
+@using BlazorProductGrid.Data
+@using BlazorProductGrid.Services
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+
+<div class="catalog-container">
+    <div class="catalog-header">
+        <h1>📦 Product Catalog</h1>
+        <p class="subtitle">Browse our collection of premium products</p>
+    </div>
+
+    <div class="toolbar-section">
+        <div class="filter-chips-section">
+            <span class="filter-label">Filter by:</span>
+            <SfButton @onclick="() => FilterByCategory(null)" CssClass="@(SelectedCategory == null ? "filter-chip active" : "filter-chip")">All</SfButton>
+            @foreach (var cat in Categories)
+            {
+                <SfButton @onclick="() => FilterByCategory(cat)" CssClass="@(SelectedCategory == cat ? "filter-chip active" : "filter-chip")">@cat</SfButton>
+            }
+        </div>
+        <div class="toolbar-actions">
+            <SfButton @onclick="ToggleCart" CssClass="cart-summary">
+                <span class="cart-icon">🛒</span>
+                <span class="cart-count">@CartService.TotalItems</span>
+                <span class="cart-text">Cart</span>
+                @if (CartService.CartItems.Any())
+                {
+                    <span class="cart-total">@CartService.TotalAmount.ToString("C")</span>
+                }
+            </SfButton>
+            <SfButton @onclick="GoToWishlist" CssClass="@("wishlist-btn" + (WishlistService.Count > 0 ? " has-items" : ""))">
+                <span class="heart-icon">❤️</span>
+                <span class="wishlist-count">@WishlistService.Count</span>
+            </SfButton>
+        </div>
+    </div>
+
+    @if (ShowCart)
+    {
+        <div class="cart-dropdown">
+            <div class="cart-header">
+                <h3>🛒 Shopping Cart</h3>
+                <SfButton @onclick="ToggleCart" CssClass="close-cart">×</SfButton>
+            </div>
+            @if (CartService.CartItems.Any())
+            {
+                <div class="cart-items">
+                    @foreach (var item in CartService.CartItems)
+                    {
+                        <div class="cart-item">
+                            <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="cart-item-image" />
+                            <div class="cart-item-details">
+                                <div class="cart-item-name">@item.Product.Name</div>
+                                <div class="cart-item-price">@item.Product.Price.ToString("C")</div>
+                            </div>
+                            <div class="cart-item-qty">
+                                <SfButton @onclick="() => CartService.DecreaseQty(item)" CssClass="qty-btn">-</SfButton>
+                                <span>@item.Quantity</span>
+                                <SfButton @onclick="() => CartService.IncreaseQty(item)" CssClass="@("qty-btn" + (item.Quantity >= item.Product.Stock ? " disabled" : ""))" Disabled="@(item.Quantity >= item.Product.Stock)">+</SfButton>
+                            </div>
+                            <div class="cart-item-subtotal">@((item.Product.Price * item.Quantity).ToString("C"))</div>
+                            <SfButton @onclick="() => CartService.RemoveFromCart(item.Product)" CssClass="remove-btn">🗑️</SfButton>
+                        </div>
+                    }
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-total-row">
+                        <span>Total:</span>
+                        <span class="cart-grand-total">@CartService.TotalAmount.ToString("C")</span>
+                    </div>
+                    <SfButton @onclick="GoToCheckout" CssClass="checkout-btn">Proceed to Checkout</SfButton>
+                </div>
+            }
+            else
+            {
+                <div class="cart-empty">
+                    <span class="empty-icon">🛒</span>
+                    <p>Your cart is empty</p>
+                </div>
+            }
+        </div>
+    }
+
+    <SfGrid @ref="DefaultGrid" DataSource="@FilteredProducts" AllowPaging="true" AllowSorting="true"
+            ShowColumnMenu="true" ID="ProductGrid" RowHeight="70">
+        <SfToolbar>
+            <ToolbarItems>
+                <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Right">
+                    <Template>
+                        <span class="e-search-icon e-icons"></span>
+                        <SfTextBox Placeholder="Search products..." Input="OnInput"></SfTextBox>
+                    </Template>
+                </ToolbarItem>
+            </ToolbarItems>
+        </SfToolbar>
+        <GridPageSettings PageSize="8" PageCount="5" PageSizes="@(new string[] { "5", "10", "15", "20", "All" })"></GridPageSettings>
+        <GridColumns>
+            <GridColumn Field="@nameof(Product.Id)" HeaderText="ID" AutoFit="true" TextAlign="TextAlign.Center"></GridColumn>
+            <GridColumn Field="@nameof(Product.ImageUrl)" HeaderText="Image" AutoFit="true">
+                <Template>
+                    @{
+                        var product = context as Product;
+                    }
+                    <div class="product-image-cell">
+                        <img src="@product?.ImageUrl" alt="@product?.Name" />
+                    </div>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(Product.Name)" HeaderText="Product Name" AutoFit="true"></GridColumn>
+            <GridColumn Field="@nameof(Product.Category)" HeaderText="Category" AutoFit="true"></GridColumn>
+            <GridColumn Field="@nameof(Product.Price)" HeaderText="Price" AutoFit="true" Format="C2"></GridColumn>
+            <GridColumn Field="@nameof(Product.Stock)" HeaderText="Stock" AutoFit="true" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var product = context as Product;
+                    }
+                    <div class="stock-cell stock-@GetStockClass(product?.Stock ?? 0)">
+                        <span class="stock-dot"></span>
+                        <span class="stock-text">@GetStockText(product?.Stock ?? 0)</span>
+                    </div>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(Product.Rating)" HeaderText="Rating" AutoFit="true">
+                <Template>
+                    @{
+                        var product = context as Product;
+                    }
+                    <div class="rating-cell">
+                        <span class="rating-stars">@GetStarDisplay(product?.Rating ?? 0)</span>
+                    </div>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(Product.Description)" HeaderText="Description" AutoFit="true"></GridColumn>
+            <GridColumn HeaderText="Actions" AutoFit="true" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var product = context as Product;
+                        var inCart = CartService.CartItems.Any(c => c.Product.Id == product?.Id);
+                        var cartItem = CartService.CartItems.FirstOrDefault(c => c.Product.Id == product?.Id);
+                        var atStockLimit = cartItem != null && cartItem.Quantity >= product!.Stock;
+                        var inWishlist = WishlistService.IsInWishlist(product!);
+                    }
+                    <div class="action-buttons">
+                            <SfButton @onclick="() => { if (!atStockLimit) AddToCart(product!); }" Disabled="@atStockLimit" CssClass="@("action-btn" + (inCart ? " in-cart" : "") + (atStockLimit ? " disabled" : ""))">
+                                🛒
+                            </SfButton>
+                            <SfButton @onclick="() => ToggleWishlist(product!)" CssClass="@("action-btn wishlist" + (inWishlist ? " in-wishlist" : ""))">
+                                @(inWishlist ? "❤️" : "🤍")
+                            </SfButton>
+                    </div>
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+
+<style>
+    .catalog-container {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    .catalog-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .catalog-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    .filter-chips-section {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        align-items: center;
+    }
+
+    .filter-label {
+        font-weight: 600;
+        color: #4a5568;
+        margin-right: 0.5rem;
+    }
+
+    .filter-chip {
+        padding: 0.5rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        border-radius: 20px;
+        background: #fff;
+        color: #4a5568;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .filter-chip:hover {
+        border-color: #667eea;
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .filter-chip.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+    }
+
+    .toolbar-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .toolbar-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+    .cart-summary {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .cart-summary:hover {
+        border-color: #667eea;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+    }
+
+    .cart-icon { font-size: 1.2rem; }
+    .cart-count {
+        background: #667eea;
+        color: #fff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+    .cart-text { font-weight: 500; color: #4a5568; }
+    .cart-total {
+        font-weight: bold;
+        color: #667eea;
+        margin-left: 0.5rem;
+    }
+
+    .wishlist-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        border-radius: 25px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .wishlist-btn:hover {
+        border-color: #e53e3e;
+        background: rgba(245, 101, 101, 0.05);
+    }
+
+    .wishlist-btn.has-items {
+        border-color: #e53e3e;
+        background: rgba(245, 101, 101, 0.05);
+    }
+
+    .heart-icon { font-size: 1.2rem; }
+    .wishlist-count {
+        background: #e53e3e;
+        color: #fff;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: bold;
+    }
+
+    /* Cart Dropdown */
+    .cart-dropdown {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 500px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        z-index: 1000;
+        max-height: 80vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+    }
+
+    .cart-header h3 { margin: 0; font-size: 1.25rem; }
+    .close-cart {
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+    }
+
+    .cart-items {
+        padding: 1rem;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .cart-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        border-radius: 12px;
+        background: #f7fafc;
+        margin-bottom: 0.75rem;
+    }
+
+    .cart-item-image {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .cart-item-details { flex: 1; }
+    .cart-item-name { font-weight: 600; color: #2d3748; }
+    .cart-item-price { color: #667eea; font-weight: bold; }
+
+    .cart-item-qty {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .qty-btn {
+        width: 28px;
+        height: 28px;
+        border: 2px solid #e2e8f0;
+        background: #fff;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        color: #4a5568;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .qty-btn:hover {
+        background: #667eea;
+        color: #fff;
+        border-color: #667eea;
+    }
+
+    .qty-btn.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .qty-btn.disabled:hover {
+        background: #fff;
+        color: #4a5568;
+        border-color: #e2e8f0;
+    }
+
+    .cart-item-subtotal {
+        font-weight: bold;
+        color: #2d3748;
+        min-width: 70px;
+        text-align: right;
+    }
+
+    .remove-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 1.2rem;
+        opacity: 0.5;
+        transition: opacity 0.2s;
+    }
+
+    .remove-btn:hover { opacity: 1; }
+
+    .cart-footer {
+        padding: 1.25rem 1.5rem;
+        border-top: 1px solid #e2e8f0;
+        background: #f7fafc;
+    }
+
+    .cart-total-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 1.25rem;
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+
+    .cart-grand-total { color: #667eea; }
+
+    .checkout-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .checkout-btn:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .cart-empty {
+        padding: 3rem;
+        text-align: center;
+    }
+
+    .empty-icon { font-size: 3rem; display: block; margin-bottom: 1rem; }
+
+    /* Action Buttons in Grid */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    .action-btn {
+        width: 36px;
+        height: 36px;
+        border: 2px solid #e2e8f0;
+        background: #fff;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        text-align: center;
+        line-height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-btn:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+        transform: scale(1.1);
+    }
+
+    .action-btn.in-cart {
+        background: #667eea;
+        border-color: #667eea;
+    }
+
+    .action-btn.wishlist.in-wishlist {
+        background: rgba(245, 101, 101, 0.1);
+        border-color: #e53e3e;
+    }
+
+    /* Grid Styling */
+    .e-grid {
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+    }
+
+    .e-grid .e-headercontent {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #fff;
+    }
+
+    .e-grid .e-headercell {
+        color: #fff !important;
+        font-weight: 600;
+        padding: 1rem 0.5rem;
+        background: transparent !important;
+        border-bottom: 2px solid rgba(255,255,255,0.3);
+    }
+
+    .e-grid .e-columnheader {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    }
+
+    .e-grid .e-rowcell {
+        vertical-align: middle;
+    }
+
+    .product-image-cell img {
+        width: 55px;
+        height: 55px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s ease;
+    }
+
+    .product-image-cell img:hover {
+        transform: scale(1.15);
+    }
+
+    .stock-cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .stock-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+    }
+
+    .stock-high {
+        background: rgba(72, 187, 120, 0.15);
+        color: #2f855a;
+    }
+    .stock-high .stock-dot { background: #48bb78; }
+
+    .stock-medium {
+        background: rgba(236, 201, 75, 0.15);
+        color: #b7791f;
+    }
+    .stock-medium .stock-dot { background: #ecc94b; }
+
+    .stock-low {
+        background: rgba(245, 101, 101, 0.15);
+        color: #e53e3e;
+    }
+    .stock-low .stock-dot { background: #f56565; }
+
+    .rating-cell {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .rating-stars {
+        color: #f6c105;
+        letter-spacing: 2px;
+    }
+</style>
+
+@code {
+    private SfGrid<Product>? DefaultGrid { get; set; }
+    private List<Product> Products { get; set; } = new();
+    private string? SelectedCategory { get; set; }
+    private bool ShowCart { get; set; } = false;
+
+    private List<string> Categories => Products.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
+    private List<Product> FilteredProducts => Products.Where(p => SelectedCategory == null || p.Category == SelectedCategory).ToList();
+
+    public void OnInput(InputEventArgs args) => DefaultGrid?.SearchAsync(args.Value);
+    protected override void OnInitialized() => Products = ProductData.GetProducts();
+    private void FilterByCategory(string? category) => SelectedCategory = category;
+    private void ToggleCart() => ShowCart = !ShowCart;
+    private void AddToCart(Product product) { CartService.AddToCart(product); ShowCart = true; }
+    private void ToggleWishlist(Product product) { if (WishlistService.IsInWishlist(product)) WishlistService.RemoveFromWishlist(product); else WishlistService.AddToWishlist(product); }
+    private void GoToCheckout() => Navigation.NavigateTo("/checkout");
+    private void GoToWishlist() => Navigation.NavigateTo("/wishlist");
+
+    private string GetStockClass(int stock) => stock > 30 ? "high" : stock > 10 ? "medium" : "low";
+    private string GetStockText(int stock) => stock > 30 ? "In Stock" : stock > 10 ? "Limited" : "Low Stock";
+    private string GetStarDisplay(double rating) => new string('★', (int)Math.Floor(rating)) + new string('☆', 5 - (int)Math.Floor(rating));
+}

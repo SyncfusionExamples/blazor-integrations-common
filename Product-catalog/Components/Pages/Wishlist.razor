@@ -1,0 +1,304 @@
+@page "/wishlist"
+@rendermode InteractiveServer
+@inject WishlistService WishlistService
+@inject CartService CartService
+@inject NavigationManager Navigation
+@using BlazorProductGrid.Models
+@using BlazorProductGrid.Services
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+
+<div class="wishlist-container">
+    <div class="wishlist-header">
+        <h1>❤️ My Wishlist</h1>
+        <p class="subtitle">@(WishlistService.Count) item@(WishlistService.Count != 1 ? "s" : "") in your wishlist</p>
+    </div>
+
+    @if (WishlistService.WishlistItems.Any())
+    {
+        <div class="wishlist-grid-section">
+            <SfGrid DataSource="@WishlistItems" ID="WishlistGrid" AllowSelection="false" Height="auto">
+                <GridColumns>
+                    <GridColumn HeaderText="Image" Width="100">
+                        <Template>
+                            @{
+                                var product = context as Product;
+                            }
+                            <div class="product-image-cell">
+                                <img src="@product?.ImageUrl" alt="@product?.Name" />
+                            </div>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="Name" HeaderText="Product Name" Width="200"></GridColumn>
+                    <GridColumn Field="Category" HeaderText="Category" Width="120"></GridColumn>
+                    <GridColumn Field="Price" HeaderText="Price" Width="120" Format="C2"></GridColumn>
+                    <GridColumn Field="Stock" HeaderText="Stock" Width="100" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var product = context as Product;
+                            }
+                            <span class="stock-badge stock-@GetStockClass(product?.Stock ?? 0)">
+                                @GetStockText(product?.Stock ?? 0)
+                            </span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="Actions" Width="180">
+                        <Template>
+                            @{
+                                var product = context as Product;
+                                var inCart = CartService.CartItems.Any(c => c.Product.Id == product?.Id);
+                                var cartBtnClass = inCart ? "add-cart-btn in-cart" : "add-cart-btn";
+                            }
+                            <div class="action-buttons">
+                                <SfButton CssClass="@cartBtnClass" 
+                                          @onclick="() => AddToCart(product!)">
+                                    @(inCart ? "In Cart" : "Add to Cart")
+                                </SfButton>
+                                <SfButton CssClass="remove-btn" 
+                                          @onclick="() => RemoveFromWishlist(product!)">
+                                    🗑️
+                                </SfButton>
+                            </div>
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+        <div class="wishlist-actions">
+            <SfButton CssClass="continue-btn" @onclick="ContinueShopping">Continue Shopping</SfButton>
+            <SfButton CssClass="clear-btn" @onclick="ClearWishlist">Clear Wishlist</SfButton>
+        </div>
+    }
+    else
+    {
+        <div class="empty-wishlist">
+            <span class="empty-icon">❤️</span>
+            <h3>Your wishlist is empty</h3>
+            <p>Save items you love by clicking the heart icon on products.</p>
+            <SfButton CssClass="browse-btn" @onclick="ContinueShopping">Browse Products</SfButton>
+        </div>
+    }
+</div>
+
+<style>
+    .wishlist-container {
+        padding: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .wishlist-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .wishlist-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    .wishlist-grid-section {
+        margin-bottom: 2rem;
+    }
+
+    .product-image-cell img {
+        width: 55px;
+        height: 55px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+
+    .stock-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .stock-high {
+        background: rgba(72, 187, 120, 0.15);
+        color: #2f855a;
+    }
+
+    .stock-medium {
+        background: rgba(236, 201, 75, 0.15);
+        color: #b7791f;
+    }
+
+    .stock-low {
+        background: rgba(245, 101, 101, 0.15);
+        color: #e53e3e;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+
+    .add-cart-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #fff !important;
+        border: none !important;
+        padding: 0.5rem 1rem !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+    }
+
+    .add-cart-btn.in-cart {
+        background: #48bb78 !important;
+    }
+
+    .remove-btn {
+        background: #fff !important;
+        border: 1px solid #e53e3e !important;
+        color: #e53e3e !important;
+        padding: 0.5rem 0.75rem !important;
+        border-radius: 8px !important;
+    }
+
+    .remove-btn:hover {
+        background: #e53e3e !important;
+        color: #fff !important;
+    }
+
+    .wishlist-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .continue-btn {
+        background: #fff !important;
+        color: #4a5568 !important;
+        border: 2px solid #e2e8f0 !important;
+        padding: 0.875rem 2rem !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+
+    .continue-btn:hover {
+        border-color: #667eea !important;
+        color: #667eea !important;
+    }
+
+    .clear-btn {
+        background: #fff !important;
+        color: #e53e3e !important;
+        border: 2px solid #e53e3e !important;
+        padding: 0.875rem 2rem !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+    }
+
+    .clear-btn:hover {
+        background: #e53e3e !important;
+        color: #fff !important;
+    }
+
+    .empty-wishlist {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 1rem;
+    }
+
+    .empty-wishlist h3 {
+        color: #4a5568;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-wishlist p {
+        color: #a0aec0;
+        margin-bottom: 1.5rem;
+    }
+
+    .browse-btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #fff !important;
+        border: none !important;
+        padding: 1rem 2rem !important;
+        border-radius: 12px !important;
+        font-weight: 600 !important;
+    }
+
+    @@media (max-width: 768px) {
+        .wishlist-container {
+            padding: 1rem;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .wishlist-actions {
+            flex-direction: column;
+        }
+    }
+</style>
+
+@code {
+    private List<Product> WishlistItems = new();
+
+    protected override void OnInitialized()
+    {
+        WishlistItems = WishlistService.WishlistItems.ToList();
+    }
+
+    private void AddToCart(Product product)
+    {
+        CartService.AddToCart(product);
+        WishlistService.RemoveFromWishlist(product);
+        WishlistItems = WishlistService.WishlistItems.ToList();
+    }
+
+    private void RemoveFromWishlist(Product product)
+    {
+        WishlistService.RemoveFromWishlist(product);
+        WishlistItems = WishlistService.WishlistItems.ToList();
+        StateHasChanged();
+    }
+
+    private void ClearWishlist()
+    {
+        WishlistService.ClearWishlist();
+        WishlistItems = WishlistService.WishlistItems.ToList();
+        StateHasChanged();
+    }
+
+    private void ContinueShopping()
+    {
+        Navigation.NavigateTo("/product-catalog");
+    }
+
+    private string GetStockClass(int stock) => stock switch
+    {
+        > 30 => "high",
+        > 10 => "medium",
+        _ => "low"
+    };
+
+    private string GetStockText(int stock) => stock switch
+    {
+        > 30 => "In Stock",
+        > 10 => "Limited",
+        _ => "Low Stock"
+    };
+}
