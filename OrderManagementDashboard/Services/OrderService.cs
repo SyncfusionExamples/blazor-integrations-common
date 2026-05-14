@@ -5,47 +5,33 @@ namespace OrderManagementDashboard.Services
     public class OrderService : IOrderService
     {
         private static List<Order> _orders = new List<Order>();
-        private static readonly Random _random = new Random(42); // Fixed seed for consistency
+        private static readonly Random _random = new Random(42);
+        private static bool _isInitialized = false;
+        private static readonly object _lock = new object();
 
         public OrderService()
         {
-            if (_orders.Count == 0)
+            lock (_lock)
             {
-                GenerateRealisticOrders();
+                if (!_isInitialized)
+                {
+                    GenerateRealisticOrders();
+                    _isInitialized = true;
+                }
             }
         }
 
         private void GenerateRealisticOrders()
         {
-            var firstNames = new[] { "John", "Emma", "Michael", "Sophia", "William", "Olivia", "James", "Ava", 
-                "Robert", "Isabella", "David", "Mia", "Richard", "Charlotte", "Joseph", "Amelia", "Thomas", "Harper",
-                "Daniel", "Evelyn", "Matthew", "Abigail", "Christopher", "Emily", "Andrew", "Elizabeth", "Joshua", 
-                "Sofia", "Kevin", "Avery", "Brian", "Ella", "George", "Scarlett", "Timothy", "Grace", "Ronald", 
-                "Chloe", "Jason", "Victoria", "Jeffrey", "Riley", "Ryan", "Aria", "Jacob", "Lily", "Gary", "Aubrey",
-                "Nicholas", "Zoey", "Eric", "Penelope", "Jonathan", "Lillian", "Stephen", "Addison", "Larry", "Layla",
-                "Justin", "Natalie", "Scott", "Camila", "Brandon", "Hannah", "Benjamin", "Brooklyn", "Samuel", "Zoe",
-                "Raymond", "Nora", "Gregory", "Leah", "Alexander", "Savannah", "Patrick", "Audrey", "Frank", "Claire",
-                "Dennis", "Eleanor", "Jerry", "Skylar", "Tyler", "Ellie", "Aaron", "Samantha", "Jose", "Stella",
-                "Adam", "Paisley", "Nathan", "Violet", "Douglas", "Mila", "Zachary", "Allison", "Peter", "Alexa"};
-            
-            var lastNames = new[] { "Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis",
-                "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor",
-                "Moore", "Jackson", "Martin", "Lee", "Thompson", "White", "Harris", "Clark", "Lewis", "Robinson",
-                "Walker", "Hall", "Allen", "Young", "King", "Wright", "Scott", "Green", "Baker", "Adams", "Nelson",
-                "Carter", "Mitchell", "Roberts", "Turner", "Phillips", "Campbell", "Parker", "Evans", "Edwards",
-                "Collins", "Stewart", "Morris", "Rogers", "Reed", "Cook", "Morgan", "Bell", "Murphy", "Bailey",
-                "Rivera", "Cooper", "Richardson", "Cox", "Howard", "Ward", "Torres", "Peterson", "Gray", "Ramirez",
-                "James", "Watson", "Brooks", "Kelly", "Sanders", "Price", "Bennett", "Wood", "Barnes", "Ross",
-                "Henderson", "Coleman", "Jenkins", "Perry", "Powell", "Long", "Patterson", "Hughes", "Flores",
-                "Washington", "Butler", "Simmons", "Foster", "Gonzales", "Bryant", "Alexander", "Russell", "Griffin"};
+            var products = new[] { "Laptop", "Smartphone", "Tablet", "Headphones", "Smartwatch", 
+                "Camera", "Speaker", "Monitor", "Keyboard", "Mouse", "Printer", "Router", 
+                "Hard Drive", "USB Cable", "Power Bank", "Webcam", "Microphone", "Desk Lamp", 
+                "Office Chair", "Standing Desk" };
 
-            var products = new[] { "Laptop", "Smartphone", "Tablet", "Headphones", "Smartwatch", "Camera", 
-                "Speaker", "Monitor", "Keyboard", "Mouse", "Printer", "Router", "Hard Drive", "USB Cable",
-                "Power Bank", "Webcam", "Microphone", "Desk Lamp", "Office Chair", "Standing Desk" };
-
-            var reasons = new[] { "Standard purchase", "Bulk order", "Corporate purchase", "Promotional offer",
-                "Repeat customer", "New customer", "Seasonal sale", "Holiday special", "Clearance item",
-                "Premium product", "Gift purchase", "Business requirement" };
+            var reasons = new[] { "Standard purchase", "Bulk order", "Corporate purchase", 
+                "Promotional offer", "Repeat customer", "New customer", "Seasonal sale", 
+                "Holiday special", "Clearance item", "Premium product", "Gift purchase", 
+                "Business requirement" };
 
             var statusDistribution = new Dictionary<string, int>
             {
@@ -65,43 +51,49 @@ namespace OrderManagementDashboard.Services
             {
                 for (int i = 0; i < status.Value; i++)
                 {
-                    var firstName = firstNames[_random.Next(firstNames.Length)];
-                    var lastName = lastNames[_random.Next(lastNames.Length)];
+                    var parts = status.Key.Split('_');
+                    var paymentStatus = Enum.Parse<PaymentStatus>(parts[0]);
+                    var receivedStatus = Enum.Parse<ReceivedStatus>(parts[1]);
+
+                    var firstName = SharedDataConstants.FirstNames[_random.Next(SharedDataConstants.FirstNames.Length)];
+                    var lastName = SharedDataConstants.LastNames[_random.Next(SharedDataConstants.LastNames.Length)];
                     var customerName = $"{firstName} {lastName}";
-                    var email = $"{firstName.ToLower()}.{lastName.ToLower()}{_random.Next(1, 999)}@email.com";
-                    
+                    var email = SharedDataConstants.GenerateEmail(firstName, lastName, orderId);
+
                     var daysAgo = _random.Next(0, 365);
                     var orderDate = startDate.AddDays(daysAgo);
-                    
-                    var itemCount = _random.Next(1, 8);
-                    var itemsList = new HashSet<string>();
+
+                    var itemCount = _random.Next(1, 4);
+                    var itemsList = new List<string>();
+                    var totalAmount = 0m;
+
                     while (itemsList.Count < itemCount)
                     {
-                        itemsList.Add(products[_random.Next(products.Length)]);
+                        var product = products[_random.Next(products.Length)];
+                        if (!itemsList.Contains(product))
+                        {
+                            itemsList.Add(product);
+                            var price = _random.Next(20, 800) + (decimal)_random.NextDouble();
+                            totalAmount += Math.Round(price, 2);
+                        }
                     }
-                    
-                    var amount = _random.Next(50, 3500);
-                    
-                    var statusParts = status.Key.Split('_');
-                    var paymentStatus = Enum.Parse<PaymentStatus>(statusParts[0]);
-                    var receivedStatus = Enum.Parse<ReceivedStatus>(statusParts[1]);
 
-                    _orders.Add(new Order
+                    var order = new Order
                     {
                         Id = $"ORD{orderId:D6}",
-                        OrderNumber = $"ON-{orderDate:yyyyMM}-{orderId:D4}",
-                        CustomerId = $"CUST{_random.Next(1000, 9999)}",
+                        OrderNumber = $"#{10000 + orderId}",
+                        OrderDate = orderDate,
                         CustomerName = customerName,
                         Email = email,
-                        Items = itemCount,
-                        Amount = amount,
+                        Amount = Math.Round(totalAmount, 2),
                         PaymentStatus = paymentStatus,
                         ReceivedStatus = receivedStatus,
-                        OrderDate = orderDate,
-                        Date = orderDate,
-                        Reason = reasons[_random.Next(reasons.Length)]
-                    });
+                        Items = string.Join(", ", itemsList),
+                        Reason = reasons[_random.Next(reasons.Length)],
+                        ShippingAddress = $"{_random.Next(100, 9999)} Main St, City, ST {_random.Next(10000, 99999)}"
+                    };
 
+                    _orders.Add(order);
                     orderId++;
                 }
             }
@@ -130,10 +122,16 @@ namespace OrderManagementDashboard.Services
             return Task.FromResult(result);
         }
 
+        public Task<List<Order>> GetAllOrdersAsync()
+        {
+            return Task.FromResult(_orders.ToList());
+        }
+
         public Task<int> GetTotalOrderCountAsync()
         {
             return Task.FromResult(_orders.Count);
         }
+
         public Task<DashboardKpi> GetKpiDataAsync()
         {
             var kpi = new DashboardKpi
@@ -145,7 +143,8 @@ namespace OrderManagementDashboard.Services
                 Delivered = _orders.Count(o => o.ReceivedStatus == ReceivedStatus.Delivered),
                 Cancelled = _orders.Count(o => o.ReceivedStatus == ReceivedStatus.Cancelled),
                 Returned = _orders.Count(o => o.ReceivedStatus == ReceivedStatus.Returned),
-                Failed = _orders.Count(o => o.PaymentStatus == PaymentStatus.Unpaid)
+                Failed = _orders.Count(o => o.PaymentStatus == PaymentStatus.Unpaid && 
+                                           o.ReceivedStatus == ReceivedStatus.Cancelled)
             };
 
             return Task.FromResult(kpi);
@@ -155,6 +154,42 @@ namespace OrderManagementDashboard.Services
         {
             var order = _orders.FirstOrDefault(o => o.Id == orderId);
             return Task.FromResult(order);
+        }
+
+        public Task<Order?> GetOrderByOrderNumberAsync(string orderNumber)
+        {
+            var order = _orders.FirstOrDefault(o => o.OrderNumber == orderNumber);
+            return Task.FromResult(order);
+        }
+
+        public Task<List<ProfitMarginData>> GetProfitMarginDataAsync(int months = 12)
+        {
+            var profitData = new List<ProfitMarginData>();
+            var startDate = DateTime.Now.AddMonths(-months);
+            
+            for (int i = 0; i < months; i++)
+            {
+                var monthStart = startDate.AddMonths(i);
+                var monthEnd = monthStart.AddMonths(1);
+                
+                var ordersInMonth = _orders.Where(o => 
+                    o.OrderDate >= monthStart && 
+                    o.OrderDate < monthEnd &&
+                    o.PaymentStatus == PaymentStatus.Paid).ToList();
+                
+                var totalRevenue = ordersInMonth.Sum(o => o.Amount);
+                var costOfGoods = totalRevenue * 0.65m; // 65% COGS
+                var totalProfit = totalRevenue - costOfGoods;
+                
+                profitData.Add(new ProfitMarginData
+                {
+                    Month = monthStart.ToString("MMM yyyy"),
+                    Earnings = totalRevenue,
+                    TotalProfits = totalProfit
+                });
+            }
+            
+            return Task.FromResult(profitData);
         }
     }
 }

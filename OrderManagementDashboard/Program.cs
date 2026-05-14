@@ -14,7 +14,6 @@ builder.Services.AddScoped<IAbandonedCartService, AbandonedCartService>();
 builder.Services.AddScoped<IReturnRefundService, ReturnRefundService>();
 
 
-// Register Syncfusion license
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

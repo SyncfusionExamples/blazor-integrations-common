@@ -16,17 +16,19 @@
 <div class="dashboard-container">
     <div class="dashboard-header">
         <h3 class="page-title">Total Orders</h3>
-        <SfButton CssClass="e-success" Content="Export"></SfButton>
     </div>
-      <!-- KPI Cards Section -->
-    <div class="kpi-grid">
+
+     <div class="kpi-grid">
         <SfCard CssClass="kpi-card kpi-blue">
             <CardContent>
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- Package / total orders -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="12" x2="12" y2="22"></line>
                             </svg>
                         </div>
                     </div>
@@ -43,9 +45,11 @@
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="2" y="5" width="20" height="14" rx="2"></rect>
-                                <line x1="2" y1="10" x2="22" y2="10"></line>
+                            <!-- Credit card / pending payment -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="4" width="22" height="16" rx="2"></rect>
+                                <line x1="1" y1="10" x2="23" y2="10"></line>
+                                <rect x="3" y="14" width="6" height="2" rx="1"></rect>
                             </svg>
                         </div>
                     </div>
@@ -62,8 +66,10 @@
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                            <!-- Gear / processing -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 0 1 2.27 16.9l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.7 0 1.29-.38 1.51-1a1.65 1.65 0 0 0-.33-1.82L4.31 4.1A2 2 0 0 1 7.14 1.27l.06.06a1.65 1.65 0 0 0 1.82.33h.01c.56-.3 1.2-.3 1.76 0a1.65 1.65 0 0 0 1.82-.33l.06-.06A2 2 0 0 1 19.69 4.1l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01c.3.56.3 1.2 0 1.76a1.65 1.65 0 0 0 .33 1.82l.06.06A2 2 0 0 1 19.4 9.1l-.06.06a1.65 1.65 0 0 0-.33 1.82c.3.56.3 1.2 0 1.76z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
                             </svg>
                         </div>
                     </div>
@@ -80,9 +86,12 @@
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
+                            <!-- Truck / shipped -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="3" width="15" height="13"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                <circle cx="5.5" cy="18.5" r="1.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="1.5"></circle>
                             </svg>
                         </div>
                     </div>
@@ -99,8 +108,10 @@
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- Delivered / package with check -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="9 11 12 14 18 8"></polyline>
                             </svg>
                         </div>
                     </div>
@@ -117,8 +128,11 @@
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- Cancel / package with X -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
                             </svg>
                         </div>
                     </div>
@@ -135,7 +149,8 @@
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- Returned / undo arrow -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <polyline points="23 4 23 10 17 10"></polyline>
                                 <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
                             </svg>
@@ -154,7 +169,8 @@
                 <div class="kpi-card-horizontal">
                     <div class="kpi-icon-wrapper">
                         <div class="kpi-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <!-- Failed / cross -->
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10"></circle>
                                 <line x1="15" y1="9" x2="9" y2="15"></line>
                                 <line x1="9" y1="9" x2="15" y2="15"></line>
@@ -172,161 +188,128 @@
 
     <!-- Chart Section -->
     <div class="chart-container">
-    <div class="chart-header">
-        <h4>Profit margin</h4>
-        <div class="chart-filters">
-            <SfButton CssClass="@(selectedPeriod == "12months" ? "e-flat e-primary" : "e-flat")"
-                      Content="12 months"
-                      OnClick="@(() => SelectPeriod("12months"))" />
-            <SfButton CssClass="@(selectedPeriod == "30days" ? "e-flat e-primary" : "e-flat")"
-                      Content="30 days"
-                      OnClick="@(() => SelectPeriod("30days"))" />
-            <SfButton CssClass="@(selectedPeriod == "7days" ? "e-flat e-primary" : "e-flat")"
-                      Content="7 days"
-                      OnClick="@(() => SelectPeriod("7days"))" />
-            <SfButton CssClass="@(selectedPeriod == "24hours" ? "e-flat e-primary" : "e-flat")"
-                      Content="24 hours"
-                      OnClick="@(() => SelectPeriod("24hours"))" />
+        <div class="chart-header">
+            <h4>Profit Margin</h4>
+            <div class="chart-filters">
+                <SfButton CssClass="@(selectedPeriod == "6months" ? "e-primary" : "")" OnClick="@(() => ChangePeriod("6months"))">6 Months</SfButton>
+                <SfButton CssClass="@(selectedPeriod == "12months" ? "e-primary" : "")" OnClick="@(() => ChangePeriod("12months"))">12 Months</SfButton>
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <SfChart Width="100%" Height="450px">
+                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                    <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+                </ChartPrimaryXAxis>
+                <ChartPrimaryYAxis Minimum="0" Maximum="@chartMaxValue" Interval="@chartInterval" LabelFormat="C0">
+                    <ChartAxisLineStyle Width="0"></ChartAxisLineStyle>
+                    <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                </ChartPrimaryYAxis>
+                <ChartSeriesCollection>
+                    <ChartSeries DataSource="@profitMarginData" XName="Month" YName="Earnings" Name="Earnings" Type="ChartSeriesType.Column" Fill="#6366f1">
+                        <ChartMarker>
+                            <ChartDataLabel Visible="false"></ChartDataLabel>
+                        </ChartMarker>
+                    </ChartSeries>
+                    <ChartSeries DataSource="@profitMarginData" XName="Month" YName="TotalProfits" Name="Total Profits" Type="ChartSeriesType.Line" Fill="#10b981" Width="3">
+                        <ChartMarker Visible="true" Height="10" Width="10" Fill="#10b981">
+                            <ChartMarkerBorder Width="2" Color="#ffffff"></ChartMarkerBorder>
+                        </ChartMarker>
+                    </ChartSeries>
+                </ChartSeriesCollection>
+                <ChartLegendSettings Visible="true" Position="LegendPosition.Top"></ChartLegendSettings>
+                <ChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y}</b>"></ChartTooltipSettings>
+            </SfChart>
         </div>
     </div>
 
-    <div class="chart-wrapper">
-        <SfChart Width="100%" Height="450px">
-            <ChartArea>
-                <ChartAreaBorder Width="0" />
-            </ChartArea>
-
-            <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
-                <ChartAxisMajorGridLines Width="0" />
-                <ChartAxisMinorGridLines Width="0" />
-            </ChartPrimaryXAxis>
-
-            <ChartPrimaryYAxis LabelFormat="{value}k" Minimum="0" Maximum="@chartMaxValue" Interval="@chartInterval">
-                <ChartAxisMajorGridLines Width="1" Color="#E0E0E0" />
-                <ChartAxisLineStyle Width="0" />
-            </ChartPrimaryYAxis>
-
-            <ChartTooltipSettings Enable="true" Shared="true"
-                                  Format="${point.x}<br/>Earnings: <b>${point.y},000</b>" />
-
-            <ChartCrosshairSettings Enable="true" LineType="LineType.Vertical">
-                <ChartCrosshairLine Width="1" Color="#9E9E9E" />
-            </ChartCrosshairSettings>
-
-            <ChartSeriesCollection>
-                <ChartSeries DataSource="@chartData"
-                             XName="Month"
-                             YName="Earnings"
-                             Name="Earnings"
-                             Type="ChartSeriesType.Line"
-                             Width="3"
-                             Fill="#008B8B">
-                    <ChartMarker Visible="true" Width="10" Height="10" Shape="ChartShape.Circle">
-                        <ChartMarkerBorder Width="3" Color="#008B8B" />
-                    </ChartMarker>
-                </ChartSeries>
-
-                <ChartSeries DataSource="@chartData"
-                             XName="Month"
-                             YName="TotalProfits"
-                             Name="Total Profits"
-                             Type="ChartSeriesType.Line"
-                             Width="3"
-                             Fill="#FFA500">
-                    <ChartMarker Visible="true" Width="10" Height="10" Shape="ChartShape.Circle">
-                        <ChartMarkerBorder Width="3" Color="#FFA500" />
-                    </ChartMarker>
-                </ChartSeries>
-            </ChartSeriesCollection>
-
-            <ChartLegendSettings Visible="true" Position="LegendPosition.Top">
-                <ChartLegendTextStyle Size="13px" Color="#666666" />
-            </ChartLegendSettings>
-        </SfChart>
-    </div>
-</div>
-
-    <!-- ...existing grid section... -->
+    <!-- Grid Section -->
     <div class="grid-container">
+        <div class="grid-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h4>Orders</h4>
+        </div>
+
         <div class="grid-toolbar">
-            <div class="search-box">
-                <SfTextBox Placeholder="Search..." @bind-Value="searchText" CssClass="search-input">
-                    <TextBoxEvents Input="@OnSearch"></TextBoxEvents>
-                </SfTextBox>
-            </div>
             <div class="filter-dropdowns">
                 <SfDropDownList TValue="string" TItem="string" 
-                                Placeholder="Payment status" 
-                                DataSource="@paymentStatusList" 
-                                @bind-Value="@selectedPaymentStatus"
-                                CssClass="filter-dropdown">
-                    <DropDownListEvents TValue="string" TItem="string" ValueChange="@OnPaymentStatusChange"></DropDownListEvents>
+                               Placeholder="Payment Status" 
+                               DataSource="@paymentStatusList"
+                               @bind-Value="selectedPaymentStatus"
+                               Width="200px">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="OnPaymentStatusChange"></DropDownListEvents>
                 </SfDropDownList>
                 <SfDropDownList TValue="string" TItem="string" 
-                                Placeholder="Received status" 
-                                DataSource="@receivedStatusList"
-                                @bind-Value="@selectedReceivedStatus" 
-                                CssClass="filter-dropdown">
-                    <DropDownListEvents TValue="string" TItem="string" ValueChange="@OnReceivedStatusChange"></DropDownListEvents>
+                               Placeholder="Received Status" 
+                               DataSource="@receivedStatusList"
+                               @bind-Value="selectedReceivedStatus"
+                               Width="200px">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="OnReceivedStatusChange"></DropDownListEvents>
                 </SfDropDownList>
                 <SfDropDownList TValue="string" TItem="string" 
-                                Placeholder="Date" 
-                                DataSource="@dateFilterList"
-                                @bind-Value="@selectedDateFilter" 
-                                CssClass="filter-dropdown">
-                    <DropDownListEvents TValue="string" TItem="string" ValueChange="@OnDateFilterChange"></DropDownListEvents>
+                               Placeholder="Date Filter" 
+                               DataSource="@dateFilterList"
+                               @bind-Value="selectedDateFilter"
+                               Width="200px">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="OnDateFilterChange"></DropDownListEvents>
                 </SfDropDownList>
             </div>
         </div>
 
-        <SfGrid @ref="grid" DataSource="@filteredOrders" AllowPaging="true" AllowSorting="true" AllowSelection="true">
+        <SfGrid @ref="grid" 
+                DataSource="@filteredOrders" 
+                AllowPaging="true" 
+                AllowSorting="true"
+                AllowSearching="true"
+                Toolbar="@(new List<string>() { "Search" })">
             <GridPageSettings PageSize="6" PageSizes="@(new int[] {6, 10, 20, 50})"></GridPageSettings>
-            <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" Mode="Syncfusion.Blazor.Grids.SelectionMode.Row"></GridSelectionSettings>
+            <GridSearchSettings Fields="@(new string[] { "Id", "CustomerName", "OrderNumber", "Email" })" 
+                                IgnoreCase="true" 
+                                Operator="Syncfusion.Blazor.Operator.Contains"></GridSearchSettings>
             <GridColumns>
-                <GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
-                <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" Width="100"></GridColumn>
-                <GridColumn Field="@nameof(Order.CustomerName)" HeaderText="Customer" Width="150"></GridColumn>
-                <GridColumn Field="@nameof(Order.Items)" HeaderText="Items" Width="100" TextAlign="TextAlign.Center"></GridColumn>
-                <GridColumn Field="@nameof(Order.Amount)" HeaderText="Amount" Width="120" Format="C0" TextAlign="TextAlign.Right"></GridColumn>
-                <GridColumn Field="@nameof(Order.PaymentStatus)" HeaderText="Payment status" Width="150">
+                <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" Width="120"></GridColumn>
+                <GridColumn Field="@nameof(Order.OrderNumber)" HeaderText="Order Number" Width="140"></GridColumn>
+                <GridColumn Field="@nameof(Order.OrderDate)" HeaderText="Order Date" Width="150" Format="dd MMM, yyyy"></GridColumn>
+                <GridColumn Field="@nameof(Order.CustomerName)" HeaderText="Customer Name" Width="180"></GridColumn>
+                <GridColumn Field="@nameof(Order.Email)" HeaderText="Email" Width="220"></GridColumn>
+                <GridColumn Field="@nameof(Order.Amount)" HeaderText="Amount" Width="120" Format="C2"></GridColumn>
+                <GridColumn Field="@nameof(Order.PaymentStatus)" HeaderText="Payment Status" Width="150">
                     <Template>
                         @{
                             var order = (Order)context;
                             var statusClass = order.PaymentStatus switch
                             {
-                                PaymentStatus.Paid => "status-badge status-paid",
-                                PaymentStatus.Pending => "status-badge status-pending",
-                                PaymentStatus.Unpaid => "status-badge status-unpaid",
-                                _ => "status-badge"
+                                PaymentStatus.Paid => "status-paid",
+                                PaymentStatus.Pending => "status-pending",
+                                PaymentStatus.Unpaid => "status-unpaid",
+                                _ => ""
                             };
-                            <span class="@statusClass">@order.PaymentStatus.ToString().ToLower()</span>
+                            <span class="status-badge @statusClass">@order.PaymentStatus</span>
                         }
                     </Template>
                 </GridColumn>
-                <GridColumn Field="@nameof(Order.ReceivedStatus)" HeaderText="Received status" Width="150">
+                <GridColumn Field="@nameof(Order.ReceivedStatus)" HeaderText="Received Status" Width="150">
                     <Template>
                         @{
                             var order = (Order)context;
                             var statusClass = order.ReceivedStatus switch
                             {
-                                ReceivedStatus.Delivered => "status-badge status-delivered",
-                                ReceivedStatus.Processing => "status-badge status-processing",
-                                ReceivedStatus.Shipped => "status-badge status-shipped",
-                                ReceivedStatus.Cancelled => "status-badge status-cancelled",
-                                ReceivedStatus.Returned => "status-badge status-returned",
-                                _ => "status-badge"
+                                ReceivedStatus.Delivered => "status-delivered",
+                                ReceivedStatus.Processing => "status-processing",
+                                ReceivedStatus.Shipped => "status-shipped",
+                                ReceivedStatus.Cancelled => "status-cancelled",
+                                ReceivedStatus.Returned => "status-returned",
+                                _ => ""
                             };
-                            <span class="@statusClass">@order.ReceivedStatus</span>
+                            <span class="status-badge @statusClass">@order.ReceivedStatus</span>
                         }
                     </Template>
                 </GridColumn>
-                <GridColumn Field="@nameof(Order.Date)" HeaderText="Date" Width="140" Format="dd MMM, yyyy" TextAlign="TextAlign.Left"></GridColumn>
-                <GridColumn HeaderText="Action" Width="100" TextAlign="TextAlign.Center">
+                <GridColumn HeaderText="Actions" Width="100">
                     <Template>
                         @{
                             var order = (Order)context;
-                            <button class="action-button" title="View details" @onclick="@(() => ViewOrderDetails(order))">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <button class="action-button" @onclick="@(() => ViewOrderDetails(order.Id))" title="View Details">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                                     <circle cx="12" cy="12" r="3"></circle>
                                 </svg>
@@ -339,7 +322,7 @@
     </div>
 </div>
 
-<!-- ...existing order details dialog... -->
+<!-- Order Details Dialog -->
 <SfDialog @bind-Visible="@showOrderDetailsDialog" Width="600px" IsModal="true" ShowCloseIcon="true">
     <DialogTemplates>
         <Header>Order Details</Header>
@@ -347,75 +330,41 @@
             @if (selectedOrder != null)
             {
                 <div style="padding: 20px;">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-                        <div>
-                            <strong>Order ID:</strong>
-                            <p>@selectedOrder.Id</p>
-                        </div>
-                        <div>
-                            <strong>Order Number:</strong>
-                            <p>@selectedOrder.OrderNumber</p>
-                        </div>
-                        <div>
-                            <strong>Customer:</strong>
-                            <p>@selectedOrder.CustomerName</p>
-                        </div>
-                        <div>
-                            <strong>Customer ID:</strong>
-                            <p>@selectedOrder.CustomerId</p>
-                        </div>
-                        <div>
-                            <strong>Email:</strong>
-                            <p>@selectedOrder.Email</p>
-                        </div>
-                        <div>
-                            <strong>Items:</strong>
-                            <p>@selectedOrder.Items</p>
-                        </div>
-                        <div>
-                            <strong>Amount:</strong>
-                            <p>@selectedOrder.Amount.ToString("C")</p>
-                        </div>
-                        <div>
-                            <strong>Order Date:</strong>
-                            <p>@selectedOrder.OrderDate.ToString("dd MMM, yyyy")</p>
-                        </div>
-                        <div>
-                            <strong>Payment Status:</strong>
-                            <p>
-                                @{
-                                    var statusClass = selectedOrder.PaymentStatus switch
-                                    {
-                                        PaymentStatus.Paid => "status-badge status-paid",
-                                        PaymentStatus.Pending => "status-badge status-pending",
-                                        PaymentStatus.Unpaid => "status-badge status-unpaid",
-                                        _ => "status-badge"
-                                    };
-                                    <span class="@statusClass">@selectedOrder.PaymentStatus.ToString().ToLower()</span>
-                                }
-                            </p>
-                        </div>
-                        <div>
-                            <strong>Received Status:</strong>
-                            <p>
-                                @{
-                                    var receivedClass = selectedOrder.ReceivedStatus switch
-                                    {
-                                        ReceivedStatus.Delivered => "status-badge status-delivered",
-                                        ReceivedStatus.Processing => "status-badge status-processing",
-                                        ReceivedStatus.Shipped => "status-badge status-shipped",
-                                        ReceivedStatus.Cancelled => "status-badge status-cancelled",
-                                        ReceivedStatus.Returned => "status-badge status-returned",
-                                        _ => "status-badge"
-                                    };
-                                    <span class="@receivedClass">@selectedOrder.ReceivedStatus</span>
-                                }
-                            </p>
-                        </div>
-                        <div style="grid-column: 1 / -1;">
-                            <strong>Reason:</strong>
-                            <p>@selectedOrder.Reason</p>
-                        </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Order ID:</strong> @selectedOrder.Id
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Order Number:</strong> @selectedOrder.OrderNumber
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Customer Name:</strong> @selectedOrder.CustomerName
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Email:</strong> @selectedOrder.Email
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Order Date:</strong> @selectedOrder.OrderDate.ToString("dd MMM, yyyy")
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Amount:</strong> @selectedOrder.Amount.ToString("C2")
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Items:</strong> @selectedOrder.Items
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Shipping Address:</strong> @selectedOrder.ShippingAddress
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Payment Status:</strong> 
+                        <span class="status-badge @GetPaymentStatusClass(selectedOrder.PaymentStatus)">
+                            @selectedOrder.PaymentStatus
+                        </span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Received Status:</strong> 
+                        <span class="status-badge @GetReceivedStatusClass(selectedOrder.ReceivedStatus)">
+                            @selectedOrder.ReceivedStatus
+                        </span>
                     </div>
                 </div>
             }
@@ -426,13 +375,12 @@
     </DialogButtons>
 </SfDialog>
 
-<!-- ...existing styles... -->
 <style>
-    /* ...existing styles... */
     .dashboard-container {
         padding: 24px;
-        background-color: #f8f9fa;
+        background-color: #f5f7fa;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        min-height: 100vh;
     }
 
     .dashboard-header {
@@ -444,9 +392,15 @@
 
     .page-title {
         font-size: 20px;
-        font-weight: 600;
+        font-weight: 700;
         color: #1a1a1a;
         margin: 0;
+    }
+
+    .export-button {
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-weight: 600;
     }
 
     .kpi-grid {
@@ -551,19 +505,16 @@
     }
 
     .chart-container {
-        width: 100%;
         background: white;
+        border-radius: 12px;
         padding: 24px;
-        border-radius: 8px;
         margin-bottom: 30px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        box-sizing: border-box;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
+
     .chart-wrapper {
-        width: 100%;
-        min-width: 0;
-        overflow: hidden;
+        margin-top: 20px;
     }
 
     .chart-wrapper .e-control,
@@ -571,31 +522,20 @@
     .chart-wrapper .e-svg-chart,
     .chart-wrapper svg {
         width: 100% !important;
-        max-width: 100% !important;
-        display: block;
     }
 
-    .profit-chart,
-    .profit-chart .e-chart,
-    .profit-chart .e-svg-chart,
-    .profit-chart svg {
-        width: 100% !important;
-        max-width: 100% !important;
-        display: block;
-    }
     .chart-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 24px;
-        flex-shrink: 0;
+        margin-bottom: 16px;
     }
 
     .chart-header h4 {
+        margin: 0;
         font-size: 18px;
         font-weight: 600;
-        margin: 0;
-        color: #1a1a1a;
+        color: #1f2937;
     }
 
     .chart-filters {
@@ -604,34 +544,22 @@
     }
 
     .chart-filters .e-btn {
-        font-size: 13px;
         padding: 6px 16px;
-        border-radius: 4px;
-        text-transform: none;
-        font-weight: 400;
+        border-radius: 6px;
     }
 
     .grid-container {
         background: white;
+        border-radius: 12px;
         padding: 24px;
-        border-radius: 8px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .grid-toolbar {
+        margin-bottom: 16px;
         display: flex;
         justify-content: space-between;
-        margin-bottom: 20px;
-        gap: 15px;
         align-items: center;
-    }
-
-    .search-box {
-        flex: 0 0 280px;
-    }
-
-    .search-input .e-input-group {
-        border-radius: 6px;
     }
 
     .filter-dropdowns {
@@ -641,142 +569,96 @@
         justify-content: flex-end;
     }
 
-    .filter-dropdown {
-        width: 170px;
-    }
-
     .e-grid {
         border: none;
     }
 
     .e-grid .e-gridheader {
-        background-color: #fafafa;
-        border-bottom: 1px solid #e0e0e0;
+        background-color: #f9fafb;
+        border-bottom: 2px solid #e5e7eb;
     }
 
     .e-grid .e-headercell {
         font-weight: 600;
+        color: #374151;
         font-size: 13px;
-        color: #666;
-        padding: 12px 16px;
+        padding: 12px 8px;
     }
 
     .e-grid .e-rowcell {
-        padding: 14px 16px;
-        font-size: 14px;
-        color: #333;
-        border-bottom: 1px solid #f0f0f0;
+        padding: 12px 8px;
+        font-size: 13px;
+        color: #4b5563;
+        border-bottom: 1px solid #f3f4f6;
     }
 
     .status-badge {
-        padding: 5px 12px;
-        border-radius: 14px;
-        font-size: 12px;
-        font-weight: 500;
         display: inline-block;
-        text-transform: lowercase;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-align: center;
     }
 
-    .status-paid {
-        background-color: #d4f4dd;
-        color: #1e7e34;
-        border: 1px solid #b8e6c3;
-    }
-
-    .status-pending {
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffe69c;
-    }
-
-    .status-unpaid {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    .status-delivered {
-        background-color: #d4f4dd;
-        color: #1e7e34;
-        border: 1px solid #b8e6c3;
-    }
-
-    .status-processing {
-        background-color: #fff3cd;
-        color: #856404;
-        border: 1px solid #ffe69c;
-    }
-
-    .status-shipped {
-        background-color: #d1ecf1;
-        color: #0c5460;
-        border: 1px solid #bee5eb;
-    }
-
-    .status-cancelled {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    .status-returned {
-        background-color: #e2e3e5;
-        color: #383d41;
-        border: 1px solid #d6d8db;
-    }
+    .status-paid { background-color: #d1fae5; color: #065f46; }
+    .status-pending { background-color: #fef3c7; color: #92400e; }
+    .status-unpaid { background-color: #fee2e2; color: #991b1b; }
+    .status-delivered { background-color: #d1fae5; color: #065f46; }
+    .status-processing { background-color: #dbeafe; color: #1e40af; }
+    .status-shipped { background-color: #e0e7ff; color: #3730a3; }
+    .status-cancelled { background-color: #fee2e2; color: #991b1b; }
+    .status-returned { background-color: #fef3c7; color: #92400e; }
 
     .action-button {
         background: none;
         border: none;
         cursor: pointer;
-        padding: 8px;
-        color: #666;
+        padding: 6px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        color: #6b7280;
+        transition: all 0.2s;
         border-radius: 4px;
-        transition: background-color 0.2s;
     }
 
     .action-button:hover {
-        background-color: #f5f5f5;
+        background-color: #f3f4f6;
+        color: #3b82f6;
     }
 
     .action-button svg {
-        width: 20px;
-        height: 20px;
+        width: 16px;
+        height: 16px;
     }
 
     .e-pager {
         padding: 16px 0;
-        background-color: transparent;
+        border-top: 1px solid #e5e7eb;
     }
 
     .e-pager .e-numericitem {
-        border-radius: 6px;
-        margin: 0 3px;
         min-width: 32px;
         height: 32px;
+        border-radius: 6px;
     }
 
     .e-pager .e-currentitem {
-        background-color: #d4f4e2;
-        color: #1e7e34;
-        border-color: #b8e6c3;
+        background-color: #3b82f6;
+        color: white;
     }
 </style>
-
 
 @code {
     private SfGrid<Order>? grid;
     private List<Order> orders = new List<Order>();
     private List<Order> filteredOrders = new List<Order>();
     private DashboardKpi kpiData = new DashboardKpi();
-    private string searchText = "";
     private string selectedPeriod = "12months";
-    private List<ChartData> chartData = new List<ChartData>();
-    private double chartMaxValue = 50;
-    private double chartInterval = 10;
+    private List<ProfitMarginData> profitMarginData = new List<ProfitMarginData>();
+    private double chartMaxValue = 50000;
+    private double chartInterval = 10000;
     private List<string> paymentStatusList = new() { "All", "Paid", "Pending", "Unpaid" };
     private List<string> receivedStatusList = new() { "All", "Delivered", "Processing", "Shipped", "Cancelled", "Returned" };
     private List<string> dateFilterList = new() { "All", "Today", "Last 7 days", "Last 30 days" };
@@ -790,197 +672,91 @@
 
     protected override async Task OnInitializedAsync()
     {
-        orders = await OrderService.GetOrdersAsync(1, 200);
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        orders = await OrderService.GetOrdersAsync(1, 1000);
         filteredOrders = orders;
         kpiData = await OrderService.GetKpiDataAsync();
-        InitializeChartData();
+        await LoadChartData();
     }
 
-    private void InitializeChartData()
+    private async Task LoadChartData()
     {
-        chartData = GetChartDataForPeriod("12months");
+        int months = selectedPeriod == "6months" ? 6 : 12;
+        profitMarginData = await OrderService.GetProfitMarginDataAsync(months);
+        
+        if (profitMarginData.Any())
+        {
+            var maxEarnings = profitMarginData.Max(x => x.Earnings);
+            var maxProfits = profitMarginData.Max(x => x.TotalProfits);
+            var maxValue = Math.Max((double)maxEarnings, (double)maxProfits);
+            
+            chartMaxValue = Math.Ceiling(maxValue / 10000) * 10000;
+            chartInterval = chartMaxValue / 5;
+        }
     }
 
-   // ...existing code...
-
-private List<ChartData> GetChartDataForPeriod(string period)
-{
-    var data = new List<ChartData>();
-    
-    switch (period)
+    private async Task ChangePeriod(string period)
     {
-        case "24hours":
-            var last24Hours = DateTime.Now.AddHours(-24);
-            for (int i = 0; i < 24; i += 4)
-            {
-                var hourStart = last24Hours.AddHours(i);
-                var hourEnd = hourStart.AddHours(4);
-                var ordersInPeriod = orders.Where(o => o.OrderDate >= hourStart && o.OrderDate < hourEnd).ToList();
-                var earnings = (double)ordersInPeriod.Sum(o => o.Amount) / 1000.0;
-                var profits = earnings * 0.7;
-                
-                data.Add(new ChartData 
-                { 
-                    Month = hourStart.ToString("h tt"),
-                    Earnings = Math.Round(earnings, 1),
-                    TotalProfits = Math.Round(profits, 1)
-                });
-            }
-            chartMaxValue = 30;
-            chartInterval = 5;
-            break;
-
-        case "7days":
-            var last7Days = DateTime.Now.AddDays(-7);
-            for (int i = 0; i < 7; i++)
-            {
-                var day = last7Days.AddDays(i);
-                var ordersInDay = orders.Where(o => o.OrderDate.Date == day.Date).ToList();
-                var earnings = (double)ordersInDay.Sum(o => o.Amount) / 1000.0;
-                var profits = earnings * 0.7;
-                
-                data.Add(new ChartData 
-                { 
-                    Month = day.ToString("ddd"),
-                    Earnings = Math.Round(earnings, 1),
-                    TotalProfits = Math.Round(profits, 1)
-                });
-            }
-            chartMaxValue = 50;
-            chartInterval = 10;
-            break;
-
-        case "30days":
-            var last30Days = DateTime.Now.AddDays(-30);
-            for (int i = 0; i < 4; i++)
-            {
-                var weekStart = last30Days.AddDays(i * 7);
-                var weekEnd = weekStart.AddDays(7);
-                var ordersInWeek = orders.Where(o => o.OrderDate >= weekStart && o.OrderDate < weekEnd).ToList();
-                var earnings = (double)ordersInWeek.Sum(o => o.Amount) / 1000.0;
-                var profits = earnings * 0.7;
-                
-                data.Add(new ChartData 
-                { 
-                    Month = $"Week {i + 1}",
-                    Earnings = Math.Round(earnings, 1),
-                    TotalProfits = Math.Round(profits, 1)
-                });
-            }
-            chartMaxValue = 80;
-            chartInterval = 20;
-            break;
-
-        default: // 12months
-            var months = new[] { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
-            var currentDate = DateTime.Now;
-            for (int i = 11; i >= 0; i--)
-            {
-                var monthDate = currentDate.AddMonths(-i);
-                var ordersInMonth = orders.Where(o => o.OrderDate.Year == monthDate.Year && o.OrderDate.Month == monthDate.Month).ToList();
-                var earnings = (double)ordersInMonth.Sum(o => o.Amount) / 1000.0;
-                var profits = earnings * 0.7;
-                
-                data.Add(new ChartData 
-                { 
-                    Month = months[monthDate.Month - 1],
-                    Earnings = Math.Round(earnings, 1),
-                    TotalProfits = Math.Round(profits, 1)
-                });
-            }
-            chartMaxValue = 100;
-            chartInterval = 20;
-            break;
-    }
-
-    return data;
-}
-
-// ...existing code...
-
-    private async Task OnSearch(InputEventArgs args)
-    {
-        searchText = args.Value;
-        await ApplyFilters();
+        selectedPeriod = period;
+        await LoadChartData();
     }
 
     private async Task OnPaymentStatusChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
     {
-        selectedPaymentStatus = args.Value ?? "All";
+        selectedPaymentStatus = args.Value;
         await ApplyFilters();
     }
 
     private async Task OnReceivedStatusChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
     {
-        selectedReceivedStatus = args.Value ?? "All";
+        selectedReceivedStatus = args.Value;
         await ApplyFilters();
     }
 
     private async Task OnDateFilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
     {
-        selectedDateFilter = args.Value ?? "All";
+        selectedDateFilter = args.Value;
         await ApplyFilters();
     }
 
     private async Task ApplyFilters()
     {
-        var result = orders.AsEnumerable();
+        filteredOrders = orders;
 
-        // Search filter
-        if (!string.IsNullOrWhiteSpace(searchText))
-        {
-            result = result.Where(o => 
-                o.OrderNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase) || 
-                o.CustomerName.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                o.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                o.Id.Contains(searchText, StringComparison.OrdinalIgnoreCase));
-        }
-
-        // Payment status filter
         if (selectedPaymentStatus != "All")
         {
-            if (Enum.TryParse<PaymentStatus>(selectedPaymentStatus, out var paymentStatus))
-            {
-                result = result.Where(o => o.PaymentStatus == paymentStatus);
-            }
+            var status = Enum.Parse<PaymentStatus>(selectedPaymentStatus);
+            filteredOrders = filteredOrders.Where(o => o.PaymentStatus == status).ToList();
         }
 
-        // Received status filter
         if (selectedReceivedStatus != "All")
         {
-            if (Enum.TryParse<ReceivedStatus>(selectedReceivedStatus, out var receivedStatus))
-            {
-                result = result.Where(o => o.ReceivedStatus == receivedStatus);
-            }
+            var status = Enum.Parse<ReceivedStatus>(selectedReceivedStatus);
+            filteredOrders = filteredOrders.Where(o => o.ReceivedStatus == status).ToList();
         }
 
-        // Date filter
         if (selectedDateFilter != "All")
         {
-            var today = DateTime.Now.Date;
-            result = selectedDateFilter switch
+            var today = DateTime.Today;
+            filteredOrders = selectedDateFilter switch
             {
-                "Today" => result.Where(o => o.OrderDate.Date == today),
-                "Last 7 days" => result.Where(o => o.OrderDate.Date >= today.AddDays(-7)),
-                "Last 30 days" => result.Where(o => o.OrderDate.Date >= today.AddDays(-30)),
-                _ => result
+                "Today" => filteredOrders.Where(o => o.OrderDate.Date == today).ToList(),
+                "Last 7 days" => filteredOrders.Where(o => o.OrderDate >= today.AddDays(-7)).ToList(),
+                "Last 30 days" => filteredOrders.Where(o => o.OrderDate >= today.AddDays(-30)).ToList(),
+                _ => filteredOrders
             };
         }
 
-        filteredOrders = result.ToList();
-        await InvokeAsync(StateHasChanged);
+        await Task.CompletedTask;
     }
 
-    private void SelectPeriod(string period)
+    private async Task ViewOrderDetails(string orderId)
     {
-        selectedPeriod = period;
-        chartData = GetChartDataForPeriod(period);
-        StateHasChanged();
-    }
-
-    private void ViewOrderDetails(Order order)
-    {
-        selectedOrder = order;
+        selectedOrder = await OrderService.GetOrderByIdAsync(orderId);
         showOrderDetailsDialog = true;
     }
 
@@ -990,10 +766,27 @@ private List<ChartData> GetChartDataForPeriod(string period)
         selectedOrder = null;
     }
 
-    public class ChartData
+    private string GetPaymentStatusClass(PaymentStatus status)
     {
-        public string Month { get; set; } = string.Empty;
-        public double Earnings { get; set; } = 0;
-        public double TotalProfits { get; set; } = 0;
+        return status switch
+        {
+            PaymentStatus.Paid => "status-paid",
+            PaymentStatus.Pending => "status-pending",
+            PaymentStatus.Unpaid => "status-unpaid",
+            _ => ""
+        };
+    }
+
+    private string GetReceivedStatusClass(ReceivedStatus status)
+    {
+        return status switch
+        {
+            ReceivedStatus.Delivered => "status-delivered",
+            ReceivedStatus.Processing => "status-processing",
+            ReceivedStatus.Shipped => "status-shipped",
+            ReceivedStatus.Cancelled => "status-cancelled",
+            ReceivedStatus.Returned => "status-returned",
+            _ => ""
+        };
     }
 }

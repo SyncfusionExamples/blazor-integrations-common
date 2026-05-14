@@ -13,7 +13,8 @@ namespace OrderManagementDashboard.Models
         public DateTime Date { get; set; }
         public string CustomerId { get; set; } = string.Empty;
         public string CustomerName { get; set; } = string.Empty;
-        public int Items { get; set; }
+        public string Items { get; set; } = string.Empty;  // Changed from int to string
+        public string ShippingAddress { get; set; } = string.Empty;  // Added missing property
     }
 
     public enum PaymentStatus
