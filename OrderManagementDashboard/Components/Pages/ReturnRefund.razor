@@ -1,9 +1,5 @@
 @page "/return-refund"
 
-@using Syncfusion.Blazor.Grids
-@using Syncfusion.Blazor.DropDowns
-@using Syncfusion.Blazor.Buttons
-@using Syncfusion.Blazor.Cards
 @using OrderManagementDashboard.Models
 @using OrderManagementDashboard.Services
 @inject IReturnRefundService ReturnRefundService
@@ -13,39 +9,35 @@
     <CardHeader>
         <div class="return-refund-header">
             <h2 class="return-refund-title">Return &amp; Refund</h2>
-            <span class="return-refund-total">Total: @TotalCount requests</span>
+            <span class="return-refund-total">Total: @Items.Count requests</span>
         </div>
     </CardHeader>
     <CardContent>
-
         <SfGrid @ref="grid"
-                DataSource="@Items" 
+                DataSource="@Items"
                 AllowPaging="true"
-                AllowSorting="true" 
+                AllowSorting="true"
                 AllowFiltering="true"
                 AllowSearching="true"
                 Toolbar="@(new List<string>() { "Search" })">
-            <GridEvents TValue="Models.ReturnRefund" OnActionBegin="OnGridActionBegin"></GridEvents>
-            <GridPageSettings PageSize="10" PageCount="5"></GridPageSettings>
+            <GridPageSettings PageSize="10"></GridPageSettings>
             <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
-            <GridSearchSettings Fields="@(new string[] { "Id", "OrderNumber", "Email" })" 
-                                IgnoreCase="true" 
+            <GridSearchSettings Fields="@(new string[] { "Id", "OrderNumber", "Email" })"
+                                IgnoreCase="true"
                                 Operator="Syncfusion.Blazor.Operator.Contains"></GridSearchSettings>
             <GridColumns>
                 <GridColumn Field="Id" HeaderText="ID" Width="120"></GridColumn>
                 <GridColumn Field="OrderNumber" HeaderText="Order Number" Width="140"></GridColumn>
-                <GridColumn Field="Amount" HeaderText="Amount" Width="120" Format="C2"></GridColumn>
+                <GridColumn Field="Amount" HeaderText="Amount" Width="120" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
                 <GridColumn Field="OrderDate" HeaderText="Order Date" Width="140" Format="dd MMM, yyyy"></GridColumn>
                 <GridColumn Field="Email" HeaderText="Email" Width="220"></GridColumn>
                 <GridColumn Field="Reason" HeaderText="Reason" Width="250"></GridColumn>
-                <GridColumn Field="Status" HeaderText="Status" Width="120">
+                <GridColumn Field="Status" HeaderText="Status" Width="120" TextAlign="TextAlign.Center">
                     <Template>
                         @{
                             var item = (Models.ReturnRefund)context;
                             var statusClass = GetStatusClass(item.Status);
-                            <span class="status-badge @statusClass">
-                                @item.Status
-                            </span>
+                            <span class="status-badge @statusClass">@item.Status</span>
                         }
                     </Template>
                 </GridColumn>
@@ -54,11 +46,17 @@
                     <Template>
                         @{
                             var item = (Models.ReturnRefund)context;
-                            <div style="display: flex; gap: 5px;">
+                            <div class="action-buttons">
                                 @if (item.Status != "Approved" && item.Status != "Refunded" && item.Status != "Rejected")
                                 {
-                                    <SfButton CssClass="e-small e-success" Content="✓" OnClick="@(() => ApproveRefund(item.Id))" />
-                                    <SfButton CssClass="e-small e-danger" Content="✕" OnClick="@(() => RejectRefund(item.Id))" />
+                                    <SfButton CssClass="e-small e-success action-button"
+                                            IconCss="e-icons e-check"
+                                            Title="Approve"
+                                            OnClick="@(() => ApproveRefund(item.Id))" />
+                                    <SfButton CssClass="e-small e-danger action-button"
+                                            IconCss="e-icons e-close"
+                                            Title="Reject"
+                                            OnClick="@(() => RejectRefund(item.Id))" />
                                 }
                                 else
                                 {
@@ -70,12 +68,11 @@
                 </GridColumn>
             </GridColumns>
         </SfGrid>
-
     </CardContent>
 </SfCard>
 
 <style>
-   .return-refund-header {
+    .return-refund-header {
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -84,8 +81,10 @@
     }
 
     .return-refund-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
         margin: 0;
-        line-height: 1.2;
     }
 
     .return-refund-total {
@@ -93,6 +92,7 @@
         font-size: 14px;
         white-space: nowrap;
     }
+
     .status-badge {
         display: inline-block;
         padding: 4px 12px;
@@ -100,6 +100,7 @@
         font-size: 12px;
         font-weight: 600;
         text-align: center;
+        line-height: 1;
     }
 
     .status-pending { background-color: #fef3c7; color: #92400e; }
@@ -107,14 +108,34 @@
     .status-rejected { background-color: #fee2e2; color: #991b1b; }
     .status-processing { background-color: #dbeafe; color: #1e40af; }
     .status-refunded { background-color: #e0e7ff; color: #3730a3; }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .action-button {
+        min-width: 30px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-button .e-btn-icon,
+    .action-button .e-icons {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1;
+    }
 </style>
 
 @code {
     private SfGrid<Models.ReturnRefund>? grid;
     private List<Models.ReturnRefund> Items = new();
-    private int TotalCount = 0;
-    private int CurrentPage = 1;
-    private int PageSize = 10;
 
     protected override async Task OnInitializedAsync()
     {
@@ -123,18 +144,8 @@
 
     private async Task LoadData()
     {
-        Items = await ReturnRefundService.GetReturnRefundsAsync(CurrentPage, PageSize);
-        TotalCount = await ReturnRefundService.GetTotalCountAsync();
-    }
-
-    
-    private async Task OnGridActionBegin(ActionEventArgs<Models.ReturnRefund> args)
-    {
-        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Paging)
-        {
-            CurrentPage = args.CurrentPage;  
-            await LoadData();
-        }
+        var totalCount = await ReturnRefundService.GetTotalCountAsync();
+        Items = await ReturnRefundService.GetReturnRefundsAsync(1, totalCount);
     }
 
     private async Task ApproveRefund(string refundId)

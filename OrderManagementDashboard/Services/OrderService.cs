@@ -137,7 +137,6 @@ namespace OrderManagementDashboard.Services
             var kpi = new DashboardKpi
             {
                 TotalOrders = _orders.Count,
-                PendingPayment = _orders.Count(o => o.PaymentStatus == PaymentStatus.Pending),
                 Processing = _orders.Count(o => o.ReceivedStatus == ReceivedStatus.Processing),
                 Shipped = _orders.Count(o => o.ReceivedStatus == ReceivedStatus.Shipped),
                 Delivered = _orders.Count(o => o.ReceivedStatus == ReceivedStatus.Delivered),
@@ -178,7 +177,7 @@ namespace OrderManagementDashboard.Services
                     o.PaymentStatus == PaymentStatus.Paid).ToList();
                 
                 var totalRevenue = ordersInMonth.Sum(o => o.Amount);
-                var costOfGoods = totalRevenue * 0.65m; // 65% COGS
+                var costOfGoods = totalRevenue * 0.65m;
                 var totalProfit = totalRevenue - costOfGoods;
                 
                 profitData.Add(new ProfitMarginData

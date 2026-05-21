@@ -4,3 +4,15 @@
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
+
+@code {
+    [Inject] private NavigationManager Navigation { get; set; } = default!;
+    
+    protected override void OnInitialized()
+    {
+        if (Navigation?.Uri?.EndsWith("/") == true)
+        {
+            Navigation.NavigateTo("/dashboard");
+        }
+    }
+}

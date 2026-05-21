@@ -8,13 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="33.2.6" />
-    <PackageReference Include="Syncfusion.Blazor.Cards" Version="33.2.6" />
-    <PackageReference Include="Syncfusion.Blazor.Charts" Version="33.2.6" />
-    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="33.2.6" />
-    <PackageReference Include="Syncfusion.Blazor.Grid" Version="33.2.6" />
-    <PackageReference Include="Syncfusion.Blazor.Inputs" Version="33.2.6" />
-    <PackageReference Include="Syncfusion.Blazor.Themes" Version="33.2.6" />
+    <PackageReference Include="Syncfusion.Blazor.Buttons" Version="33.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Cards" Version="33.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Charts" Version="33.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.DropDowns" Version="33.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Grid" Version="33.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Navigations" Version="33.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Popups" Version="33.2.7" />
+    <PackageReference Include="Syncfusion.Blazor.Themes" Version="33.2.7" />
   </ItemGroup>
 
 </Project>

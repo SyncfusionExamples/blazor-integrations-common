@@ -76,7 +76,6 @@ namespace OrderManagementDashboard.Services
             var data = new List<ReturnRefund>();
             var random = new Random(42);
             
-            // Get delivered orders that can be returned
             var eligibleOrders = _orderService.GetAllOrdersAsync().Result
                 .Where(o => o.PaymentStatus == PaymentStatus.Paid && 
                            (o.ReceivedStatus == ReceivedStatus.Delivered || 
@@ -90,7 +89,6 @@ namespace OrderManagementDashboard.Services
                 var order = eligibleOrders[i];
                 var returnDate = order.OrderDate.AddDays(random.Next(2, 20));
                 
-                // Ensure return date is not in the future
                 if (returnDate > DateTime.Now)
                     returnDate = DateTime.Now.AddDays(-random.Next(1, 10));
 

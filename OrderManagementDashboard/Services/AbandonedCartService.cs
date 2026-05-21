@@ -38,7 +38,6 @@ namespace OrderManagementDashboard.Services
             var random = new Random(123);
             var baseDate = DateTime.Now.AddDays(-90);
             
-            // Get existing customers from orders
             var existingOrders = _orderService.GetAllOrdersAsync().Result;
             var customerEmails = existingOrders
                 .Select(o => o.Email)
@@ -50,7 +49,6 @@ namespace OrderManagementDashboard.Services
                 var abandonDate = baseDate.AddDays(random.Next(0, 90));
                 var cartAmount = Math.Round((decimal)(random.Next(15, 750) + random.NextDouble()), 2);
                 
-                // 70% use existing customer emails, 30% new potential customers
                 string email;
                 if (random.NextDouble() < 0.7 && customerEmails.Count > 0)
                 {

@@ -8,11 +8,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddSyncfusionBlazor();
 
-// Register all services with proper lifetime
+// Application services
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IAbandonedCartService, AbandonedCartService>();
 builder.Services.AddScoped<IReturnRefundService, ReturnRefundService>();
-
 
 var app = builder.Build();
 

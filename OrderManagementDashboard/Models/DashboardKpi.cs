@@ -3,7 +3,6 @@ namespace OrderManagementDashboard.Models
     public class DashboardKpi
     {
         public int TotalOrders { get; set; }
-        public int PendingPayment { get; set; }
         public int Processing { get; set; }
         public int Shipped { get; set; }
         public int Delivered { get; set; }
