@@ -1,0 +1,81 @@
+﻿@page "/"
+
+@rendermode InteractiveServer
+@inject IChatInferenceService AIService
+@using Syncfusion.Blazor.AI
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Spinner
+
+<div class="ai-grid-shell">
+    <SfGrid @ref="GridRef"
+            TValue="SalesOrder"
+            DataSource="@orders"
+            AllowTextWrap="true">
+        <GridTemplates>
+            <ToolbarTemplate>
+                <SfButton CssClass="e-primary" IsPrimary="true" Disabled="@isLoading"
+                          OnClick="GenerateInsightsAsync">
+                    @(isLoading ? "Generating..." : "Generate AI Insights")
+                </SfButton>
+            </ToolbarTemplate>
+        </GridTemplates>
+
+        <GridEvents TValue="SalesOrder" QueryCellInfo="OnQueryCellInfo"></GridEvents>
+
+        <GridColumns>
+            <GridColumn Field="@nameof(SalesOrder.OrderId)" HeaderText="Order ID" IsPrimaryKey="true" Width="110"></GridColumn>
+            <GridColumn Field="@nameof(SalesOrder.Customer)" HeaderText="Customer" Width="140"></GridColumn>
+            <GridColumn Field="@nameof(SalesOrder.Region)" HeaderText="Region" Width="110"></GridColumn>
+            <GridColumn Field="@nameof(SalesOrder.Category)" HeaderText="Category" Width="120"></GridColumn>
+            <GridColumn Field="@nameof(SalesOrder.Sales)" HeaderText="Sales" TextAlign="TextAlign.Right" Format="C0" Width="110"></GridColumn>
+            <GridColumn Field="@nameof(SalesOrder.Profit)" HeaderText="Profit" TextAlign="TextAlign.Right" Format="C0" Width="110"></GridColumn>
+            <GridColumn Field="@nameof(SalesOrder.OrderDate)" HeaderText="Order Date" Format="d" Width="130"></GridColumn>
+        </GridColumns>
+    </SfGrid>
+
+    <SfSpinner Visible="@isLoading"></SfSpinner>
+
+    @if (!string.IsNullOrWhiteSpace(errorMessage))
+    {
+        <div class="error-box">@errorMessage</div>
+    }
+
+    @if (insight is not null)
+    {
+        <div class="insight-grid">
+            <div class="insight-card">
+                <h4>Executive Summary</h4>
+                <p>@insight.Summary</p>
+            </div>
+
+            <div class="insight-card">
+                <h4>Key Trends</h4>
+                <ul>
+                    @foreach (var item in insight.KeyTrends)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </div>
+
+            <div class="insight-card">
+                <h4>Recommendations</h4>
+                <ul>
+                    @foreach (var item in insight.Recommendations)
+                    {
+                        <li>@item</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .ai-grid-shell { display: grid; gap: 1rem; }
+    .insight-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .insight-card { border: 1px solid #d1d5db; border-radius: 8px; padding: 1rem; background: #fff; }
+    .error-box { padding: .75rem 1rem; border-radius: 6px; background: #fee2e2; color: #991b1b; }
+    .ai-highlight-cell { background: #fff7ed; color: #9a3412; font-weight: 600; }
+</style>
