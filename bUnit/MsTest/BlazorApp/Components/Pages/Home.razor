@@ -1,0 +1,38 @@
+﻿@page "/"
+
+
+<SfGrid DataSource="@Orders" AllowPaging="true">
+    <GridPageSettings PageSize="12"></GridPageSettings>
+    <GridColumns>
+        <GridColumn Field=@nameof(Order.OrderID) HeaderText="Order ID" Width="120" TextAlign="TextAlign.Right"></GridColumn>
+        <GridColumn Field=@nameof(Order.CustomerID) HeaderText="Customer Name" Width="150"></GridColumn>
+        <GridColumn Field=@nameof(Order.OrderDate) HeaderText="Order Date" Width="130" Format="d" TextAlign="TextAlign.Right"></GridColumn>
+        <GridColumn Field=@nameof(Order.Freight) HeaderText="Freight" Width="120" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+        <GridColumn Field=@nameof(Order.ShipCountry) HeaderText="Ship Country" Width="150"></GridColumn>
+    </GridColumns>
+</SfGrid>
+
+@code {
+    public List<Order> Orders { get; set; } = new List<Order>();
+
+    protected override void OnInitialized()
+    {
+        Orders = Enumerable.Range(1, 75).Select(i => new Order
+        {
+            OrderID = 1000 + i,
+            CustomerID = (new[] { "Maria", "Ana", "Antonio", "Thomas", "Peter", "Anne", "Berglund", "Fin" })[i % 8],
+            OrderDate = DateTime.Now.AddDays(-i),
+            Freight = i * 50.5m,
+            ShipCountry = (new[] { "USA", "Germany", "Brazil", "France", "UK", "Spain", "Italy", "Argentina" })[i % 8]
+        }).ToList();
+    }
+
+    public class Order
+    {
+        public int OrderID { get; set; }
+        public string CustomerID { get; set; } = "";
+        public DateTime OrderDate { get; set; }
+        public decimal Freight { get; set; }
+        public string ShipCountry { get; set; } = "";
+    }
+}
