@@ -81,6 +81,56 @@
     }
 </div>
 
+@code {
+    private List<Product> WishlistItems = new();
+
+    protected override void OnInitialized()
+    {
+        WishlistItems = WishlistService.WishlistItems.ToList();
+    }
+
+    private void AddToCart(Product product)
+    {
+        CartService.AddToCart(product);
+        WishlistService.RemoveFromWishlist(product);
+        WishlistItems = WishlistService.WishlistItems.ToList();
+    }
+
+    private void RemoveFromWishlist(Product product)
+    {
+        WishlistService.RemoveFromWishlist(product);
+        WishlistItems = WishlistService.WishlistItems.ToList();
+        StateHasChanged();
+    }
+
+    private void ClearWishlist()
+    {
+        WishlistService.ClearWishlist();
+        WishlistItems = WishlistService.WishlistItems.ToList();
+        StateHasChanged();
+    }
+
+    private void ContinueShopping()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private string GetStockClass(int stock) => stock switch
+    {
+        > 30 => "high",
+        > 10 => "medium",
+        _ => "low"
+    };
+
+    private string GetStockText(int stock) => stock switch
+    {
+        > 30 => "In Stock",
+        > 10 => "Limited",
+        _ => "Low Stock"
+    };
+}
+
+
 <style>
     .wishlist-container {
         padding: 2rem;
@@ -253,52 +303,3 @@
         }
     }
 </style>
-
-@code {
-    private List<Product> WishlistItems = new();
-
-    protected override void OnInitialized()
-    {
-        WishlistItems = WishlistService.WishlistItems.ToList();
-    }
-
-    private void AddToCart(Product product)
-    {
-        CartService.AddToCart(product);
-        WishlistService.RemoveFromWishlist(product);
-        WishlistItems = WishlistService.WishlistItems.ToList();
-    }
-
-    private void RemoveFromWishlist(Product product)
-    {
-        WishlistService.RemoveFromWishlist(product);
-        WishlistItems = WishlistService.WishlistItems.ToList();
-        StateHasChanged();
-    }
-
-    private void ClearWishlist()
-    {
-        WishlistService.ClearWishlist();
-        WishlistItems = WishlistService.WishlistItems.ToList();
-        StateHasChanged();
-    }
-
-    private void ContinueShopping()
-    {
-        Navigation.NavigateTo("/product-catalog");
-    }
-
-    private string GetStockClass(int stock) => stock switch
-    {
-        > 30 => "high",
-        > 10 => "medium",
-        _ => "low"
-    };
-
-    private string GetStockText(int stock) => stock switch
-    {
-        > 30 => "In Stock",
-        > 10 => "Limited",
-        _ => "Low Stock"
-    };
-}

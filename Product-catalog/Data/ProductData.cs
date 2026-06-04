@@ -14,7 +14,7 @@ public class ProductData
                 Name = "Wireless Bluetooth Headphones",
                 Category = "Electronics",
                 Price = 79.99m,
-                Stock = 45,
+                Stock = 4,
                 ImageUrl = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300",
                 Rating = 4.5,
                 Description = "Premium wireless headphones with noise cancellation"
@@ -139,6 +139,94 @@ public class ProductData
                 ImageUrl = "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=300",
                 Rating = 4.4,
                 Description = "High capacity portable charger for all devices"
+            },
+            new Product
+            {
+                Id = 13,
+                Name = "Wireless Earbuds Pro",
+                Category = "Electronics",
+                Price = 149.99m,
+                Stock = 50,
+                ImageUrl = "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=300",
+                Rating = 4.7,
+                Description = "True wireless earbuds with active noise cancellation"
+            },
+            new Product
+            {
+                Id = 14,
+                Name = "Smart Home Hub",
+                Category = "Electronics",
+                Price = 89.99m,
+                Stock = 40,
+                ImageUrl = "https://images.unsplash.com/photo-1558089687-f282ffcbc126?w=300",
+                Rating = 4.5,
+                Description = "Central hub for all your smart home devices"
+            },
+            new Product
+            {
+                Id = 15,
+                Name = "Fitness Tracker Band",
+                Category = "Electronics",
+                Price = 59.99m,
+                Stock = 75,
+                ImageUrl = "https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300",
+                Rating = 4.4,
+                Description = "Lightweight fitness tracker with heart rate monitor"
+            },
+            new Product
+            {
+                Id = 16,
+                Name = "Leather Wallet",
+                Category = "Accessories",
+                Price = 69.99m,
+                Stock = 45,
+                ImageUrl = "https://images.unsplash.com/photo-1627123424574-724758594e93?w=300",
+                Rating = 4.6,
+                Description = "Genuine leather wallet with card organizer"
+            },
+            new Product
+            {
+                Id = 17,
+                Name = "Desk Lamp LED",
+                Category = "Home & Kitchen",
+                Price = 44.99m,
+                Stock = 85,
+                ImageUrl = "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=300",
+                Rating = 4.3,
+                Description = "Adjustable LED desk lamp with multiple brightness levels"
+            },
+            new Product
+            {
+                Id = 18,
+                Name = "Hiking Boots",
+                Category = "Footwear",
+                Price = 159.99m,
+                Stock = 30,
+                ImageUrl = "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=300",
+                Rating = 4.8,
+                Description = "Waterproof hiking boots for all terrains"
+            },
+            new Product
+            {
+                Id = 19,
+                Name = "Noise Canceling Earmuffs",
+                Category = "Electronics",
+                Price = 39.99m,
+                Stock = 60,
+                ImageUrl = "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300",
+                Rating = 4.2,
+                Description = "Comfortable earmuffs for focused work and travel"
+            },
+            new Product
+            {
+                Id = 20,
+                Name = "Insulated Lunch Bag",
+                Category = "Home & Kitchen",
+                Price = 29.99m,
+                Stock = 95,
+                ImageUrl = "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300",
+                Rating = 4.5,
+                Description = "Reusable insulated lunch bag with multiple compartments"
             }
         };
     }
