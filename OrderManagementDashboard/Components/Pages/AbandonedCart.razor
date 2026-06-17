@@ -1,0 +1,79 @@
+@page "/abandoned-cart"
+
+@using OrderManagementDashboard.Models
+@using OrderManagementDashboard.Services
+@inject IAbandonedCartService AbandonedCartService
+
+<SfCard>
+    <CardHeader>
+        <div class="abandoned-cart-header">
+            <h3 class="page-card-title">Abandoned Cart</h3>
+            <span class="abandoned-cart-total">Total: @Items.Count carts</span>
+        </div>
+    </CardHeader>
+    <CardContent>
+        <SfGrid @ref="grid"
+                DataSource="@Items" 
+                AllowPaging="true"
+                AllowSorting="true" 
+                AllowFiltering="true"
+                AllowSearching="true"
+                Toolbar="@(new List<string>() { "Search" })">
+            <GridPageSettings PageSize="10"></GridPageSettings>
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+            <GridSearchSettings Fields="@(new string[] { "Id", "PlacedBy" })" 
+                                IgnoreCase="true" 
+                                Operator="Syncfusion.Blazor.Operator.Contains"></GridSearchSettings>
+            <GridColumns>
+                <GridColumn Field="Id" HeaderText="ID" Width="120"></GridColumn>
+                <GridColumn Field="Date" HeaderText="Date" Width="150" Format="dd MMM, yyyy"></GridColumn>
+                <GridColumn Field="PlacedBy" HeaderText="Placed By" Width="230"></GridColumn>
+                <GridColumn Field="Amount" HeaderText="Amount" Width="120" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </CardContent>
+</SfCard>
+
+<style>
+    .abandoned-cart-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .abandoned-cart-title {
+        margin: 0;
+        line-height: 1.2;
+    }
+
+    .abandoned-cart-total {
+        color: #6b7280;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .page-card-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+    }
+</style>
+
+@code {
+    private SfGrid<Models.AbandonedCart>? grid;
+    private List<Models.AbandonedCart> Items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var totalCount = await AbandonedCartService.GetTotalCountAsync();
+        Items = await AbandonedCartService.GetAbandonedCartsAsync(1, totalCount);
+    }
+}

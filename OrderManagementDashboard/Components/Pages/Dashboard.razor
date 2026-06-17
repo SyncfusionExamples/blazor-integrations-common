@@ -1,0 +1,754 @@
+@page "/dashboard"
+
+@using OrderManagementDashboard.Models
+@using OrderManagementDashboard.Services
+@inject IOrderService OrderService
+
+<PageTitle>Dashboard - Order Management</PageTitle>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h3 class="page-title">Total Orders</h3>
+    </div>
+
+     <div class="kpi-grid">
+        <SfCard CssClass="kpi-card kpi-blue">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                <line x1="12" y1="12" x2="12" y2="22"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Total Order</div>
+                        <div class="kpi-value">@kpiData.TotalOrders</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-cyan">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06A2 2 0 0 1 2.27 16.9l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09c.7 0 1.29-.38 1.51-1a1.65 1.65 0 0 0-.33-1.82L4.31 4.1A2 2 0 0 1 7.14 1.27l.06.06a1.65 1.65 0 0 0 1.82.33h.01c.56-.3 1.2-.3 1.76 0a1.65 1.65 0 0 0 1.82-.33l.06-.06A2 2 0 0 1 19.69 4.1l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01c.3.56.3 1.2 0 1.76a1.65 1.65 0 0 0 .33 1.82l.06.06A2 2 0 0 1 19.4 9.1l-.06.06a1.65 1.65 0 0 0-.33 1.82c.3.56.3 1.2 0 1.76z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Processing</div>
+                        <div class="kpi-value">@kpiData.Processing</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-orange">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="1" y="3" width="15" height="13"></rect>
+                                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                                <circle cx="5.5" cy="18.5" r="1.5"></circle>
+                                <circle cx="18.5" cy="18.5" r="1.5"></circle>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Shipped</div>
+                        <div class="kpi-value">@kpiData.Shipped</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-pink">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <polyline points="9 11 12 14 18 8"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Delivered</div>
+                        <div class="kpi-value">@kpiData.Delivered</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-lightorange">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Cancelled</div>
+                        <div class="kpi-value">@kpiData.Cancelled</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-green">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Returned</div>
+                        <div class="kpi-value">@kpiData.Returned</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+
+        <SfCard CssClass="kpi-card kpi-lightblue">
+            <CardContent>
+                <div class="kpi-card-horizontal">
+                    <div class="kpi-icon-wrapper">
+                        <div class="kpi-icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="15" y1="9" x2="9" y2="15"></line>
+                                <line x1="9" y1="9" x2="15" y2="15"></line>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="kpi-text">
+                        <div class="kpi-label">Failed</div>
+                        <div class="kpi-value">@kpiData.Failed</div>
+                    </div>
+                </div>
+            </CardContent>
+        </SfCard>
+    </div>
+
+    <div class="chart-container">
+        <div class="chart-header">
+            <h3 class="page-title">Profit Margin</h3>
+            <div class="chart-filters">
+                <SfButton CssClass="@(selectedPeriod == "6months" ? "e-primary" : "")" OnClick="@(() => ChangePeriod("6months"))">6 Months</SfButton>
+                <SfButton CssClass="@(selectedPeriod == "12months" ? "e-primary" : "")" OnClick="@(() => ChangePeriod("12months"))">12 Months</SfButton>
+            </div>
+        </div>
+
+        <div class="chart-wrapper">
+            <SfChart Width="100%" Height="450px">
+                <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category">
+                    <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+                </ChartPrimaryXAxis>
+                <ChartPrimaryYAxis Minimum="0" Maximum="@chartMaxValue" Interval="@chartInterval" LabelFormat="C0">
+                    <ChartAxisLineStyle Width="0"></ChartAxisLineStyle>
+                    <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                </ChartPrimaryYAxis>
+                <ChartSeriesCollection>
+                    <ChartSeries DataSource="@profitMarginData" XName="Month" YName="Earnings" Name="Earnings" Type="ChartSeriesType.Line" Fill="#6366f1" Width="3">
+                        <ChartMarker Visible="true" Height="10" Width="10" Fill="#6366f1">
+                            <ChartDataLabel Visible="false"></ChartDataLabel>
+                            <ChartMarkerBorder Width="2" Color="#ffffff"></ChartMarkerBorder>
+                        </ChartMarker>
+                    </ChartSeries>
+                    <ChartSeries DataSource="@profitMarginData" XName="Month" YName="TotalProfits" Name="Total Profits" Type="ChartSeriesType.Line" Fill="#10b981" Width="3">
+                        <ChartMarker Visible="true" Height="10" Width="10" Fill="#10b981">
+                            <ChartMarkerBorder Width="2" Color="#ffffff"></ChartMarkerBorder>
+                        </ChartMarker>
+                    </ChartSeries>
+                </ChartSeriesCollection>
+                <ChartLegendSettings Visible="true" Position="LegendPosition.Top"></ChartLegendSettings>
+                <ChartTooltipSettings Enable="true" Format="${point.x} : <b>${point.y}</b>"></ChartTooltipSettings>
+            </SfChart>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="grid-header">
+            <h3 class="page-title">Order Management Details</h3>
+        </div>
+
+        <div class="grid-toolbar">
+            <div class="filter-dropdowns">
+                <SfDropDownList TValue="string" TItem="string" 
+                               Placeholder="Payment Status" 
+                               DataSource="@paymentStatusList"
+                               @bind-Value="selectedPaymentStatus"
+                               Width="200px">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="OnPaymentStatusChange"></DropDownListEvents>
+                </SfDropDownList>
+                <SfDropDownList TValue="string" TItem="string" 
+                               Placeholder="Received Status" 
+                               DataSource="@receivedStatusList"
+                               @bind-Value="selectedReceivedStatus"
+                               Width="200px">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="OnReceivedStatusChange"></DropDownListEvents>
+                </SfDropDownList>
+                <SfDropDownList TValue="string" TItem="string" 
+                               Placeholder="Date Filter" 
+                               DataSource="@dateFilterList"
+                               @bind-Value="selectedDateFilter"
+                               Width="200px">
+                    <DropDownListEvents TValue="string" TItem="string" ValueChange="OnDateFilterChange"></DropDownListEvents>
+                </SfDropDownList>
+            </div>
+        </div>
+
+        <SfGrid @ref="grid" 
+                DataSource="@filteredOrders" 
+                AllowPaging="true" 
+                AllowSorting="true"
+                AllowSearching="true"
+                Toolbar="@(new List<string>() { "Search" })">
+            <GridPageSettings PageSize="10" PageSizes="@(new int[] {10, 20, 50, 100})"></GridPageSettings>
+            <GridSearchSettings Fields="@(new string[] { "Id", "CustomerName", "OrderNumber", "Email" })" 
+                                IgnoreCase="true" 
+                                Operator="Syncfusion.Blazor.Operator.Contains"></GridSearchSettings>
+            <GridColumns>
+                    <GridColumn Field="@nameof(Order.Id)" HeaderText="ID" Width="120" TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(Order.OrderNumber)" HeaderText="Order Number" Width="140" TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(Order.OrderDate)" HeaderText="Order Date" Width="150" Format="dd MMM, yyyy" TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(Order.CustomerName)" HeaderText="Customer Name" Width="180" TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(Order.Email)" HeaderText="Email" Width="220" TextAlign="TextAlign.Left"></GridColumn>
+                    <GridColumn Field="@nameof(Order.Amount)" HeaderText="Amount" Width="120" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+
+                    <GridColumn Field="@nameof(Order.PaymentStatus)" HeaderText="Payment Status" Width="150" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            var order = (Order)context;
+                            var statusClass = order.PaymentStatus switch
+                            {
+                                PaymentStatus.Paid => "status-paid",
+                                PaymentStatus.Pending => "status-pending",
+                                PaymentStatus.Unpaid => "status-unpaid",
+                                _ => ""
+                            };
+                            <span class="status-badge @statusClass">@order.PaymentStatus</span>
+                        }
+                    </Template>
+                </GridColumn>
+
+                <GridColumn Field="@nameof(Order.ReceivedStatus)" HeaderText="Received Status" Width="150" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            var order = (Order)context;
+                            var statusClass = order.ReceivedStatus switch
+                            {
+                                ReceivedStatus.Delivered => "status-delivered",
+                                ReceivedStatus.Processing => "status-processing",
+                                ReceivedStatus.Shipped => "status-shipped",
+                                ReceivedStatus.Cancelled => "status-cancelled",
+                                ReceivedStatus.Returned => "status-returned",
+                                _ => ""
+                            };
+                            <span class="status-badge @statusClass">@order.ReceivedStatus</span>
+                        }
+                    </Template>
+                </GridColumn>
+
+                <GridColumn HeaderText="Actions" Width="100" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            var order = (Order)context;
+                            <button class="action-button" @onclick="@(() => ViewOrderDetails(order.Id))" title="View Details">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                </svg>
+                            </button>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </div>
+</div>
+
+<SfDialog @bind-Visible="@showOrderDetailsDialog" Width="600px" IsModal="true" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>Order Details</Header>
+        <Content>
+            @if (selectedOrder != null)
+            {
+                <div style="padding: 20px;">
+                    <div style="margin-bottom: 15px;">
+                        <strong>Order ID:</strong> @selectedOrder.Id
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Order Number:</strong> @selectedOrder.OrderNumber
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Customer Name:</strong> @selectedOrder.CustomerName
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Email:</strong> @selectedOrder.Email
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Order Date:</strong> @selectedOrder.OrderDate.ToString("dd MMM, yyyy")
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Amount:</strong> @selectedOrder.Amount.ToString("C2")
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Items:</strong> @selectedOrder.Items
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Shipping Address:</strong> @selectedOrder.ShippingAddress
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Payment Status:</strong> 
+                        <span class="status-badge @GetPaymentStatusClass(selectedOrder.PaymentStatus)">
+                            @selectedOrder.PaymentStatus
+                        </span>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <strong>Received Status:</strong> 
+                        <span class="status-badge @GetReceivedStatusClass(selectedOrder.ReceivedStatus)">
+                            @selectedOrder.ReceivedStatus
+                        </span>
+                    </div>
+                </div>
+            }
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="Close" OnClick="@CloseOrderDetails" />
+    </DialogButtons>
+</SfDialog>
+
+<style>
+    .dashboard-container {
+        padding: 24px;
+        background-color: #f5f7fa;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        min-height: 100vh;
+    }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .page-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 30px;
+    }
+
+    .kpi-card {
+        border-radius: 12px;
+        box-shadow: none;
+        border: none;
+        overflow: hidden;
+    }
+
+    .kpi-card .e-card {
+        border: none;
+        box-shadow: none;
+    }
+
+    .kpi-card-horizontal {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px;
+    }
+
+    .kpi-icon-wrapper {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .kpi-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+    }
+
+    .kpi-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .kpi-text {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .kpi-label {
+        font-size: 13px;
+        color: #1a1a1a;
+        font-weight: 400;
+        line-height: 1.2;
+    }
+
+    .kpi-value {
+        font-size: 28px;
+        font-weight: 700;
+        color: #1a1a1a;
+        line-height: 1;
+    }
+
+    .kpi-blue {
+        background: linear-gradient(135deg, #B8D4F1 0%, #A0C5EE 100%);
+    }
+
+    .kpi-cyan {
+        background: linear-gradient(135deg, #C8E6E6 0%, #B0DCDC 100%);
+    }
+
+    .kpi-orange {
+        background: linear-gradient(135deg, #FFD7C4 0%, #FFC8B0 100%);
+    }
+
+    .kpi-pink {
+        background: linear-gradient(135deg, #F5D4E0 0%, #F0C5D5 100%);
+    }
+
+    .kpi-lightorange {
+        background: linear-gradient(135deg, #FFDDB8 0%, #FFD0A0 100%);
+    }
+
+    .kpi-green {
+        background: linear-gradient(135deg, #D4F1D4 0%, #C0E8C0 100%);
+    }
+
+    .kpi-lightblue {
+        background: linear-gradient(135deg, #D4E8F5 0%, #C0DEF0 100%);
+    }
+
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 30px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .chart-wrapper {
+        margin-top: 20px;
+    }
+
+    .chart-wrapper .e-control,
+    .chart-wrapper .e-chart,
+    .chart-wrapper .e-svg-chart,
+    .chart-wrapper svg {
+        width: 100% !important;
+    }
+
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+    }
+
+    .chart-header h4 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+    }
+
+    .chart-filters {
+        display: flex;
+        gap: 8px;
+    }
+
+    .chart-filters .e-btn {
+        padding: 6px 16px;
+        border-radius: 6px;
+    }
+
+    .grid-container {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .grid-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .grid-toolbar {
+        margin-bottom: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .filter-dropdowns {
+        display: flex;
+        gap: 12px;
+        flex: 1;
+        justify-content: flex-end;
+    }
+
+    .e-grid {
+        border: none;
+    }
+
+    .e-grid .e-gridheader {
+        background-color: #f9fafb;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .e-grid .e-headercell {
+        font-weight: 600;
+        color: #374151;
+        font-size: 13px;
+        padding: 12px 8px;
+    }
+
+    .e-grid .e-rowcell {
+        padding: 12px 8px;
+        font-size: 13px;
+        color: #4b5563;
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .status-paid { background-color: #d1fae5; color: #065f46; }
+    .status-pending { background-color: #fef3c7; color: #92400e; }
+    .status-unpaid { background-color: #fee2e2; color: #991b1b; }
+    .status-delivered { background-color: #d1fae5; color: #065f46; }
+    .status-processing { background-color: #dbeafe; color: #1e40af; }
+    .status-shipped { background-color: #e0e7ff; color: #3730a3; }
+    .status-cancelled { background-color: #fee2e2; color: #991b1b; }
+    .status-returned { background-color: #fef3c7; color: #92400e; }
+
+    .action-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #6b7280;
+        transition: all 0.2s;
+        border-radius: 4px;
+    }
+
+    .action-button:hover {
+        background-color: #f3f4f6;
+        color: #3b82f6;
+    }
+
+    .action-button svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .e-pager {
+        padding: 16px 0;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    .e-pager .e-numericitem {
+        min-width: 32px;
+        height: 32px;
+        border-radius: 6px;
+    }
+
+    .e-pager .e-currentitem {
+        background-color: #3b82f6;
+        color: white;
+    }
+</style>
+
+@code {
+    private SfGrid<Order>? grid;
+    private List<Order> orders = new List<Order>();
+    private List<Order> filteredOrders = new List<Order>();
+    private DashboardKpi kpiData = new DashboardKpi();
+    private string selectedPeriod = "12months";
+    private List<ProfitMarginData> profitMarginData = new List<ProfitMarginData>();
+    private double chartMaxValue = 50000;
+    private double chartInterval = 10000;
+    private List<string> paymentStatusList = new() { "All", "Paid", "Pending", "Unpaid" };
+    private List<string> receivedStatusList = new() { "All", "Delivered", "Processing", "Shipped", "Cancelled", "Returned" };
+    private List<string> dateFilterList = new() { "All", "Today", "Last 7 days", "Last 30 days" };
+    
+    private string selectedPaymentStatus = "All";
+    private string selectedReceivedStatus = "All";
+    private string selectedDateFilter = "All";
+    
+    private bool showOrderDetailsDialog = false;
+    private Order? selectedOrder = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        orders = await OrderService.GetOrdersAsync(1, 1000);
+        filteredOrders = orders;
+        kpiData = await OrderService.GetKpiDataAsync();
+        await LoadChartData();
+    }
+
+    private async Task LoadChartData()
+    {
+        int months = selectedPeriod == "6months" ? 6 : 12;
+        profitMarginData = await OrderService.GetProfitMarginDataAsync(months);
+        
+        if (profitMarginData.Any())
+        {
+            var maxEarnings = profitMarginData.Max(x => x.Earnings);
+            var maxProfits = profitMarginData.Max(x => x.TotalProfits);
+            var maxValue = Math.Max((double)maxEarnings, (double)maxProfits);
+            
+            chartMaxValue = Math.Ceiling(maxValue / 10000) * 10000;
+            chartInterval = chartMaxValue / 5;
+        }
+    }
+
+    private async Task ChangePeriod(string period)
+    {
+        selectedPeriod = period;
+        await LoadChartData();
+    }
+
+    private async Task OnPaymentStatusChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
+    {
+        selectedPaymentStatus = args.Value;
+        await ApplyFilters();
+    }
+
+    private async Task OnReceivedStatusChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
+    {
+        selectedReceivedStatus = args.Value;
+        await ApplyFilters();
+    }
+
+    private async Task OnDateFilterChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, string> args)
+    {
+        selectedDateFilter = args.Value;
+        await ApplyFilters();
+    }
+
+    private async Task ApplyFilters()
+    {
+        filteredOrders = orders;
+
+        if (selectedPaymentStatus != "All")
+        {
+            var status = Enum.Parse<PaymentStatus>(selectedPaymentStatus);
+            filteredOrders = filteredOrders.Where(o => o.PaymentStatus == status).ToList();
+        }
+
+        if (selectedReceivedStatus != "All")
+        {
+            var status = Enum.Parse<ReceivedStatus>(selectedReceivedStatus);
+            filteredOrders = filteredOrders.Where(o => o.ReceivedStatus == status).ToList();
+        }
+
+        if (selectedDateFilter != "All")
+        {
+            var today = DateTime.Today;
+            filteredOrders = selectedDateFilter switch
+            {
+                "Today" => filteredOrders.Where(o => o.OrderDate.Date == today).ToList(),
+                "Last 7 days" => filteredOrders.Where(o => o.OrderDate >= today.AddDays(-7)).ToList(),
+                "Last 30 days" => filteredOrders.Where(o => o.OrderDate >= today.AddDays(-30)).ToList(),
+                _ => filteredOrders
+            };
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task ViewOrderDetails(string orderId)
+    {
+        selectedOrder = await OrderService.GetOrderByIdAsync(orderId);
+        showOrderDetailsDialog = true;
+    }
+
+    private void CloseOrderDetails()
+    {
+        showOrderDetailsDialog = false;
+        selectedOrder = null;
+    }
+
+    private string GetPaymentStatusClass(PaymentStatus status)
+    {
+        return status switch
+        {
+            PaymentStatus.Paid => "status-paid",
+            PaymentStatus.Pending => "status-pending",
+            PaymentStatus.Unpaid => "status-unpaid",
+            _ => ""
+        };
+    }
+
+    private string GetReceivedStatusClass(ReceivedStatus status)
+    {
+        return status switch
+        {
+            ReceivedStatus.Delivered => "status-delivered",
+            ReceivedStatus.Processing => "status-processing",
+            ReceivedStatus.Shipped => "status-shipped",
+            ReceivedStatus.Cancelled => "status-cancelled",
+            ReceivedStatus.Returned => "status-returned",
+            _ => ""
+        };
+    }
+}

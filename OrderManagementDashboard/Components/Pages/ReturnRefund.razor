@@ -1,0 +1,183 @@
+@page "/return-refund"
+
+@using OrderManagementDashboard.Models
+@using OrderManagementDashboard.Services
+@inject IReturnRefundService ReturnRefundService
+@inject IOrderService OrderService
+
+<SfCard>
+    <CardHeader>
+        <div class="return-refund-header">
+            <h2 class="return-refund-title">Return &amp; Refund</h2>
+            <span class="return-refund-total">Total: @Items.Count requests</span>
+        </div>
+    </CardHeader>
+    <CardContent>
+        <SfGrid @ref="grid"
+                DataSource="@Items"
+                AllowPaging="true"
+                AllowSorting="true"
+                AllowFiltering="true"
+                AllowSearching="true"
+                Toolbar="@(new List<string>() { "Search" })">
+            <GridPageSettings PageSize="10"></GridPageSettings>
+            <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+            <GridSearchSettings Fields="@(new string[] { "Id", "OrderNumber", "Email" })"
+                                IgnoreCase="true"
+                                Operator="Syncfusion.Blazor.Operator.Contains"></GridSearchSettings>
+            <GridColumns>
+                <GridColumn Field="Id" HeaderText="ID" Width="120"></GridColumn>
+                <GridColumn Field="OrderNumber" HeaderText="Order Number" Width="140"></GridColumn>
+                <GridColumn Field="Amount" HeaderText="Amount" Width="120" Format="C2" TextAlign="TextAlign.Right"></GridColumn>
+                <GridColumn Field="OrderDate" HeaderText="Order Date" Width="140" Format="dd MMM, yyyy"></GridColumn>
+                <GridColumn Field="Email" HeaderText="Email" Width="220"></GridColumn>
+                <GridColumn Field="Reason" HeaderText="Reason" Width="250"></GridColumn>
+                <GridColumn Field="Status" HeaderText="Status" Width="120" TextAlign="TextAlign.Center">
+                    <Template>
+                        @{
+                            var item = (Models.ReturnRefund)context;
+                            var statusClass = GetStatusClass(item.Status);
+                            <span class="status-badge @statusClass">@item.Status</span>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="Date" HeaderText="Return Date" Width="140" Format="dd MMM, yyyy"></GridColumn>
+                <GridColumn HeaderText="Action" Width="140">
+                    <Template>
+                        @{
+                            var item = (Models.ReturnRefund)context;
+                            <div class="action-buttons">
+                                @if (item.Status != "Approved" && item.Status != "Refunded" && item.Status != "Rejected")
+                                {
+                                    <SfButton CssClass="e-small e-success action-button"
+                                            IconCss="e-icons e-check"
+                                            Title="Approve"
+                                            OnClick="@(() => ApproveRefund(item.Id))" />
+                                    <SfButton CssClass="e-small e-danger action-button"
+                                            IconCss="e-icons e-close"
+                                            Title="Reject"
+                                            OnClick="@(() => RejectRefund(item.Id))" />
+                                }
+                                else
+                                {
+                                    <span style="color: #6b7280; font-size: 12px;">@item.Status</span>
+                                }
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    </CardContent>
+</SfCard>
+
+<style>
+    .return-refund-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        width: 100%;
+    }
+
+    .return-refund-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0;
+    }
+
+    .return-refund-total {
+        color: #6b7280;
+        font-size: 14px;
+        white-space: nowrap;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        text-align: center;
+        line-height: 1;
+    }
+
+    .status-pending { background-color: #fef3c7; color: #92400e; }
+    .status-approved { background-color: #d1fae5; color: #065f46; }
+    .status-rejected { background-color: #fee2e2; color: #991b1b; }
+    .status-processing { background-color: #dbeafe; color: #1e40af; }
+    .status-refunded { background-color: #e0e7ff; color: #3730a3; }
+
+    .action-buttons {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .action-button {
+        min-width: 30px;
+        width: 30px;
+        height: 30px;
+        padding: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .action-button .e-btn-icon,
+    .action-button .e-icons {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1;
+    }
+</style>
+
+@code {
+    private SfGrid<Models.ReturnRefund>? grid;
+    private List<Models.ReturnRefund> Items = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        var totalCount = await ReturnRefundService.GetTotalCountAsync();
+        Items = await ReturnRefundService.GetReturnRefundsAsync(1, totalCount);
+    }
+
+    private async Task ApproveRefund(string refundId)
+    {
+        var success = await ReturnRefundService.ApproveRefundAsync(refundId);
+        if (success)
+        {
+            await LoadData();
+            StateHasChanged();
+        }
+    }
+
+    private async Task RejectRefund(string refundId)
+    {
+        var success = await ReturnRefundService.RejectRefundAsync(refundId);
+        if (success)
+        {
+            await LoadData();
+            StateHasChanged();
+        }
+    }
+
+    private string GetStatusClass(string status)
+    {
+        return status.ToLower() switch
+        {
+            "pending" => "status-pending",
+            "approved" => "status-approved",
+            "rejected" => "status-rejected",
+            "processing" => "status-processing",
+            "refunded" => "status-refunded",
+            _ => ""
+        };
+    }
+}
