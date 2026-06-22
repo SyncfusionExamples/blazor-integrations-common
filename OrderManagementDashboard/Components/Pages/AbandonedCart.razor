@@ -34,34 +34,6 @@
     </CardContent>
 </SfCard>
 
-<style>
-    .abandoned-cart-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        width: 100%;
-    }
-
-    .abandoned-cart-title {
-        margin: 0;
-        line-height: 1.2;
-    }
-
-    .abandoned-cart-total {
-        color: #6b7280;
-        font-size: 14px;
-        white-space: nowrap;
-    }
-
-    .page-card-title {
-        font-size: 20px;
-        font-weight: 700;
-        color: #1a1a1a;
-        margin: 0;
-    }
-</style>
-
 @code {
     private SfGrid<Models.AbandonedCart>? grid;
     private List<Models.AbandonedCart> Items = new();
