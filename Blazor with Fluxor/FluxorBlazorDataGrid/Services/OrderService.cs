@@ -6,9 +6,6 @@ namespace FluxorBlazorDataGrid.Services
     {
         private static int _nextId = 1;
 
-        // Static constructor initializes _nextId to the max ID in seed data.
-        // Set to max (not max + 1) because Interlocked.Increment increments
-        // the value before returning it, so the first new ID will be max + 1.
         static OrderService()
         {
             var seedData = GetSeedData();

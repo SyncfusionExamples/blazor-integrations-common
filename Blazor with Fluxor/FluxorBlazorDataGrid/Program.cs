@@ -1,5 +1,5 @@
-using Fluxor;
 using FluxorBlazorDataGrid.Components;
+using Fluxor;
 using FluxorBlazorDataGrid.Services;
 using Syncfusion.Blazor;
 
@@ -9,14 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Add Syncfusion Blazor service
+// Add Blazor service
 builder.Services.AddSyncfusionBlazor();
 
-// OrderService is stateless — all state lives in the Fluxor store.
-// Scoped lifetime is appropriate for server-side Blazor.
+// Register OrderService with a scoped lifetime
 builder.Services.AddScoped<OrderService>();
 
-// Fluxor: ScanAssemblies automatically discovers all Features, Reducers, and Effects.
+// Register Fluxor and automatically discover features, reducers, and effects
 builder.Services.AddFluxor(options =>
 {
     options.ScanAssemblies(typeof(Program).Assembly);
