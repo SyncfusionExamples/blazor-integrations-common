@@ -1,8 +1,4 @@
 @page "/orders"
-@using Fluxor
-@using Fluxor.Blazor.Web.Components
-@using FluxorBlazorDataGrid.Store.OrderState
-@using FluxorBlazorDataGrid.Store.OrderState.Actions
 @inherits FluxorComponent
 @inject IState<OrderState> OrderState
 @inject IDispatcher Dispatcher
@@ -22,7 +18,7 @@
 }
 
 <div class="control-section">
-    <SfGrid DataSource="@OrderState.Value.Orders" Toolbar="@(new List<string>() { "Add" })" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
+    <SfGrid DataSource="@OrderState.Value.Orders" Toolbar="@ToolbarItems" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
         <GridPageSettings PageSize="10"></GridPageSettings>
         <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true"></GridEditSettings>
         <GridEvents TValue="Order" OnActionBegin="ActionBeginHandler" CommandClicked="CommandClickHandler" />
@@ -90,6 +86,7 @@
 </SfDialog>
 
 @code {
+    private List<string> ToolbarItems = new() { "Add" };
     private bool DialogVisible { get; set; }
     private string DialogTitle { get; set; } = "Add Order";
     private Order CurrentEditOrder { get; set; } = new Order();

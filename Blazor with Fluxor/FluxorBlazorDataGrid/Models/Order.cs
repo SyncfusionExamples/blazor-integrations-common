@@ -24,7 +24,7 @@ namespace FluxorBlazorDataGrid.Models
 
         public Order()
         {
-            OrderDate = DateTime.Now;
+            OrderDate = DateTime.UtcNow;
             Status = "Pending";
         }
     }
