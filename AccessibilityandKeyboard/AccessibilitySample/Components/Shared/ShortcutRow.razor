@@ -1,0 +1,25 @@
+<table class="shortcut-row-table">
+    <tbody>
+        <tr>
+            <td class="shortcut-keys">
+                @for (var i = 0; i < Keys.Count; i++)
+                {
+                    <kbd class="kbd-badge">@Keys[i]</kbd>
+                    @if (i < Keys.Count - 1)
+                    {
+                        <span class="kbd-plus">+</span>
+                    }
+                }
+            </td>
+            <td class="shortcut-desc">@Description</td>
+        </tr>
+    </tbody>
+</table>
+
+@code {
+    [Parameter, EditorRequired]
+    public List<string> Keys { get; set; } = new();
+
+    [Parameter, EditorRequired]
+    public string Description { get; set; } = string.Empty;
+}

@@ -1,0 +1,430 @@
+/* ── Root Layout ── */
+.accessibility-app-root {
+    display: flex;
+    height: 100%;
+    overflow: hidden;
+    padding: 8px 10px;
+    gap: 8px;
+}
+
+/* ── Grid Side ── */
+.accessibility-app-body {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.accessibility-container {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+/* ── Right Panel ── */
+.acc-panel {
+    width: clamp(340px, 30vw, 440px);
+    flex: 0 0 auto;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
+
+.acc-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+    padding: 14px 16px;
+    background: var(--color-sf-primary, #0f6cbd);
+    color: var(--color-sf-primary-text-color, #fff);
+    border-radius: 12px 12px 0 0;
+}
+
+.acc-panel-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.acc-tab-fill.e-tab {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.acc-tab-fill.e-tab .e-tab-header {
+    flex-shrink: 0;
+}
+
+.acc-tab-fill.e-tab .e-content {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.acc-tab-fill.e-tab .e-content .e-item.e-active {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Tab content area ── */
+.acc-tab-content {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ── Info notice banner ── */
+.acc-info-notice,
+.acc-known__intro {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #eef6ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    font-size: 12px;
+    color: #0c4a6e;
+    line-height: 1.6;
+}
+
+.kpi-info-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-size: 15px;
+}
+
+/* ── Violations ── */
+.violations-list,
+.violation-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.violation-item {
+    opacity: 0.7;
+    pointer-events: auto;
+}
+
+.violation-body {
+    padding: 4px 0;
+    font-size: 12px;
+}
+
+.violation-snippet {
+    margin: 4px 0 0;
+    padding: 8px 12px;
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    font-size: 11px;
+    overflow: auto;
+    max-height: 220px;
+}
+
+.violation-snippet pre,
+.violation-snippet pre code {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-all;
+    overflow-wrap: anywhere;
+}
+
+.violation-snippet pre[class*="language-"],
+.violation-snippet code[class*="language-"] {
+    background: transparent;
+    padding: 0;
+}
+
+/* ── Shortcut accordion group header ── */
+.acc-tab-content .e-accordion .e-acrdn-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.acc-tab-content .e-accordion .e-acrdn-header .e-acrdn-header-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.shortcut-group-header {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.shortcut-group-header > span:first-child {
+    flex: 1;
+}
+
+.shortcut-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-right: 32px;
+    color: var(--color-sf-primary, #0f6cbd);
+    background: var(--color-sf-primary-lighter, #ebf3fc);
+    border: 1px solid var(--color-sf-primary-light, #b4d6fa);
+    border-radius: 999px;
+}
+
+/* ── Keyboard shortcut rows ── */
+.shortcut-row-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: none;
+    table-layout: fixed;
+}
+
+.shortcut-row-table tbody tr {
+    border: none;
+}
+
+.shortcut-row-table td {
+    border: none;
+    padding: 5px 0;
+    vertical-align: top;
+}
+
+.shortcut-keys {
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+    width: 140px;
+    padding-right: 12px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    flex-wrap: wrap;
+}
+
+.shortcut-desc {
+    font-size: 12px;
+    color: #475569;
+    text-align: left;
+    padding-left: 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    line-height: 1.4;
+}
+
+.shortcut-keys kbd.kbd-badge {
+    display: inline-flex;
+    justify-content: center;
+    padding: 2px 7px;
+    border-radius: 5px;
+    border: 1px solid #cbd5e1;
+    border-bottom: 3px solid #94a3b8;
+    background: #f8fafc;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: #1e293b;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    white-space: nowrap;
+}
+
+.kbd-plus {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 700;
+    margin-top: 5px;
+}
+
+.acc-panel .e-accordion .e-acrdn-header:focus,
+.acc-panel .e-accordion .e-acrdn-header:focus-visible,
+.acc-panel .e-accordion .e-acrdn-header-icon:focus,
+.acc-panel .e-accordion .e-acrdn-header-icon:focus-visible,
+.acc-panel .e-accordion .e-acrdn-item:focus,
+.acc-panel .e-accordion .e-acrdn-item:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* ───────────────── Tablet ───────────────── */
+@media (max-width: 900px) {
+
+    .accessibility-app-root {
+        flex-direction: column;
+        overflow: auto;
+        height: auto;
+        min-height: 100%;
+    }
+
+    .accessibility-app-body {
+        width: 100%;
+        min-height: 420px;
+        flex: none;
+    }
+
+    .accessibility-container {
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .acc-panel {
+        width: 100%;
+        height: 420px;
+        flex: none;
+    }
+
+    .acc-tab-fill.e-tab .e-content .e-item.e-active {
+        overflow-y: auto;
+    }
+
+    .shortcut-row-table td {
+        align-items: flex-start;
+    }
+
+    .shortcut-keys {
+        min-width: 170px;
+    }
+}
+
+/* ───────────────── Mobile ───────────────── */
+@media (max-width: 600px) {
+
+    .accessibility-app-root {
+        flex-direction: column;
+        padding: 6px;
+        gap: 6px;
+        overflow: auto;
+        height: auto;
+    }
+
+    .accessibility-app-body {
+        width: 100%;
+        min-height: 340px;
+        padding: 8px;
+        flex: none;
+    }
+
+    .accessibility-container {
+        min-height: 0;
+    }
+
+    .acc-panel {
+        width: 100%;
+        height: 380px;
+        flex: none;
+    }
+
+    .acc-panel-header {
+        padding: 12px;
+    }
+
+    .acc-panel-title {
+        font-size: 14px;
+    }
+
+    .acc-tab-content {
+        padding: 8px;
+        gap: 8px;
+    }
+
+    .shortcut-group-header {
+        gap: 6px;
+    }
+
+    .shortcut-count-badge {
+        margin-right: 24px;
+    }
+
+    .shortcut-row-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .shortcut-keys {
+        min-width: 100%;
+        flex-wrap: wrap;
+    }
+
+    .shortcut-desc {
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .shortcut-keys kbd.kbd-badge {
+        font-size: 10px;
+        padding: 2px 6px;
+    }
+
+    .violation-snippet {
+        font-size: 10px;
+        padding: 6px 8px;
+    }
+
+    .acc-info-notice {
+        padding: 8px 10px;
+        font-size: 11px;
+    }
+}
+
+.accessibility-app-body,
+.acc-panel {
+    height: 640px;
+}
+
+#accessibility-grid {
+    border: none;
+}
+
+#accessibility-grid .e-groupdroparea {
+    border-style: none;
+}
+
+#accessibility-grid .e-headercelldiv {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    min-width: 0;
+}
+
+#accessibility-grid .e-rowdragdrop {
+    min-width: 32px;
+    width: 32px;
+}
+
+#accessibility-grid .e-rowdragdrop .e-rowdragicon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    cursor: grab;
+}
+
+.accessibility-container .e-schedule { border: none; }
+.rte-accessibility-component .e-rte-container { border: none; }
+#accessibility-tree-grid .e-treelistgrid { border: none; }
+#accessibility-tree-grid .e-grid .e-toolbar { border-top: none; }
