@@ -1,0 +1,162 @@
+@page "/orders"
+@inherits FluxorComponent
+@inject IState<OrderState> OrderState
+@inject IDispatcher Dispatcher
+
+<PageTitle>Order Management</PageTitle>
+
+<h3>Order Management with Fluxor</h3>
+
+@if (OrderState.Value.IsLoading)
+{
+    <div class="alert alert-info" role="status">Loading orders...</div>
+}
+
+@if (!string.IsNullOrEmpty(OrderState.Value.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">@OrderState.Value.ErrorMessage</div>
+}
+
+<div class="control-section">
+    <SfGrid DataSource="@OrderState.Value.Orders" Toolbar="@ToolbarItems" AllowPaging="true" AllowSorting="true" AllowFiltering="true">
+        <GridPageSettings PageSize="10"></GridPageSettings>
+        <GridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true"></GridEditSettings>
+        <GridEvents TValue="Order" OnActionBegin="ActionBeginHandler" CommandClicked="CommandClickHandler" />
+        <GridColumns>
+            <GridColumn Field="@nameof(Order.Id)" HeaderText="Order ID" IsPrimaryKey="true" TextAlign="TextAlign.Right" HeaderTextAlign="TextAlign.Right" Width="110"></GridColumn>
+            <GridColumn Field="@nameof(Order.CustomerName)" HeaderText="Customer Name" TextAlign="TextAlign.Left" Width="150"></GridColumn>
+            <GridColumn Field="@nameof(Order.ProductName)" HeaderText="Product Name" TextAlign="TextAlign.Left" Width="150"></GridColumn>
+            <GridColumn Field="@nameof(Order.Quantity)" HeaderText="Quantity" TextAlign="TextAlign.Center" HeaderTextAlign="TextAlign.Center" Width="100"></GridColumn>
+            <GridColumn Field="@nameof(Order.Price)" HeaderText="Price" Format="C2" TextAlign="TextAlign.Right" HeaderTextAlign="TextAlign.Right" Width="120"></GridColumn>
+            <GridColumn Field="@nameof(Order.OrderDate)" HeaderText="Order Date" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Center" HeaderTextAlign="TextAlign.Center" Width="130"></GridColumn>
+            <GridColumn Field="@nameof(Order.Status)" HeaderText="Status" TextAlign="TextAlign.Center" HeaderTextAlign="TextAlign.Center" Width="120"></GridColumn>
+            <GridColumn HeaderText="Actions" TextAlign="TextAlign.Center" HeaderTextAlign="TextAlign.Center" Width="150">
+                <GridCommandColumns>
+                    <GridCommandColumn Type="CommandButtonType.Edit" ButtonOption="@(new CommandButtonOptions() { CssClass = "e-flat", IconCss = "e-edit e-icons" })"></GridCommandColumn>
+                    <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { CssClass = "e-flat", IconCss = "e-delete e-icons" })"></GridCommandColumn>
+                </GridCommandColumns>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+
+<!-- Add/Edit Dialog -->
+<SfDialog @bind-Visible="@DialogVisible" IsModal="true" Width="500px" ShowCloseIcon="true">
+    <DialogTemplates>
+        <Header>@DialogTitle</Header>
+        <Content>
+            @if (DialogVisible)
+            {
+                <EditForm Model="@CurrentEditOrder" OnValidSubmit="SaveOrder">
+                    <DataAnnotationsValidator />
+                    <div class="form-group mb-3">
+                        <label>Customer Name:</label>
+                        <SfTextBox @bind-Value="@CurrentEditOrder.CustomerName" Placeholder="Enter customer name"></SfTextBox>
+                        <ValidationMessage For="@(() => CurrentEditOrder.CustomerName)" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Product Name:</label>
+                        <SfTextBox @bind-Value="@CurrentEditOrder.ProductName" Placeholder="Enter product name"></SfTextBox>
+                        <ValidationMessage For="@(() => CurrentEditOrder.ProductName)" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Quantity:</label>
+                        <SfNumericTextBox TValue="int" @bind-Value="CurrentEditOrder.Quantity" Min="1" Format="N0"></SfNumericTextBox>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Price:</label>
+                        <SfNumericTextBox TValue="decimal" @bind-Value="CurrentEditOrder.Price" Min="0.01m" Format="C2"></SfNumericTextBox>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Order Date:</label>
+                        <SfDatePicker TValue="DateTime" @bind-Value="CurrentEditOrder.OrderDate" Format="MM/dd/yyyy" Placeholder="Select order date"></SfDatePicker>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label>Status:</label>
+                        <SfDropDownList TValue="string" TItem="string" @bind-Value="CurrentEditOrder.Status" DataSource="@StatusList" Placeholder="Select status"></SfDropDownList>
+                    </div>
+                    <div class="form-group d-flex justify-content-end gap-2">
+                        <SfButton Type="ButtonType.Submit" CssClass="e-primary">Save</SfButton>
+                        <SfButton Type="ButtonType.Button" CssClass="e-flat" OnClick="CloseDialog">Cancel</SfButton>
+                    </div>
+                </EditForm>
+            }
+        </Content>
+    </DialogTemplates>
+</SfDialog>
+
+@code {
+    private List<string> ToolbarItems = new() { "Add" };
+    private bool DialogVisible { get; set; }
+    private string DialogTitle { get; set; } = "Add Order";
+    private Order CurrentEditOrder { get; set; } = new Order();
+    private bool IsAddMode { get; set; }
+    private List<string> StatusList = new() { "Pending", "Processing", "Shipped", "Completed", "Cancelled" };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (firstRender && !OrderState.Value.IsLoading && !OrderState.Value.Orders.Any())
+        {
+            Dispatcher.Dispatch(new LoadOrdersAction());
+        }
+    }
+
+    private void ActionBeginHandler(ActionEventArgs<Order> args)
+    {
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Add)
+        {
+            IsAddMode = true;
+            DialogTitle = "Add New Order";
+            CurrentEditOrder = new Order();
+            DialogVisible = true;
+            args.Cancel = true;
+        }
+        else if (args.RequestType == Syncfusion.Blazor.Grids.Action.BeginEdit && args.Data != null)
+        {
+            IsAddMode = false;
+            DialogTitle = "Edit Order";
+            CurrentEditOrder = new Order
+            {
+                Id = args.Data.Id,
+                CustomerName = args.Data.CustomerName,
+                ProductName = args.Data.ProductName,
+                Quantity = args.Data.Quantity,
+                Price = args.Data.Price,
+                OrderDate = args.Data.OrderDate,
+                Status = args.Data.Status
+            };
+            DialogVisible = true;
+            args.Cancel = true;
+        }
+    }
+
+    private void CommandClickHandler(CommandClickEventArgs<Order> args)
+    {
+        if (args.CommandColumn?.Type == CommandButtonType.Delete && args.RowData != null)
+        {
+            Dispatcher.Dispatch(new DeleteOrderAction(args.RowData.Id));
+        }
+    }
+
+    private void SaveOrder()
+    {
+        if (IsAddMode)
+        {
+            Dispatcher.Dispatch(new AddOrderAction(CurrentEditOrder));
+        }
+        else
+        {
+            Dispatcher.Dispatch(new UpdateOrderAction(CurrentEditOrder));
+        }
+
+        CloseDialog();
+    }
+
+    private void CloseDialog()
+    {
+        DialogVisible = false;
+        CurrentEditOrder = new Order();
+    }
+}
