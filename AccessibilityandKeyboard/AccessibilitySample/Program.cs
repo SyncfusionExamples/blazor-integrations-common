@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.SignalR;
 using Syncfusion.Blazor;
 
 var builder = WebApplication.CreateBuilder(args);
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1JAaF5cX2pCdkxzWmFZfVhgcV9GaVZRRWYuP1ZhSXxVdkJjX39bcH1RQmJaU0F9XEY=");
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
