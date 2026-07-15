@@ -1,0 +1,173 @@
+@rendermode InteractiveServer
+@using Syncfusion.Blazor.Navigations
+@inject IJSRuntime JSRuntime
+
+<div class="acc-panel">
+    <div class="acc-panel-header">
+        <span class="acc-panel-title">WCAG 2.1 AA — axe-core Audit</span>
+        <SfButton IconCss="@(Loading ? "e-icons e-clock" : "e-icons e-play")"
+                  Disabled="@Loading"
+                  CssClass="audit-button"
+                  OnClick="HandleRun">
+            @(Loading ? "Running…" : "Run audit")
+        </SfButton>
+    </div>
+
+    <SfTab HeightAdjustMode="ContentHeightAdjustMode.None"
+           EnablePersistence="false"
+           CssClass="acc-tab-fill"
+           SelectedItem="@ActiveTab"
+           Selected="OnTabSelected">
+        <TabItems>
+            <TabItem>
+                <HeaderTemplate>Accessibility audit</HeaderTemplate>
+                <ContentTemplate>
+                    <div class="acc-tab-content">
+                        @if (Results is null)
+                        {
+                            <div class="acc-info-notice">
+                                <span class="e-icons e-circle-info kpi-info-icon"></span>
+                                <span>Select <strong>Run audit</strong> to scan the Data Grid for accessibility issues.</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="acc-info-notice">
+                                <span class="e-icons e-circle-info kpi-info-icon"></span>
+                                <span>
+                                    The Syncfusion Blazor Data Grid uses a two-table structure for header and content rendering.
+                                    This improves screen reader interpretation but may trigger warnings in automated accessibility tools.
+                                    <br />
+                                    Know more: <a href="@UserGuideUrl"
+                                              target="_blank"
+                                              rel="noopener noreferrer">View in User Guide</a>
+                                </span>
+                            </div>
+
+                            @if (Results.Violations.Count == 0)
+                            {
+                                <p>No accessibility violations detected.</p>
+                            }
+                            else
+                            {
+                                <div class="violations-list">
+                                    @foreach (var v in Results.Violations)
+                                    {
+                                        var violation = v;
+                                        <div class="violation-item" @key="violation.Id">
+                                            <SfAccordion ExpandMode="ExpandMode.Single"
+                                                         Expanded="OnAccordionExpanded">
+                                                <AccordionItems>
+                                                    <AccordionItem Expanded="false">
+                                                        <HeaderTemplate>
+                                                            <span>@violation.Id</span>
+                                                        </HeaderTemplate>
+                                                        <ContentTemplate>
+                                                            <div class="violation-body">
+                                                                @foreach (var n in violation.Nodes)
+                                                                {
+                                                                    <div>
+                                                                        <code>@string.Join(" ", n.Target)</code>
+                                                                        @if (!string.IsNullOrEmpty(n.Html))
+                                                                        {
+                                                                            <div class="violation-snippet">
+                                                                                <pre><code class="language-markup hljs-source">@((MarkupString)System.Net.WebUtility.HtmlEncode(n.Html))</code></pre>
+                                                                            </div>
+                                                                        }
+                                                                    </div>
+                                                                }
+
+                                                                <a class="violation-help-link"
+                                                                   href="@UserGuideUrl"
+                                                                   target="_blank"
+                                                                   rel="noopener noreferrer">View in User Guide</a>
+                                                            </div>
+                                                        </ContentTemplate>
+                                                    </AccordionItem>
+                                                </AccordionItems>
+                                            </SfAccordion>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        }
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+
+            <TabItem>
+                <HeaderTemplate>Keyboard shortcuts</HeaderTemplate>
+                <ContentTemplate>
+                    <div class="acc-tab-content">
+                        <div class="acc-known__intro acc-known__intro--row">
+                            <span class="e-icons e-circle-info kpi-info-icon"></span>
+                            <span>
+                                All keyboard interactions listed below are supported by the Syncfusion Blazor Data Grid. These shortcuts enable users to interact with grid features using the keyboard without relying on a mouse.
+                            </span>
+                        </div>
+                        <SfAccordion ExpandMode="ExpandMode.Multiple">
+                            <AccordionItems>
+                                @foreach (var group in KeyboardShortcuts.All)
+                                {
+                                    <AccordionItem>
+                                        <HeaderTemplate>
+                                            <span class="shortcut-group-header">
+                                                <span>@group.Category</span>
+                                                <span class="shortcut-count-badge">@group.Shortcuts.Count shortcuts</span>
+                                            </span>
+                                        </HeaderTemplate>
+                                        <ContentTemplate>
+                                            <div>
+                                                @foreach (var s in group.Shortcuts)
+                                                {
+                                                    <ShortcutRow Keys="@s.Keys" Description="@s.Description" />
+                                                }
+                                            </div>
+                                        </ContentTemplate>
+                                    </AccordionItem>
+                                }
+                            </AccordionItems>
+                        </SfAccordion>
+                    </div>
+                </ContentTemplate>
+            </TabItem>
+        </TabItems>
+    </SfTab>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public bool Loading { get; set; }
+
+    [Parameter, EditorRequired]
+    public AxeResults? Results { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback OnRun { get; set; }
+
+    private int ActiveTab;
+
+    private const string UserGuideUrl =
+        "https://blazor.syncfusion.com/documentation/datagrid/accessibility";
+
+    private async Task HandleRun(MouseEventArgs args) => await OnRun.InvokeAsync();
+
+    private void OnTabSelected(SelectEventArgs args) => ActiveTab = args.SelectedIndex;
+
+    private async Task OnAccordionExpanded(ExpandedEventArgs args)
+    {
+        try
+        {
+            await Task.Delay(30);
+            await JSRuntime.InvokeVoidAsync("axeAudit.highlightSnippets", ".acc-panel");
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit dropped — no action needed.
+        }
+        catch (JSException jsEx)
+        {
+            Console.Error.WriteLine($"highlight.js failed: {jsEx.Message}");
+        }
+    }
+}

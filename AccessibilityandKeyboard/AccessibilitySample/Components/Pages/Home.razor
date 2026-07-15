@@ -1,0 +1,222 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Calendars
+@inject OrderDataService OrderDataService
+@inject IJSRuntime JSRuntime
+@inject AxeAuditService AuditService
+
+<PageTitle>Accessibility - Syncfusion DataGrid</PageTitle>
+
+<div class="accessibility-app-root">
+    <div class="accessibility-app-body">
+        <div class="accessibility-container">
+            <SfGrid ID="accessibility-grid"
+                    @ref="Grid"
+                    TValue="Order"
+                    DataSource="@Orders"
+                    Height="100%"
+                    AllowPaging="true"
+                    AllowSorting="true"
+                    AllowFiltering="true"
+                    AllowGrouping="true"
+                    ShowColumnChooser="true"
+                    AllowRowDragAndDrop="true"
+                    AllowReordering="true"
+                    AllowMultiSorting="true"
+                    SelectionMode="Syncfusion.Blazor.Grids.SelectionMode.Both"
+                    Toolbar="@Toolbar"
+                    SelectedRowIndex="0">
+                <GridPageSettings PageCount="2" PageSizes="true" />
+                <GridSortSettings>
+                    <GridSortColumns>
+                        <GridSortColumn Field="@nameof(Order.OrderID)"
+                                        Direction="SortDirection.Ascending" />
+                        <GridSortColumn Field="@nameof(Order.ShipCity)"
+                                        Direction="SortDirection.Descending" />
+                    </GridSortColumns>
+                </GridSortSettings>
+                <GridFilterSettings Type="FilterType.Menu" />
+                <GridGroupSettings Columns="@(new[] { nameof(Order.CustomerID) })" />
+                <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"
+                                       Mode="Syncfusion.Blazor.Grids.SelectionMode.Both" />
+                <GridEditSettings AllowAdding="true"
+                                  AllowEditing="true"
+                                  AllowDeleting="true" />
+                <GridColumns>
+                    <GridColumn Type="ColumnType.CheckBox" Width="50" />
+
+                    <GridColumn Field="@nameof(Order.OrderID)"
+                                HeaderText="Order ID"
+                                Width="140"
+                                IsPrimaryKey="true"
+                                TextAlign="TextAlign.Right"
+                                ClipMode="ClipMode.EllipsisWithTooltip"
+                                ValidationRules="@IDRules" />
+
+                    <GridColumn Field="@nameof(Order.CustomerID)"
+                                HeaderText="Customer ID"
+                                Width="100"
+                                ClipMode="ClipMode.EllipsisWithTooltip"
+                                EditType="EditType.DropDownEdit"
+                                ValidationRules="@RequiredStringRules" />
+
+                    <GridColumn Field="@nameof(Order.OrderDate)"
+                                HeaderText="Order Date"
+                                TextAlign="TextAlign.Right"
+                                Format="d"
+                                Type="ColumnType.DateTime"
+                                Width="120"
+                                EditType="EditType.DatePickerEdit"
+                                ValidationRules="@DateValidationRule">
+                        <EditTemplate>
+                            @{
+                                var row = (context as Order)!;
+                                var current = row.OrderDate;
+                            }
+                            <SfDatePicker TValue="DateTime"
+                                          Value="@current"
+                                          ValueChanged="@(v => row.OrderDate = v)"
+                                          StrictMode="true"
+                                          Format="d"
+                                          ShowClearButton="true" />
+                        </EditTemplate>
+                    </GridColumn>
+
+                    <GridColumn Field="@nameof(Order.Freight)"
+                                HeaderText="Freight($)"
+                                TextAlign="TextAlign.Right"
+                                Format="C2"
+                                Width="125"
+                                ClipMode="ClipMode.EllipsisWithTooltip"
+                                ValidationRules="@IDRules" />
+
+                    <GridColumn Field="@nameof(Order.ShipCity)"
+                                HeaderText="Ship City"
+                                Width="150"
+                                EditType="EditType.DropDownEdit"
+                                ValidationRules="@RequiredStringRules" />
+
+                    <GridColumn Field="@nameof(Order.ShipCountry)"
+                                HeaderText="Ship Country"
+                                Width="140"
+                                EditType="EditType.DropDownEdit"
+                                ValidationRules="@RequiredStringRules" />
+
+                    <GridColumn Field="@nameof(Order.ShipName)"
+                                HeaderText="Shipped Name"
+                                TextAlign="TextAlign.Right"
+                                Width="150"
+                                ClipMode="ClipMode.EllipsisWithTooltip"
+                                EditType="EditType.DropDownEdit"
+                                ValidationRules="@RequiredStringRules" />
+                </GridColumns>
+
+                <GridAggregates>
+                    <GridAggregate>
+                        <GridAggregateColumns>
+                            <GridAggregateColumn Field="@nameof(Order.Freight)"
+                                                 Type="AggregateType.Sum"
+                                                 Format="C2">
+                                <FooterTemplate>
+                                    @{
+                                        var agg = context as AggregateTemplateContext;
+                                        <span>Sum: @agg?.Sum</span>
+                                    }
+                                </FooterTemplate>
+                            </GridAggregateColumn>
+                        </GridAggregateColumns>
+                    </GridAggregate>
+
+                    <GridAggregate>
+                        <GridAggregateColumns>
+                            <GridAggregateColumn Field="@nameof(Order.Freight)"
+                                                 Type="AggregateType.Sum"
+                                                 Format="C2">
+                                <GroupFooterTemplate>
+                                    @{
+                                        var agg = context as AggregateTemplateContext;
+                                        <span>Sum: @agg?.Sum</span>
+                                    }
+                                </GroupFooterTemplate>
+                            </GridAggregateColumn>
+                        </GridAggregateColumns>
+                    </GridAggregate>
+
+                    <GridAggregate>
+                        <GridAggregateColumns>
+                            <GridAggregateColumn Field="@nameof(Order.Freight)"
+                                                 Type="AggregateType.Max"
+                                                 Format="C2">
+                                <GroupCaptionTemplate>
+                                    @{
+                                        var agg = context as AggregateTemplateContext;
+                                        <span>Max: @agg?.Max</span>
+                                    }
+                                </GroupCaptionTemplate>
+                            </GridAggregateColumn>
+                        </GridAggregateColumns>
+                    </GridAggregate>
+                </GridAggregates>
+
+                <GridEvents Created="OnCreated" TValue="Order" />
+            </SfGrid>
+        </div>
+    </div>
+
+    <AccAuditPanel Loading="@AuditLoading"
+                   Results="@AuditResult"
+                   OnRun="RunAudit" />
+</div>
+
+@code {
+    private SfGrid<Order>? Grid;
+    private List<Order> Orders = new();
+    private bool AuditLoading;
+    private AxeResults? AuditResult;
+
+    private readonly List<string> Toolbar = new()
+    {
+        "Add", "Edit", "Delete", "Update", "Cancel", "Search", "ColumnChooser"
+    };
+
+    private readonly ValidationRules IDRules = new() { Required = true, Number = true };
+    private readonly ValidationRules RequiredStringRules = new() { Required = true };
+    private readonly ValidationRules DateValidationRule = new() { Required = true };
+
+    protected override void OnInitialized()
+    {
+        Orders = OrderDataService.GetOrders();
+    }
+
+    private void OnCreated()
+    {
+        _ = JSRuntime.InvokeVoidAsync(
+            "eval",
+            "document.querySelectorAll('#accessibility-grid .e-search input').forEach(i=>i.setAttribute('autocomplete','off'))");
+    }
+
+    private async Task RunAudit()
+    {
+        if (AuditLoading) return;
+        
+        AuditLoading = true;
+        
+        try
+        {
+            await Task.Delay(100);
+            AuditResult = await AuditService.RunAuditAsync("#accessibility-grid");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Audit error: {ex.Message}");
+            AuditResult = new AxeResults();
+        }
+        finally
+        {
+            AuditLoading = false;
+        }
+    }
+}
