@@ -1,0 +1,392 @@
+@page "/benchmark"
+@rendermode InteractiveServer
+@implements IDisposable
+@inject IEmployeeService EmployeeService
+@inject IJSRuntime JS
+
+<PageTitle>Syncfusion Blazor Performance Benchmark</PageTitle>
+
+<div class="app-body">
+
+    <!-- ── Benchmark Info Bar ── -->
+    <div class="benchmark-info-bar">
+        <div class="benchmark-info-item">
+            <span class="benchmark-info-dot"></span>
+            Performance Benchmark
+        </div>
+    </div>
+
+    <!-- ── Top Toolbar ── -->
+    <div class="top-toolbar">
+
+        <!-- Select Dataset -->
+        <div class="toolbar-group">
+            <div class="toolbar-column">
+                <span class="toolbar-label">Select Dataset</span>
+                <SfDropDownList TValue="string" TItem="DropdownItem"
+                                DataSource="@DataModeItems"
+                                Value="@DataMode"
+                                Width="140px">
+                    <DropDownListFieldSettings Text="Text" Value="Value" />
+                    <DropDownListEvents TValue="string" TItem="DropdownItem"
+                                       ValueChange="OnDataModeChange" />
+                </SfDropDownList>
+            </div>
+        </div>
+
+        <div class="vertical-separator" aria-hidden="true"></div>
+
+        <!-- Benchmark Mode -->
+        <div class="toolbar-group">
+            <div class="toolbar-column">
+                <span class="toolbar-label">Benchmark Mode</span>
+                <SfDropDownList TValue="string" TItem="DropdownItem"
+                                DataSource="@ScrollModeItems"
+                                Value="@ScrollMode"
+                                Width="160px">
+                    <DropDownListFieldSettings Text="Text" Value="Value" />
+                    <DropDownListEvents TValue="string" TItem="DropdownItem"
+                                       ValueChange="OnScrollModeChange" />
+                </SfDropDownList>
+            </div>
+        </div>
+
+        <div class="vertical-separator" aria-hidden="true"></div>
+
+        <!-- Actions -->
+        <div class="toolbar-actions">
+            <SfButton CssClass="e-primary" Disabled="@Loaded" OnClick="HandleLoadAsync">
+                @LoadButtonText
+            </SfButton>
+
+            <SfButton Disabled="@(!Loaded)" OnClick="ResetMetrics">
+                Reset
+            </SfButton>
+        </div>
+    </div>
+
+    <!-- ── Main Content ── -->
+    <div class="outer-content">
+
+        <!-- ── Grid ── -->
+        <div class="performance-container">
+            <SfGrid @ref="Grid"
+                    ID="blazor-benchmark-grid"
+                    DataSource="@Employees"
+                    AllowSelection="true"
+                    AllowSorting="true"
+                    AllowFiltering="true"
+                    AllowGrouping="true"
+                    AllowPaging="@IsPaging"
+                    EnableVirtualization="@IsVirtual"
+                    EnableColumnVirtualization="false"
+                    EnableInfiniteScrolling="@IsInfinite"
+                    EnableVirtualMaskRow="false"
+                    Toolbar="@(new List<string> { "Search" })"
+                    Height="395"
+                    RowHeight="38"
+                    @key="@GridKey">
+                <GridPageSettings PageSize="50" />
+                <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple" CheckboxOnly="true" />
+                <GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" />
+                <GridGroupSettings ShowGroupedColumn="true"/>
+                <GridEvents OnDataBound="OnDataBound"
+                             OnActionBegin="OnActionBegin"
+                             OnActionComplete="OnActionComplete"
+                             TValue="Employee" />
+                <GridColumns>
+                    <GridColumn Type="ColumnType.CheckBox" Width="55" AllowSorting="false" AllowFiltering="false" />
+                    <GridColumn Field="@nameof(Employee.EmployeeID)" HeaderText="ID" IsPrimaryKey="true" Width="90" Visible="false" />
+                    <GridColumn Field="@nameof(Employee.EmployeeName)" HeaderText="Employee Name" Width="200" />
+                    <GridColumn Field="@nameof(Employee.Designation)" HeaderText="Designation" Width="190" />
+                    <GridColumn Field="@nameof(Employee.Department)" HeaderText="Department" Width="140" />
+                    <GridColumn Field="@nameof(Employee.Location)" HeaderText="Location" Width="120" />
+                    <GridColumn Field="@nameof(Employee.Status)" HeaderText="Status" Width="120">
+                        <Template>
+                            @{
+                                var emp = (context as Employee);
+                                <span class="bz-statustemp @(emp!.Status == "Active" ? "bz-active" : "bz-inactive")">
+                                    @emp.Status
+                                </span>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(Employee.Rating)" HeaderText="Rating" Width="140" AllowFiltering="false">
+                        <Template>
+                            @{
+                                var emp = (context as Employee);
+                                <span class="bz-rating">
+                                    @for (int s = 0; s < 5; s++)
+                                    {
+                                        <span class="@(s < emp!.Rating ? "" : "empty")">★</span>
+                                    }
+                                </span>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(Employee.Salary)" HeaderText="Salary" Width="140" Format="C0">
+                        <Template>
+                            @{
+                                var emp = (context as Employee);
+                                <span style="font-variant-numeric: tabular-nums;">@emp!.Salary.ToString("C0")</span>
+                            }
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="@nameof(Employee.Experience)" HeaderText="Experience (yrs)" Width="150" />
+                    <GridColumn Field="@nameof(Employee.SkillSet)" HeaderText="Primary Skill" Width="160" />
+                    <GridColumn Field="@nameof(Employee.Manager)" HeaderText="Manager" Width="160" />
+                    <GridColumn Field="@nameof(Employee.HireDate)" HeaderText="Hire Date" Width="130" Format="yyyy-MM-dd" />
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+        <!-- ── Metrics Panel ── -->
+        <div class="panel">
+            <div class="panel-head panel-head--blazor">
+                <span class="panel-head-text">Performance Metrics</span>
+                <span class="blazor-badge" style="font-size: 10px; padding: 2px 8px;">Live</span>
+            </div>
+
+            <div class="metrics-body metrics-body--full">
+
+                <BigCard Label="Initial Load Time" Value="@Fmt(InitialLoadTime)" Unit="ms" />
+
+                <MetricSection Label="Sorting">
+                    <MiniCard Label="Sort Applied" Value="@Fmt(SortingTime)" Unit="ms" />
+                    <MiniCard Label="Sort Cleared" Value="@Fmt(ClearSortingTime)" Unit="ms" />
+                </MetricSection>
+
+                <MetricSection Label="Filtering">
+                    <MiniCard Label="Filter Applied" Value="@Fmt(FilteringTime)" Unit="ms" />
+                    <MiniCard Label="Filter Cleared" Value="@Fmt(ClearFilteringTime)" Unit="ms" />
+                </MetricSection>
+
+                <MetricSection Label="Searching">
+                    <MiniCard Label="Search Applied" Value="@Fmt(SearchingTime)" Unit="ms" />
+                    <MiniCard Label="Search Cleared" Value="@Fmt(ClearSearchingTime)" Unit="ms" />
+                </MetricSection>
+
+                <MetricSection Label="Grouping">
+                    <MiniCard Label="Group Applied" Value="@Fmt(GroupingTime)" Unit="ms" />
+                    <MiniCard Label="Group Removed" Value="@Fmt(UngroupingTime)" Unit="ms" />
+                </MetricSection>
+
+                <MetricSection Label="DOM Insights">
+                    <MiniCard Label="Total Dataset" Value="@(TotalRows > 0 ? TotalRows.ToString("N0") : "0")" Unit="rows" />
+                    <MiniCard Label="Rows in DOM" Value="@(DomRowCount > 0 ? DomRowCount.ToString() : "—")" Unit="rows" />
+                </MetricSection>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@code {
+    // ── State ───────────────────────────────────────────────────────────
+    private const int TotalRowCount = 100_000;
+
+    private SfGrid<Employee>? Grid { get; set; }
+    private List<Employee> Employees { get; set; } = new();
+
+    private string DataMode { get; set; } = "local";
+    private string ScrollMode { get; set; } = "virtual";
+    private bool Loaded { get; set; }
+    private int TotalRows { get; set; }
+    private int DomRowCount { get; set; }
+    private string GridKey { get; set; } = Guid.NewGuid().ToString();
+
+    private string LoadButtonText => Loaded ? "Loaded ✓" : "Load Data";
+
+    private bool IsVirtual => ScrollMode == "virtual";
+    private bool IsInfinite => ScrollMode == "infinite";
+    private bool IsPaging => ScrollMode == "paging";
+
+    // ── Metric state ────────────────────────────────────────────────────
+    private long InitialLoadTime { get; set; }
+    private long SortingTime { get; set; }
+    private long ClearSortingTime { get; set; }
+    private long FilteringTime { get; set; }
+    private long ClearFilteringTime { get; set; }
+    private long SearchingTime { get; set; }
+    private long ClearSearchingTime { get; set; }
+    private long GroupingTime { get; set; }
+    private long UngroupingTime { get; set; }
+
+    // Timing primitives
+    private long LoadStartTicks { get; set; }
+    private long ActionStartTicks { get; set; }
+    private bool IsTimingActive { get; set; }
+    // The "previous" filter/search state we infer apply vs clear from
+    private int LastFilterCount { get; set; }
+
+    // ── Dropdown items ─────────────────────────────────────────────────
+    private List<DropdownItem> DataModeItems { get; } = new()
+    {
+        new() { Text = "Local Data", Value = "local" },
+        new() { Text = "Remote Data", Value = "remote" },
+    };
+
+    private List<DropdownItem> ScrollModeItems { get; } = new()
+    {
+        new() { Text = "Virtual Scroll", Value = "virtual" },
+        new() { Text = "Infinite Scroll", Value = "infinite" },
+        new() { Text = "Paging", Value = "paging" },
+    };
+
+    // ── Lifecycle ──────────────────────────────────────────────────────
+    protected override void OnInitialized() { }
+
+    public void Dispose() { }
+
+    // ── Event handlers ─────────────────────────────────────────────────
+    private void OnDataModeChange(ChangeEventArgs<string, DropdownItem> args)
+    {
+        if (args.Value != DataMode)
+        {
+            DataMode = args.Value;
+            ResetMetrics();
+        }
+    }
+
+    private void OnScrollModeChange(ChangeEventArgs<string, DropdownItem> args)
+    {
+        if (args.Value != ScrollMode)
+        {
+            ScrollMode = args.Value;
+            ResetMetrics();
+        }
+    }
+
+    private async Task HandleLoadAsync()
+    {
+        if (Loaded) return;
+
+        LoadStartTicks = DateTime.UtcNow.Ticks;
+        // Generate data
+        Employees = DataMode == "local"
+            ? await EmployeeService.GenerateLocalDataAsync(TotalRowCount)
+            : await EmployeeService.FetchRemoteDataAsync(TotalRowCount);
+
+        TotalRows = Employees.Count;
+        Loaded = true;
+
+        // Start timing — OnDataBound will stop it
+        
+        IsTimingActive = true;
+
+        GridKey = Guid.NewGuid().ToString(); // force grid re-render
+        await InvokeAsync(StateHasChanged);
+        await CountDomRowsAsync();
+    }
+
+    private void ResetMetrics()
+    {
+        Employees = new();
+        Loaded = false;
+        TotalRows = 0;
+        InitialLoadTime = 0;
+        SortingTime = 0;
+        ClearSortingTime = 0;
+        FilteringTime = 0;
+        ClearFilteringTime = 0;
+        SearchingTime = 0;
+        ClearSearchingTime = 0;
+        GroupingTime = 0;
+        UngroupingTime = 0;
+        GridKey = Guid.NewGuid().ToString();
+    }
+
+    // ── Grid events ────────────────────────────────────────────────────
+    private void OnDataBound(BeforeDataBoundArgs<Employee> args)
+    {
+        if (IsTimingActive)
+        {
+            var elapsed = (DateTime.UtcNow.Ticks - LoadStartTicks) / TimeSpan.TicksPerMillisecond;
+            InitialLoadTime = elapsed;
+            IsTimingActive = false;
+        }
+        // Count rendered DOM rows (visible rows in virtual/infinite mode)
+        _ = CountDomRowsAsync();
+    }
+
+    private async Task CountDomRowsAsync()
+    {
+        try
+        {
+            await Task.Delay(100);
+            DomRowCount = await JS.InvokeAsync<int>("eval",
+                "document.querySelectorAll('#blazor-benchmark-grid .e-row').length");
+            await InvokeAsync(StateHasChanged);
+        }
+        catch { /* ignore if grid not ready */ }
+    }
+
+    private void OnActionBegin(Syncfusion.Blazor.Grids.ActionEventArgs<Employee> args)
+    {
+        if (!IsTrackable(args.RequestType)) return;
+        // Snapshot filter count BEFORE action completes so we can detect apply vs clear
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering)
+            LastFilterCount = Grid?.FilterSettings?.Columns?.Count ?? 0;
+        ActionStartTicks = DateTime.UtcNow.Ticks;
+    }
+
+    private void OnActionComplete(Syncfusion.Blazor.Grids.ActionEventArgs<Employee> args)
+    {
+        if (!IsTrackable(args.RequestType) || ActionStartTicks == 0) return;
+
+        long elapsed = (DateTime.UtcNow.Ticks - ActionStartTicks) / TimeSpan.TicksPerMillisecond;
+        ActionStartTicks = 0;
+
+        switch (args.RequestType)
+        {
+            case Syncfusion.Blazor.Grids.Action.Sorting:
+                bool isSort = args.Direction == SortDirection.Ascending || args.Direction == SortDirection.Descending;
+                if (isSort) SortingTime = elapsed; else ClearSortingTime = elapsed;
+                break;
+
+            case Syncfusion.Blazor.Grids.Action.Filtering:
+                // After action: count increased → filter applied; decreased/0 → filter cleared
+                int newCount = (Grid?.FilterSettings?.Columns?.Count) ?? 0;
+                if (newCount >= LastFilterCount && newCount > 0)
+                    FilteringTime = elapsed;
+                else
+                    ClearFilteringTime = elapsed;
+                LastFilterCount = newCount;
+                break;
+
+            case Syncfusion.Blazor.Grids.Action.ClearFiltering:
+                ClearFilteringTime = elapsed;
+                LastFilterCount = 0;
+                break;
+
+            case Syncfusion.Blazor.Grids.Action.Searching:
+                string search = args.SearchString ?? string.Empty;
+                if (string.IsNullOrEmpty(search))
+                    ClearSearchingTime = elapsed;
+                else
+                    SearchingTime = elapsed;
+                break;
+
+            case Syncfusion.Blazor.Grids.Action.Grouping:
+                GroupingTime = elapsed;
+                break;
+
+            case Syncfusion.Blazor.Grids.Action.UnGrouping:
+                UngroupingTime = elapsed;
+                break;
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private static bool IsTrackable(Syncfusion.Blazor.Grids.Action action) =>
+        action == Syncfusion.Blazor.Grids.Action.Sorting
+        || action == Syncfusion.Blazor.Grids.Action.Filtering
+        || action == Syncfusion.Blazor.Grids.Action.ClearFiltering
+        || action == Syncfusion.Blazor.Grids.Action.Searching
+        || action == Syncfusion.Blazor.Grids.Action.Grouping
+        || action == Syncfusion.Blazor.Grids.Action.UnGrouping;
+
+    // ── Helpers ────────────────────────────────────────────────────────
+    private string Fmt(long val) => val > 0 ? val.ToString() : "—";
+}

@@ -1,0 +1,11 @@
+@* Shared metric section wrapper *@
+
+<div class="section section--primary">
+    <div class="section-label section-label--primary">@Label</div>
+    <div class="section-row">@ChildContent</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
