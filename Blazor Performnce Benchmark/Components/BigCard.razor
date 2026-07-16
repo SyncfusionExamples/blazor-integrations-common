@@ -1,0 +1,17 @@
+@* Shared large metric card *@
+
+<div class="big-card">
+    <div class="big-left">
+        <span class="big-label">@Label</span>
+    </div>
+    <div class="big-right">
+        <span class="big-value">@Value</span>
+        <span class="big-chip">@Unit</span>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Value { get; set; } = string.Empty;
+    [Parameter, EditorRequired] public string Unit { get; set; } = string.Empty;
+}
