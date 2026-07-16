@@ -1,0 +1,221 @@
+@page "/"
+@rendermode InteractiveServer
+@inject CartService CartService
+@inject WishlistService WishlistService
+@inject NavigationManager Navigation
+@using BlazorProductGrid.Models
+@using BlazorProductGrid.Data
+@using BlazorProductGrid.Services
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Popups
+
+<div class="catalog-container">
+    <div class="catalog-header">
+        <h1>📦 Product Catalog</h1>
+        <p class="subtitle">Browse our collection of premium products</p>
+    </div>
+
+    <div class="toolbar-section">
+        <div class="filter-chips-section">
+            <span class="filter-label">Filter by:</span>
+            <SfButton @onclick="() => FilterByCategory(null)" CssClass="@(SelectedCategory == null ? "filter-chip active" : "filter-chip")">All</SfButton>
+            @foreach (var cat in Categories)
+            {
+                <SfButton @onclick="() => FilterByCategory(cat)" CssClass="@(SelectedCategory == cat ? "filter-chip active" : "filter-chip")">@cat</SfButton>
+            }
+        </div>
+        <div class="toolbar-actions">
+            <SfButton @onclick="ToggleCart" CssClass="cart-summary">
+                <span class="cart-icon">🛒</span>
+                <span class="cart-count">@CartService.TotalItems</span>
+                <span class="cart-text">Cart</span>
+                @if (CartService.CartItems.Any())
+                {
+                    <span class="cart-total">@CartService.TotalAmount.ToString("C")</span>
+                }
+            </SfButton>
+            <SfButton @onclick="GoToWishlist" CssClass="@("wishlist-btn" + (WishlistService.Count > 0 ? " has-items" : ""))">
+                <span class="heart-icon">❤️</span>
+                <span class="wishlist-count">@WishlistService.Count</span>
+            </SfButton>
+        </div>
+    </div>
+
+    <SfDialog @bind-Visible="@ShowCart" IsModal="true" Width="500px" ShowCloseIcon="true" CssClass="cart-dialog">
+        <DialogTemplates>
+            <Header>
+                <div class="cart-header">
+                    <h3>🛒 Shopping Cart</h3>
+                </div>
+            </Header>
+            <Content>
+                @if (CartService.CartItems.Any())
+                {
+                    <div class="cart-items">
+                        @foreach (var item in CartService.CartItems)
+                        {
+                            <div class="cart-item">
+                                <img src="@item.Product.ImageUrl" alt="@item.Product.Name" class="cart-item-image" />
+                                <div class="cart-item-details">
+                                    <div class="cart-item-name">@item.Product.Name</div>
+                                    <div class="cart-item-price">@item.Product.Price.ToString("C")</div>
+                                </div>
+                                <div class="cart-item-qty">
+                                    <SfButton @onclick="() => CartService.DecreaseQty(item)" CssClass="qty-btn">-</SfButton>
+                                    <span>@item.Quantity</span>
+                                    <SfButton @onclick="() => CartService.IncreaseQty(item)" CssClass="@("qty-btn" + (item.Quantity >= item.Product.Stock ? " disabled" : ""))" Disabled="@(item.Quantity >= item.Product.Stock)">+</SfButton>
+                                </div>
+                                <div class="cart-item-subtotal">@((item.Product.Price * item.Quantity).ToString("C"))</div>
+                                <SfButton @onclick="() => CartService.RemoveFromCart(item.Product)" CssClass="remove-btn">🗑️</SfButton>
+                            </div>
+                        }
+                    </div>
+                    <div class="cart-footer">
+                        <div class="cart-total-row">
+                            <span>Total:</span>
+                            <span class="cart-grand-total">@CartService.TotalAmount.ToString("C")</span>
+                        </div>
+                        <SfButton @onclick="GoToCart" CssClass="cart-btn">View Cart</SfButton>
+                    </div>
+                }
+                else
+                {
+                    <div class="cart-empty">
+                        <span class="empty-icon">🛒</span>
+                        <p>Your cart is empty</p>
+                    </div>
+                }
+            </Content>
+        </DialogTemplates>
+    </SfDialog>
+
+    <SfDialog @bind-Visible="@ShowImageGallery" IsModal="true" Width="90%" MaxWidth="800px" ShowCloseIcon="true" CssClass="image-gallery-dialog" OnOverlayClick="CloseGalleryOnOverlay">
+        <DialogTemplates>
+            <Header>
+                <div class="gallery-header">
+                    <h3>@Products[CurrentImageIndex].Name</h3>
+                </div>
+            </Header>
+            <Content>
+                <SfCarousel @bind-SelectedIndex="@CurrentImageIndex" ShowIndicators="false" ShowArrows="Always" AutoPlay="false">
+                    @foreach (var product in Products)
+                    {
+                        <CarouselItem>
+                            <figure class="carousel-item-wrapper">
+                                <img src="@product.ImageUrl" alt="@product.Name" class="gallery-image" />
+                            </figure>
+                        </CarouselItem>
+                    }
+                </SfCarousel>
+            </Content>
+        </DialogTemplates>
+    </SfDialog>
+
+    <SfGrid @ref="DefaultGrid" DataSource="@FilteredProducts" AllowPaging="true" AllowSorting="true"
+            ShowColumnMenu="true" ID="ProductGrid" RowHeight="70">
+        <SfToolbar>
+            <ToolbarItems>
+                <ToolbarItem Type="ItemType.Input" Align="ItemAlign.Right">
+                    <Template>
+                        <span class="e-search-icon e-icons"></span>
+                        <SfTextBox Placeholder="Search products..." Input="OnInput"></SfTextBox>
+                    </Template>
+                </ToolbarItem>
+            </ToolbarItems>
+        </SfToolbar>
+        <GridPageSettings PageSize="8"></GridPageSettings>
+        <GridColumns>
+            <GridColumn Field="@nameof(Product.Id)" HeaderText="ID" Width="80" TextAlign="TextAlign.Center"></GridColumn>
+            <GridColumn Field="@nameof(Product.ImageUrl)" HeaderText="Image" Width="100">
+                <Template>
+                    @{
+                        var product = context as Product;
+                    }
+                    <div class="product-image-cell">
+                        <img src="@product?.ImageUrl" alt="@product?.Name" @onclick="() => OpenImageGallery(product!)" style="cursor: pointer;" />
+                    </div>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(Product.Name)" HeaderText="Product Name" Width="220"></GridColumn>
+            <GridColumn Field="@nameof(Product.Category)" HeaderText="Category" Width="120"></GridColumn>
+            <GridColumn Field="@nameof(Product.Price)" HeaderText="Price" Width="100" Format="C2"></GridColumn>
+            <GridColumn Field="@nameof(Product.Stock)" HeaderText="Stock" Width="100" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var product = context as Product;
+                    }
+                    <div class="stock-cell stock-@GetStockClass(product?.Stock ?? 0)">
+                        <span class="stock-dot"></span>
+                        <span class="stock-text">@GetStockText(product?.Stock ?? 0)</span>
+                    </div>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(Product.Rating)" HeaderText="Rating" Width="100">
+                <Template>
+                    @{
+                        var product = context as Product;
+                    }
+                    <div class="rating-cell">
+                        <span class="rating-stars">@GetStarDisplay(product?.Rating ?? 0)</span>
+                    </div>
+                </Template>
+            </GridColumn>
+            <GridColumn Field="@nameof(Product.Description)" HeaderText="Description" Width="350"></GridColumn>
+            <GridColumn HeaderText="Actions" Width="120" TextAlign="TextAlign.Center">
+                <Template>
+                    @{
+                        var product = context as Product;
+                        var inCart = CartService.CartItems.Any(c => c.Product.Id == product?.Id);
+                        var cartItem = CartService.CartItems.FirstOrDefault(c => c.Product.Id == product?.Id);
+                        var atStockLimit = cartItem != null && cartItem.Quantity >= product!.Stock;
+                        var inWishlist = WishlistService.IsInWishlist(product!);
+                    }
+                    <div class="action-buttons">
+                            <SfButton @onclick="() => { if (!atStockLimit) AddToCart(product!); }" Disabled="@atStockLimit" CssClass="@("action-btn" + (inCart ? " in-cart" : "") + (atStockLimit ? " disabled" : ""))">
+                                🛒
+                            </SfButton>
+                            <SfButton @onclick="() => ToggleWishlist(product!)" CssClass="@("action-btn wishlist" + (inWishlist ? " in-wishlist" : ""))">
+                                @(inWishlist ? "❤️" : "🤍")
+                            </SfButton>
+                    </div>
+                </Template>
+            </GridColumn>
+        </GridColumns>
+    </SfGrid>
+</div>
+
+@code {
+    private SfGrid<Product>? DefaultGrid { get; set; }
+    private List<Product> Products { get; set; } = new();
+    private string? SelectedCategory { get; set; }
+    private bool ShowCart { get; set; } = false;
+    private bool ShowImageGallery { get; set; } = false;
+    private int CurrentImageIndex { get; set; } = 0;
+
+    private List<string> Categories => Products.Select(p => p.Category).Distinct().OrderBy(c => c).ToList();
+    private List<Product> FilteredProducts => Products.Where(p => SelectedCategory == null || p.Category == SelectedCategory).ToList();
+
+    public void OnInput(InputEventArgs args) => DefaultGrid?.SearchAsync(args.Value);
+    protected override void OnInitialized() => Products = ProductData.GetProducts();
+    private void FilterByCategory(string? category) => SelectedCategory = category;
+    private void ToggleCart() => ShowCart = !ShowCart;
+    private void AddToCart(Product product) { CartService.AddToCart(product); ShowCart = true; }
+    private void ToggleWishlist(Product product) { if (WishlistService.IsInWishlist(product)) WishlistService.RemoveFromWishlist(product); else WishlistService.AddToWishlist(product); }
+    private void GoToCart() => Navigation.NavigateTo("/cart");
+    private void GoToWishlist() => Navigation.NavigateTo("/wishlist");
+    private void CloseGalleryOnOverlay() => ShowImageGallery = false;
+
+    private void OpenImageGallery(Product product)
+    {
+        CurrentImageIndex = Products.FindIndex(p => p.Id == product.Id);
+        ShowImageGallery = true;
+    }
+
+    private string GetStockClass(int stock) => stock > 30 ? "high" : stock > 10 ? "medium" : "low";
+    private string GetStockText(int stock) => stock > 30 ? "In Stock" : stock > 10 ? "Limited" : "Low Stock";
+    private string GetStarDisplay(double rating) => new string('★', (int)Math.Floor(rating)) + new string('☆', 5 - (int)Math.Floor(rating));
+}
+

@@ -1,0 +1,132 @@
+@page "/wishlist"
+@rendermode InteractiveServer
+@inject WishlistService WishlistService
+@inject CartService CartService
+@inject NavigationManager Navigation
+@using BlazorProductGrid.Models
+@using BlazorProductGrid.Services
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Buttons
+
+<div class="wishlist-container">
+    <div class="wishlist-header">
+        <h1>❤️ My Wishlist</h1>
+        <p class="subtitle">@(WishlistService.Count) item@(WishlistService.Count != 1 ? "s" : "") in your wishlist</p>
+    </div>
+
+    @if (WishlistService.WishlistItems.Any())
+    {
+        <div class="wishlist-grid-section">
+            <SfGrid DataSource="@WishlistItems" ID="WishlistGrid" AllowSelection="false" Height="auto">
+                <GridColumns>
+                    <GridColumn HeaderText="Image" Width="100">
+                        <Template>
+                            @{
+                                var product = context as Product;
+                            }
+                            <div class="product-image-cell">
+                                <img src="@product?.ImageUrl" alt="@product?.Name" />
+                            </div>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn Field="Name" HeaderText="Product Name" Width="200"></GridColumn>
+                    <GridColumn Field="Category" HeaderText="Category" Width="120"></GridColumn>
+                    <GridColumn Field="Price" HeaderText="Price" Width="120" Format="C2"></GridColumn>
+                    <GridColumn Field="Stock" HeaderText="Stock" Width="100" TextAlign="TextAlign.Center">
+                        <Template>
+                            @{
+                                var product = context as Product;
+                            }
+                            <span class="stock-badge stock-@GetStockClass(product?.Stock ?? 0)">
+                                @GetStockText(product?.Stock ?? 0)
+                            </span>
+                        </Template>
+                    </GridColumn>
+                    <GridColumn HeaderText="Actions" Width="180">
+                        <Template>
+                            @{
+                                var product = context as Product;
+                                var inCart = CartService.CartItems.Any(c => c.Product.Id == product?.Id);
+                                var cartBtnClass = inCart ? "add-cart-btn in-cart" : "add-cart-btn";
+                            }
+                            <div class="action-buttons">
+                                <SfButton CssClass="@cartBtnClass" 
+                                          @onclick="() => AddToCart(product!)">
+                                    @(inCart ? "In Cart" : "Add to Cart")
+                                </SfButton>
+                                <SfButton CssClass="remove-btn" 
+                                          @onclick="() => RemoveFromWishlist(product!)">
+                                    🗑️
+                                </SfButton>
+                            </div>
+                        </Template>
+                    </GridColumn>
+                </GridColumns>
+            </SfGrid>
+        </div>
+
+        <div class="wishlist-actions">
+            <SfButton CssClass="continue-btn" @onclick="ContinueShopping">Continue Shopping</SfButton>
+            <SfButton CssClass="clear-btn" @onclick="ClearWishlist">Clear Wishlist</SfButton>
+        </div>
+    }
+    else
+    {
+        <div class="empty-wishlist">
+            <span class="empty-icon">❤️</span>
+            <h3>Your wishlist is empty</h3>
+            <p>Save items you love by clicking the heart icon on products.</p>
+            <SfButton CssClass="browse-btn" @onclick="ContinueShopping">Browse Products</SfButton>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Product> WishlistItems = new();
+
+    protected override void OnInitialized()
+    {
+        WishlistItems = WishlistService.WishlistItems.ToList();
+    }
+
+    private void AddToCart(Product product)
+    {
+        CartService.AddToCart(product);
+        WishlistService.RemoveFromWishlist(product);
+        WishlistItems = WishlistService.WishlistItems.ToList();
+    }
+
+    private void RemoveFromWishlist(Product product)
+    {
+        WishlistService.RemoveFromWishlist(product);
+        WishlistItems = WishlistService.WishlistItems.ToList();
+        StateHasChanged();
+    }
+
+    private void ClearWishlist()
+    {
+        WishlistService.ClearWishlist();
+        WishlistItems = WishlistService.WishlistItems.ToList();
+        StateHasChanged();
+    }
+
+    private void ContinueShopping()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private string GetStockClass(int stock) => stock switch
+    {
+        > 30 => "high",
+        > 10 => "medium",
+        _ => "low"
+    };
+
+    private string GetStockText(int stock) => stock switch
+    {
+        > 30 => "In Stock",
+        > 10 => "Limited",
+        _ => "Low Stock"
+    };
+}
+
