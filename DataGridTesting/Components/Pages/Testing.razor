@@ -1,0 +1,39 @@
+@page "/testing"
+@rendermode InteractiveServer
+@inject GridFixture Fixture
+
+<PageTitle>Blazor DataGrid Testing Showcase</PageTitle>
+
+<div class="testing-page">
+    <div class="intro-panel">
+        <p class="intro-title">
+            <span class="highlight-blue">Tested, trusted and production‑ready</span>
+        </p>
+        <p>
+            The Blazor Data Grid is built for enterprise‑grade reliability, backed by
+            <span class="highlight-blue">7,000+ automated test cases</span>
+            written in Playwright. It delivers
+            <span class="highlight-blue">100% core feature coverage</span>,
+            ensuring all critical scenarios are validated, and every release is regression‑tested
+            for consistent stability. For architects and teams, we provide
+            <span class="highlight-blue">ready‑to‑use demo samples</span>
+            that demonstrate how to automate your application across modern testing libraries.
+            Simply explore the sample flows, run the tests, and replicate the approach in your
+            own setup to quickly adopt automation, improve <span class="highlight-blue">quality</span>,
+            and accelerate delivery with confidence.
+        </p>
+    </div>
+
+    <div class="layout-two-column">
+        <div class="column-left">
+            <div class="testing-component-section">
+                <GridClient InitialData="@Fixture.GetData()" />
+            </div>
+        </div>
+        <div class="column-right">
+            <div class="testing-component-section">
+                <TestDashboard />
+            </div>
+        </div>
+    </div>
+</div>

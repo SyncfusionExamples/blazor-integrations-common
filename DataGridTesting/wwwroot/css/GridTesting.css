@@ -1,0 +1,10 @@
+/* ========================= GRID TOOLBAR ========================= */
+#sample-grid.e-grid .e-toolbar .e-tbar-btn-text { display: none; }
+
+/* ========================= TABLET ================================ */
+@media (max-width: 900px) {
+    #sample-grid { width: 100% !important; }
+}
+
+#sample-grid { border: none; }
+#sample-grid .e-toolbar { border-top: none; }
