@@ -31,14 +31,20 @@
    * highlight.js processes every <pre><code> block not yet highlighted.
    */
   global.highlightAllCode = function () {
-    if (!global.hljs) return;
-    document.querySelectorAll('pre code').forEach(function (block) {
-      if (!block.dataset.highlighted) {
-        global.hljs.highlightElement(block);
-        block.dataset.highlighted = 'true';
-      }
-    });
-  };
+  if (!global.hljs) return;
+  if (!global.__csharpRegistered) {
+    try { global.hljs.registerLanguage('csharp', global.hljs.getLanguage('csharp')); } catch (e) {}
+    global.__csharpRegistered = true;
+  }
+  document.querySelectorAll('pre code').forEach(function (block) {
+    if (!block.dataset.highlighted) {
+      // Force the C# grammar (the markup uses language-csharp; this is defensive)
+      block.classList.add('csharp');
+      global.hljs.highlightElement(block);
+      block.dataset.highlighted = 'true';
+    }
+  });
+};
 
   /**
    * Mirrors resetPaneState(pane) in TestDashboard.tsx:

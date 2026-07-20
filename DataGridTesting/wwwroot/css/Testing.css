@@ -82,7 +82,7 @@
     font-size: 14px;
 }
 
-/* =========================  STEPS / CODE BLOCK  ========================= */
+/* ========================= STEPS / CODE BLOCK ========================= */
 .test-steps-panel__title {
     font-size: 14px;
     font-weight: 700;
@@ -101,7 +101,6 @@
 .test-code-block pre {
     margin: 0;
     padding: 12px 14px;
-    background: rgb(242, 242, 252);
     border-radius: 8px;
     font-family: Consolas, 'Cascadia Code', monospace;
     white-space: pre-wrap;

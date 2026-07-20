@@ -1,4 +1,6 @@
 @inject IJSRuntime JS
+@using GaelJ.BlazorCodeMirror6
+@using GaelJ.BlazorCodeMirror6.Models
 
 <div class="dashboard-wrap">
     <SfTab Height="100%"
@@ -44,7 +46,11 @@
                                                                             @if (!string.IsNullOrEmpty(tc.Code))
                                                                             {
                                                                                 <div class="test-code-block">
-                                                                                    <pre><code class="language-csharp">@tc.Code</code></pre>
+                                                                                    <CodeMirror6Wrapper Doc="@tc.Code"
+                                                                                                        Language="CodeMirrorLanguage.Csharp"
+                                                                                                        ReadOnly="true"
+                                                                                                        Editable="false"
+                                                                                                        LineNumbers="true" />
                                                                                 </div>
                                                                             }
                                                                             else
@@ -94,13 +100,15 @@
 </div>
 
 @code {
-    // Intentional difference from React: framework names are bUnit / xUnit / MSTest / Playwright
+    // 5 Blazor testing frameworks (mirrors React sample: Jest / RTL / Cypress / Playwright
+    // mapped to bUnit / xUnit / NUnit / Playwright / Cypress).
     private readonly List<KeyValuePair<string, List<TestCase>>> Frameworks = new()
     {
         new("bUnit",      TestCaseRepository.BUnitCases),
         new("xUnit",      TestCaseRepository.xUnitCases),
-        new("MSTest",     TestCaseRepository.MSTestCases),
+        new("NUnit",      TestCaseRepository.NUnitCases),
         new("Playwright", TestCaseRepository.PlaywrightCases),
+        new("Cypress",    TestCaseRepository.CypressCases),
     };
 
     // Mirrors React's `created` callback. TabEvents.Created is EventCallback<object>.
