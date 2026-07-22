@@ -87,7 +87,6 @@
     protected override void OnInitialized()
         => GridData = (InitialData ?? Fixture.GetData()).ToList();
 
-    // Mirrors onToolbarClick(args) in GridClient.tsx
     private async Task OnToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
     {
         if (gridRef is null) return;
@@ -112,10 +111,6 @@
             });
     }
 
-    // Mirrors disableSearchAutofill() hooked from React `created` callback.
-    // Uses proper async/await instead of fire-and-forget Task.Run.
-    // The `Created` event fires after the grid DOM is rendered, so no
-    // setTimeout / Task.Delay equivalent is needed.
     private async Task OnCreated()
     {
         try

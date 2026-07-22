@@ -1,25 +1,27 @@
 @inject IJSRuntime JS
-@using GaelJ.BlazorCodeMirror6
-@using GaelJ.BlazorCodeMirror6.Models
 
 <div class="dashboard-wrap">
     <SfTab Height="100%"
            OverflowMode="OverflowMode.Scrollable"
            EnablePersistence="false"
-           EnableLazyLoad="false">
+           EnableLazyLoad="false"
+           LoadOn="ContentLoad.Dynamic">
         <TabEvents Created="OnTabCreated" Selected="OnTabSelected"></TabEvents>
         <TabItems>
             @foreach (var framework in Frameworks)
             {
                 var count = framework.Value.Count;
+                var frameworkKey = framework.Key;
+                var frameworkIndex = Frameworks.IndexOf(framework);
                 <TabItem>
                     <ChildContent>
-                        <TabHeader Text="@($"{framework.Key} ({count})")" />
+                        <TabHeader Text="@($"{frameworkKey} ({count})")" />
                     </ChildContent>
                     <ContentTemplate>
-                        <div class="tool-accordion-scroll">
+                        <div class="tool-accordion-scroll" @key="@($"pane-{frameworkIndex}-{_activeTabIndex}")">
                             <div class="tab-cases-list">
-                                <SfAccordion ExpandMode="ExpandMode.Single">
+                                <SfAccordion ExpandMode="ExpandMode.Single"
+                                             LoadOnDemand="false">
                                     <AccordionItems>
                                         @foreach (var tc in framework.Value)
                                         {
@@ -36,7 +38,8 @@
                                                         <div class="case-tabs-wrap">
                                                             <SfTab CssClass="full-height-tabs"
                                                                    HeaderPlacement="HeaderPosition.Top"
-                                                                   EnablePersistence="false">
+                                                                   EnablePersistence="false"
+                                                                   LoadOn="ContentLoad.Dynamic">
                                                                 <TabItems>
                                                                     <TabItem>
                                                                         <ChildContent>
@@ -46,11 +49,7 @@
                                                                             @if (!string.IsNullOrEmpty(tc.Code))
                                                                             {
                                                                                 <div class="test-code-block">
-                                                                                    <CodeMirror6Wrapper Doc="@tc.Code"
-                                                                                                        Language="CodeMirrorLanguage.Csharp"
-                                                                                                        ReadOnly="true"
-                                                                                                        Editable="false"
-                                                                                                        LineNumbers="true" />
+                                                                                    <pre><code class="language-csharp">@tc.Code</code></pre>
                                                                                 </div>
                                                                             }
                                                                             else
@@ -100,8 +99,6 @@
 </div>
 
 @code {
-    // 5 Blazor testing frameworks (mirrors React sample: Jest / RTL / Cypress / Playwright
-    // mapped to bUnit / xUnit / NUnit / Playwright / Cypress).
     private readonly List<KeyValuePair<string, List<TestCase>>> Frameworks = new()
     {
         new("bUnit",      TestCaseRepository.BUnitCases),
@@ -111,35 +108,29 @@
         new("Cypress",    TestCaseRepository.CypressCases),
     };
 
-    // Mirrors React's `created` callback. TabEvents.Created is EventCallback<object>.
+    private int _activeTabIndex = 0;
+
     private async Task OnTabCreated(object args)
     {
+        // Re-key on first render so the active tab's content is fresh.
+        _activeTabIndex = 0;
         await HighlightCodeAsync();
     }
 
-    // Mirrors React's `selected` callback (handleTabSelected(e)).
     private async Task OnTabSelected(SelectEventArgs args)
     {
+        _activeTabIndex = args.SelectedIndex;
         await HighlightCodeAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            await HighlightCodeAsync();
-        }
+        if (firstRender) await HighlightCodeAsync();
     }
 
     private async Task HighlightCodeAsync()
     {
-        try
-        {
-            await JS.InvokeVoidAsync("highlightAllCode");
-        }
-        catch
-        {
-            /* swallow during SSR / pre-render */
-        }
+        try { await JS.InvokeVoidAsync("highlightAllCode"); }
+        catch { /* swallow during SSR / pre-render */ }
     }
 }

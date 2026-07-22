@@ -1,24 +1,6 @@
-/* =====================================================================
-   sample.interop.js
-   ---------------------------------------------------------------------
-   Blazor JS-interop helpers used by GridClient.razor and TestDashboard.razor.
-   Kept as plain global functions on `window` so they can be invoked via
-   IJSRuntime.InvokeVoidAsync("functionName", ...) without a module import.
-
-   These mirror the React helpers used in GridClient.tsx and TestDashboard.tsx
-   (disableSearchAutofill, resetPaneState). highlight.js replaces CodeMirror.
-   ===================================================================== */
-
 (function (global) {
   'use strict';
 
-  /**
-   * Mirrors disableSearchAutofill() in GridClient.tsx.
-   * Sets autocomplete="off" on the toolbar search input.
-   * SfGrid<TValue> has no Blazor parameter for this DOM attribute,
-   * so JS interop is the recommended approach.
-   * @param {string} gridId  The ID of the SfGrid element.
-   */
   global.disableSearchAutofill = function (gridId) {
     const grid = document.getElementById(gridId);
     if (!grid) return;
@@ -26,37 +8,7 @@
     if (input) input.setAttribute('autocomplete', 'off');
   };
 
-  /**
-   * Mirrors the CodeMirror readonly highlighting used in TestDashboard.tsx.
-   * highlight.js processes every <pre><code> block not yet highlighted.
-   */
-  global.highlightAllCode = function () {
-  if (!global.hljs) return;
-  if (!global.__csharpRegistered) {
-    try { global.hljs.registerLanguage('csharp', global.hljs.getLanguage('csharp')); } catch (e) {}
-    global.__csharpRegistered = true;
-  }
-  document.querySelectorAll('pre code').forEach(function (block) {
-    if (!block.dataset.highlighted) {
-      // Force the C# grammar (the markup uses language-csharp; this is defensive)
-      block.classList.add('csharp');
-      global.hljs.highlightElement(block);
-      block.dataset.highlighted = 'true';
-    }
-  });
-};
 
-  /**
-   * Mirrors resetPaneState(pane) in TestDashboard.tsx:
-   *   1. Reset inner case-tabs (Code/Steps) to index 0
-   *   2. Collapse all accordion items in the active pane
-   *   3. Scroll .tab-cases-list to top
-   * Inner SfTab / SfAccordion instances are rendered inside foreach loops
-   * without individual @ref handles, so JS interop targeting the ej2
-   * DOM instances is the cleanest equivalent to React's
-   * `el.ej2_instances[0]` access.
-   * @param {number} paneIndex  Zero-based index of the active framework tab.
-   */
   global.resetDashboardPane = function (paneIndex) {
     const tabRoot = document.querySelector('.dashboard-wrap .e-tab');
     if (!tabRoot) return;
@@ -76,7 +28,7 @@
       const acc = el && el.ej2_instances && el.ej2_instances[0];
       if (!acc) return;
       const count = (acc.items && acc.items.length) ||
-                    el.querySelectorAll('.e-acrdn-item').length || 0;
+        el.querySelectorAll('.e-acrdn-item').length || 0;
       for (let i = 0; i < count; i++) {
         try { if (acc.expandItem) acc.expandItem(false, i); } catch (e) { }
       }
@@ -86,4 +38,57 @@
     const list = pane.querySelector('.tab-cases-list');
     if (list) list.scrollTo({ top: 0 });
   };
+
+  function highlightOne(block) {
+    try {
+      if (!block.classList.contains('hljs')) {
+        if (!block.className || block.className.indexOf('language-') === -1) {
+          block.classList.add('language-csharp');
+        }
+        global.hljs.highlightElement(block);
+      }
+      block.dataset.highlighted = 'true';
+    } catch (e) { /* swallow per-block failures */ }
+  }
+
+  function highlightAll() {
+    if (!global.hljs) return false;
+    var blocks = document.querySelectorAll('pre code:not([data-highlighted])');
+    for (var i = 0; i < blocks.length; i++) highlightOne(blocks[i]);
+    return blocks.length > 0;
+  }
+  global.highlightAllCode = highlightAll;
+
+  var pollHandle = null;
+  function ensureHljsThenHighlight() {
+    if (global.hljs) { highlightAll(); return; }
+    if (pollHandle) return;
+    var attempts = 0;
+    pollHandle = setInterval(function () {
+      attempts++;
+      if (global.hljs) {
+        clearInterval(pollHandle); pollHandle = null;
+        highlightAll();
+      } else if (attempts > 50) { // give up after ~5s
+        clearInterval(pollHandle); pollHandle = null;
+      }
+    }, 100);
+  }
+
+  function startObserver() {
+    if (!global.MutationObserver) return;
+    if (!document.body) return;
+    var mo = new MutationObserver(function () { ensureHljsThenHighlight(); });
+    mo.observe(document.body, { childList: true, subtree: true });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      startObserver();
+      ensureHljsThenHighlight();
+    });
+  } else {
+    startObserver();
+    ensureHljsThenHighlight();
+  }
 })(window);

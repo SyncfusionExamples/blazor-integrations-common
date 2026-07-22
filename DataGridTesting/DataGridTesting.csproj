@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GaelJ.BlazorCodeMirror6" Version="0.10.0" />
     <PackageReference Include="Syncfusion.Blazor.Buttons" Version="34.1.29" />
     <PackageReference Include="Syncfusion.Blazor.Grid" Version="34.1.29" />
     <PackageReference Include="Syncfusion.Blazor.Layouts" Version="34.1.29" />

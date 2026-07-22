@@ -2,11 +2,11 @@ namespace DataGridTesting.Components.Dashboard;
 
 public static class TestCaseRepository
 {
-    public static readonly List<TestCase> BUnitCases     = Build(Constants.Names, Codes.BUnit);
-    public static readonly List<TestCase> xUnitCases     = Build(Constants.Names, Codes.xUnit);
-    public static readonly List<TestCase> NUnitCases     = Build(Constants.Names, Codes.NUnit);
-    public static readonly List<TestCase> PlaywrightCases= Build(Constants.Names, Codes.Playwright);
-    public static readonly List<TestCase> CypressCases   = Build(Constants.Names, Codes.Cypress);
+    public static readonly List<TestCase> BUnitCases = Build(Constants.Names, Codes.BUnit);
+    public static readonly List<TestCase> xUnitCases = Build(Constants.Names, Codes.xUnit);
+    public static readonly List<TestCase> NUnitCases = Build(Constants.Names, Codes.NUnit);
+    public static readonly List<TestCase> PlaywrightCases = Build(Constants.Names, Codes.Playwright);
+    public static readonly List<TestCase> CypressCases = Build(Constants.Names, Codes.Cypress);
 
     // Zip shared metadata with the per-framework code snippets.
     private static List<TestCase> Build(IReadOnlyList<string> names,
@@ -16,18 +16,18 @@ public static class TestCaseRepository
         for (int i = 0; i < 25; i++)
             list.Add(new TestCase
             {
-                Name        = names[i],
+                Name = names[i],
                 Description = Constants.Descriptions[i],
-                Steps       = Constants.Steps[i].ToList(),   // ← string[] → List<string>
-                Code        = codes[i]
+                Steps = Constants.Steps[i].ToList(),   // ← string[] → List<string>
+                Code = codes[i]
             });
         return list;
     }
 
     // ─────────────────────────────────────────────────────────────────────
-    //  Shared metadata (Name + Description + Steps) — same across all 5
-    //  framework tabs (mirrors React sample).
+    //  framework tabs
     // ─────────────────────────────────────────────────────────────────────
+
     private static class Constants
     {
         public static readonly string[] Names =
@@ -206,11 +206,14 @@ public static class TestCaseRepository
     // ─────────────────────────────────────────────────────────────────────
     //  Per-framework code snippets (25 each).
     // ─────────────────────────────────────────────────────────────────────
+
     private static class Codes
     {
-                public static readonly string[] BUnit =
-        {
-            // 1. Sort Name asc
+
+        // bUnit Test cases
+        public static readonly string[] BUnit =
+{
+            // 1. Sort the name column in ascending order
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -243,7 +246,7 @@ public class GridSortedNameAscendingTests : TestContext
         Assert.Equal(names.OrderBy(n => n, StringComparer.Ordinal), names);
     }
 }",
-            // 2. Sort Name desc — BUGFIX: 32-record fixture starts desc with Zack, not Wendy
+            // 2. Sort the name column in descending order
             @"using System;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -278,7 +281,7 @@ public class GridSortedNameDescendingTests : TestContext
         Assert.Equal(""Zack"", names[0]);
     }
 }",
-            // 3. Sort Id asc
+            // 3. Sort the ID column in ascending numerical order
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -312,7 +315,7 @@ public class GridSortedIdAscendingTests : TestContext
         Assert.Equal(1, ids[0]);
     }
 }",
-            // 4. Multi-sort — ClearSortingAsync + SortColumnAsync(..., isMultiSort:true)
+            // 4. Apply sorting to multiple columns
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -346,7 +349,7 @@ public class GridMultiSortTests : TestContext
         Assert.True(grid.SortSettings.Columns.Count >= 2);
     }
 }",
-            // 5. Filter exact — FilterByColumnAsync(field, ""equal"", value) is string-based per Syncfusion API
+            // 5. Filter rows by exact column value
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -381,7 +384,7 @@ public class GridFilterExactTests : TestContext
         Assert.All(rows, r => Assert.Equal(""Design"", r.Department));
     }
 }",
-            // 6. Filter contains
+            // 6. Filter rows using partial text match
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -416,7 +419,7 @@ public class GridFilterContainsTests : TestContext
         Assert.All(rows, r => Assert.Contains(""Des"", r.Department));
     }
 }",
-            // 7. Multi-filter AND — compare both sides case-insensitively (React spec)
+            // 7. Apply multiple filters using the AND condition
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -456,7 +459,7 @@ public class GridMultiFilterTests : TestContext
         });
     }
 }",
-            // 8. Filter case-insensitive
+            // 8. Filter should ignore case sensitivity
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -491,7 +494,7 @@ public class GridFilterIgnoreCaseTests : TestContext
         Assert.All(rows, r => Assert.Contains(""design"", r.Department.ToLower()));
     }
 }",
-            // 9. Non-existent filter → no rows
+            // 9. Search with non-existent value returns no results
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -524,7 +527,7 @@ public class GridFilterNoResultsTests : TestContext
         Assert.Empty(await grid.GetCurrentViewRecordsAsync());
     }
 }",
-            // 10. Search
+            // 10. Search rows based on Name column
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -555,7 +558,7 @@ public class GridSearchNameTests : TestContext
         Assert.All(rows, r => Assert.Contains(""alice"", r.Name.ToLower()));
     }
 }",
-            // 11. Edit dialog — JS-driven; assert EditSettings.Mode == Dialog
+            // 11. Open edit dialog on row interaction
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -579,17 +582,12 @@ public class GridEditDialogTests : TestContext
                           TimeSpan.FromSeconds(3));
         var grid = cut.FindComponent<SfGrid<GridRow>>().Instance;
 
-        // bUnit limitation: Syncfusion's edit Dialog popup is JS-driven and
-        // is NOT rendered under JSRuntimeMode.Loose. We assert the grid is
-        // configured for Dialog editing and that data rows exist for
-        // double-click handling — the actual dialog render is verified by
-        // the Playwright suite (#11).
         var rows = cut.FindAll("".e-row:not(.e-headerrow)"");
         Assert.NotEmpty(rows);
         Assert.Equal(EditMode.Dialog, grid.EditSettings.Mode);
     }
 }",
-            // 12. Add record
+            // 12. Add a new record to the grid
             @"using System;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -626,7 +624,7 @@ public class GridAddRecordTests : TestContext
         Assert.Contains(grid.DataSource, r => r.Id == 100);
     }
 }",
-            // 13. Update record
+            // 13. Update an existing record
             @"using System;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -670,7 +668,7 @@ public class GridUpdateRecordTests : TestContext
         Assert.Equal(""R&D"", row.Department);
     }
 }",
-            // 14. Delete record
+            // 14. Delete a record from the grid
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -701,7 +699,7 @@ public class GridDeleteRecordTests : TestContext
         Assert.DoesNotContain(grid.DataSource, r => r.Id == 1);
     }
 }",
-            // 15. Select rows — SelectedRowIndexes is read-only; use SelectRowsAsync
+            // 15. Select single and multiple rows
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -733,7 +731,7 @@ public class GridSelectRowsTests : TestContext
         Assert.Contains(1, multi);
     }
 }",
-            // 16. Headers rendered
+            // 16. Verify column headers are displayed correctly
             @"using System.Linq;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -765,7 +763,7 @@ public class GridHeadersTests : TestContext
         Assert.Contains(""Date of Joining"", headers);
     }
 }",
-            // 17. Sort icon present
+            // 17. Verify sorting icons on columns
             @"using System.Linq;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -794,7 +792,7 @@ public class GridSortIconTests : TestContext
         Assert.NotNull(headerCell.QuerySelector("".e-sortfilterdiv""));
     }
 }",
-            // 18. Data rows rendered
+            // 18. Verify grid data rows are rendered
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -818,7 +816,7 @@ public class GridDataRowsTests : TestContext
         Assert.NotEmpty(cut.FindAll("".e-row:not(.e-headerrow)""));
     }
 }",
-            // 19. Paging → 12 rows (GridClient.razor sets <GridPageSettings PageSize=""12"" />)
+            // 19. Verify pagination limits row count
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -844,11 +842,10 @@ public class GridPagingTests : TestContext
         var rows = await grid.GetCurrentViewRecordsAsync();
         Assert.Equal(12, rows.Count);
 
-        // Also verify the DOM agrees.
         Assert.Equal(12, cut.FindAll("".e-row:not(.e-headerrow)"").Count);
     }
 }",
-            // 20. Filter dialog trigger — popup is JS-driven; assert the trigger icon
+            // 20. Verify focus behavior in filter dialog
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -869,17 +866,13 @@ public class GridFilterDialogTests : TestContext
         cut.WaitForState(() => cut.FindAll("".e-row"").Count > 0,
                           TimeSpan.FromSeconds(3));
 
-        // bUnit limitation: filter menu popup (.e-dialog) is JS-rendered under
-        // JSRuntimeMode.Loose. Assert the per-column filter menu trigger icon
-        // is present on header cells — the actual modal/trap behaviour is
-        // covered by the Playwright suite (#20).
         var triggerIcons = cut.FindAll("".e-headercell .e-filterdiv, "" +
                                         "".e-headercell .e-filterbar, "" +
                                         "".e-headercell .e-filtermenudiv"");
         Assert.NotEmpty(triggerIcons);
     }
 }",
-            // 21. Reorder — JS-driven; assert AllowReordering + API no-throw
+            // 21. Verify column reorder functionality
             @"using System.Linq;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -910,16 +903,11 @@ public class GridColumnReorderTests : TestContext
         Assert.Contains(""Name"", before);
         Assert.Contains(""Id"",   before);
 
-        // bUnit limitation: ReorderColumnsAsync mutates the live column order
-        // via JS interop; GetColumnsAsync() returns a fresh snapshot each
-        // call, so the mutation never shows up when re-queried.
-        // Assert the API call doesn't throw — visible DOM reorder is covered
-        // by the Playwright suite (#21).
         await cut.InvokeAsync(async () =>
             await grid.ReorderColumnsAsync(new[] { ""Name"" }, ""Id""));
     }
 }",
-            // 22. Resize — JS-driven; assert AllowResizing + column width + API no-throw
+            // 22. Verify column resizing updates width
             @"using Bunit;
 using DataGridTesting.Components.Grid;
 using DataGridTesting.Data;
@@ -947,13 +935,8 @@ public class GridColumnResizeTests : TestContext
 
         var col = await grid.GetColumnByFieldAsync(""Id"");
         Assert.NotNull(col);
-        Assert.Equal(""70"", col.Width);   // declarative width from GridClient.razor
+        Assert.Equal(""70"", col.Width);
 
-        // bUnit limitation: mutating col.Width + RefreshColumnsAsync does NOT
-        // persist — GetColumnByFieldAsync returns a fresh snapshot each call
-        // (the width mutation is applied to DOM via JS interop under loose
-        // mode). Assert the mutation + API call shouldn't throw — real
-        // width-growth DOM assertion is covered by Playwright #22.
         await cut.InvokeAsync(async () =>
         {
             col.Width = ""120"";
@@ -961,7 +944,7 @@ public class GridColumnResizeTests : TestContext
         });
     }
 }",
-            // 23. PDF export — toolbar is JS-driven; assert via grid.Toolbar
+            // 23. Verify PDF export functionality
             @"using System.Collections.Generic;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -991,10 +974,6 @@ public class GridPdfExportTests : TestContext
         var toolbar = Assert.IsAssignableFrom<IEnumerable<string>>(grid.Toolbar);
         Assert.Contains(""PdfExport"", toolbar);
 
-        // bUnit limitation: <SfGrid Toolbar> renders only the placeholder div
-        // in bUnit; the actual <button id=""sample-grid_pdfexport""> elements
-        // are populated by Syncfusion's JS interop, which JSRuntimeMode.Loose
-        // silently no-ops. Real file download is covered by Playwright #23.
         await cut.InvokeAsync(async () =>
         {
             try { await grid.ExportToPdfAsync(
@@ -1003,7 +982,7 @@ public class GridPdfExportTests : TestContext
         });
     }
 }",
-            // 24. Excel export
+            // 24. Verify Excel export functionality
             @"using System.Collections.Generic;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -1041,7 +1020,7 @@ public class GridExcelExportTests : TestContext
         });
     }
 }",
-            // 25. CSV export — reuses AllowExcelExport (no separate flag)
+            // 25. Verify CSV export functionality
             @"using System.Collections.Generic;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -1081,9 +1060,11 @@ public class GridCsvExportTests : TestContext
 }"
         };
 
-       public static readonly string[] xUnit =
-{
-    // 1. Sort Name asc — verify the view is sorted ascending via SortColumnAsync.
+
+        // xUnit Test cases
+        public static readonly string[] xUnit =
+ {
+    // 1. Sort the name column in ascending order
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1123,7 +1104,7 @@ public class T01_SortNameAscending : TestContext
     }
 }",
 
-    // 2. Sort Name desc — BUGFIX: 32 names start desc with ""Zack"", not ""Wendy"".
+    // 2. Sort the name column in descending order
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1164,7 +1145,7 @@ public class T02_SortNameDescending : TestContext
     }
 }",
 
-    // 3. Sort Id asc — numeric sort on the primary key.
+    // 3. Sort the name column in descending order
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1204,7 +1185,7 @@ public class T03_SortIdAscending : TestContext
     }
 }",
 
-    // 4. Multi-sort — two columns sorted together via the isMultiSort flag.
+    // 4. Apply sorting to multiple columns
     @"using System;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -1245,7 +1226,7 @@ public class T04_MultiSort : TestContext
     }
 }",
 
-    // 5. Filter exact — operator ""equal"" narrows to one Department value.
+    // 5. Filter rows by exact column value
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1287,7 +1268,7 @@ public class T05_FilterExactValue : TestContext
     }
 }",
 
-    // 6. Filter contains — partial substring match on Department.
+    // 6. Filter rows using partial text match
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1329,7 +1310,7 @@ public class T06_FilterContains : TestContext
     }
 }",
 
-    // 7. Multi-filter AND — Name contains ""A"" AND Role contains ""Eng"".
+    // 7. Apply multiple filters using the AND condition
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1377,7 +1358,7 @@ public class T07_MultiFilterAnd : TestContext
     }
 }",
 
-    // 8. Case-insensitive filter — lower-case ""design"" still matches ""Design"".
+    // 8. Filter should ignore case sensitivity
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1420,7 +1401,7 @@ public class T08_FilterCaseInsensitive : TestContext
     }
 }",
 
-    // 9. Non-existent search value returns no rows.
+    // 9. Search with non-existent value returns no results
     @"using System;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -1461,7 +1442,7 @@ public class T09_FilterNonExistentNoRows : TestContext
     }
 }",
 
-    // 10. Search by Name — SearchAsync() applies the global toolbar search.
+    // 10. Search rows based on Name column
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1499,9 +1480,7 @@ public class T10_SearchByName : TestContext
     }
 }",
 
-    // 11. Edit dialog configured — bUnit can't render the JS-driven dialog,
-    //     so we assert on the grid's EditSettings.Mode and the presence of
-    //     clickable rows. Playwright covers the actual dialog rendering.
+    // 11. Open edit dialog on row interaction
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1537,7 +1516,7 @@ public class T11_OpenEditDialog : TestContext
     }
 }",
 
-    // 12. Add a new record — AddRecordAsync inserts a row into the data source.
+    // 12. Add a new record to the grid
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1582,7 +1561,7 @@ public class T12_AddNewRecord : TestContext
     }
 }",
 
-    // 13. Update a record — find the row index, then UpdateRowAsync mutates it.
+    // 13. Update an existing record
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1634,7 +1613,7 @@ public class T13_UpdateRecord : TestContext
     }
 }",
 
-    // 14. Delete a record — DeleteRecordAsync removes the matching key.
+    // 14. Delete a record from the grid
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1672,7 +1651,7 @@ public class T14_DeleteRecord : TestContext
     }
 }",
 
-    // 15. Select rows — single then multiple via SelectRowsAsync(int[]).
+    // 15. Select single and multiple rows
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1714,8 +1693,7 @@ public class T15_SelectRows : TestContext
     }
 }",
 
-    // 16. Column headers rendered — bUnit renders the header cells even
-    //     under JSRuntimeMode.Loose, so we can read their text content.
+    // 16. Verify column headers are displayed correctly
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1755,8 +1733,7 @@ public class T16_HeadersRendered : TestContext
     }
 }",
 
-    // 17. Sort icons present — the .e-sortfilterdiv is the per-header
-    //     sort/filter control node. bUnit renders it without JS.
+    // 17. Verify sorting icons on columns
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1792,8 +1769,7 @@ public class T17_SortIconsPresent : TestContext
     }
 }",
 
-    // 18. Data rows rendered — at least one .e-row is on the page after
-    //     the grid finishes its first render.
+    // 18. Verify grid data rows are rendered
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1826,7 +1802,7 @@ public class T18_DataRowsRendered : TestContext
     }
 }",
 
-    // 19. Pagination — PageSize is 12; both the model and the DOM agree.
+    // 19. Verify pagination limits row count
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1862,10 +1838,7 @@ public class T19_PaginationLimitsRows : TestContext
     }
 }",
 
-    // 20. Filter menu trigger — bUnit can't open the JS-driven filter
-    //     popup under JSRuntimeMode.Loose, but the per-header trigger
-    //     icon (.e-filterdiv / .e-filterbar / .e-filtermenudiv) is in
-    //     the DOM. Playwright covers the actual focus-trap behaviour.
+    // 20. Verify focus behavior in filter dialog
     @"using System;
 using System.Linq;
 using Bunit;
@@ -1901,10 +1874,7 @@ public class T20_FilterDialogFocus : TestContext
     }
 }",
 
-    // 21. Column reordering — assert the grid is configured for reordering
-    //     and the reorder API is invokable. Real DOM reorder is covered
-    //     by the Playwright suite (bUnit returns a fresh column snapshot
-    //     under loose JS, so we don't re-query for ""after"").
+    // 21. Verify column reorder functionality
     @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1947,9 +1917,7 @@ public class T21_ColumnReorder : TestContext
     }
 }",
 
-    // 22. Column resizing — assert AllowResizing and the default width
-    //     from GridClient.razor; the mutation + RefreshColumnsAsync call
-    //     must not throw. Real DOM width-change is covered by Playwright.
+    // 22. Verify column resizing updates width
     @"using System;
 using System.Threading.Tasks;
 using Bunit;
@@ -1995,9 +1963,7 @@ public class T22_ColumnResize : TestContext
     }
 }",
 
-    // 23. PDF export wired — bUnit can't trigger a real file download
-    //     under JSRuntimeMode.Loose, so we verify the toolbar config
-    //     and the export API doesn't throw unhandled.
+    // 23. Verify PDF export functionality
     @"using System;
 using System.Collections.Generic;
 using Bunit;
@@ -2040,7 +2006,7 @@ public class T23_PdfExportTriggered : TestContext
     }
 }",
 
-    // 24. Excel export wired — same shape as T23 but for the Excel API.
+    // 24. Verify Excel export functionality
     @"using System;
 using System.Collections.Generic;
 using Bunit;
@@ -2083,7 +2049,7 @@ public class T24_ExcelExportTriggered : TestContext
     }
 }",
 
-    // 25. CSV export wired — CsvExport reuses AllowExcelExport under the hood.
+    // 25. Verify CSV export functionality
     @"using System;
 using System.Collections.Generic;
 using Bunit;
@@ -2127,9 +2093,10 @@ public class T25_CsvExportTriggered : TestContext
 }"
 };
 
-               public static readonly string[] NUnit =
-        {
-            // 1. Sort Name asc — verify sorted view via SortColumnAsync
+        // NUnit Test cases        
+        public static readonly string[] NUnit =
+ {
+            // 1. Sort the name column in ascending order
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2174,7 +2141,7 @@ public class T01_SortNameAscendingTests : Bunit.TestContext
             names.OrderBy(n => n, StringComparer.Ordinal).ToList()));
     }
 }",
-            // 2. Sort Name desc — descending ordinal sort puts ""Zack"" first
+            // 2. Sort the name column in descending order
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2220,7 +2187,7 @@ public class T02_SortNameDescendingTests : Bunit.TestContext
         Assert.That(names[0], Is.EqualTo(""Zack""));
     }
 }",
-            // 3. Sort Id asc
+            // 3. Sort the name column in descending order
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2265,7 +2232,7 @@ public class T03_SortIdAscendingTests : Bunit.TestContext
         Assert.That(ids[0], Is.EqualTo(1));
     }
 }",
-            // 4. Multi-sort — isMultiSort: true keeps prior sort column
+            // 4. Apply sorting to multiple columns
             @"using System;
 using System.Threading.Tasks;
 using Bunit;
@@ -2312,7 +2279,7 @@ public class T04_MultiSortTests : Bunit.TestContext
         Assert.That(grid.SortSettings!.Columns.Count, Is.GreaterThanOrEqualTo(2));
     }
 }",
-            // 5. Filter exact — ""equal"" operator is a string per Syncfusion API
+            // 5. Filter rows by exact column value
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2360,7 +2327,7 @@ public class T05_FilterExactValueTests : Bunit.TestContext
         Assert.That(rows.All(r => r.Department == ""Design""), Is.True);
     }
 }",
-            // 6. Filter contains
+            // 6. Filter rows using partial text match
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2408,7 +2375,7 @@ public class T06_FilterContainsTests : Bunit.TestContext
         Assert.That(rows.All(r => r.Department.Contains(""Des"")), Is.True);
     }
 }",
-            // 7. Multi-filter AND
+            // 7. Apply multiple filters using the AND condition
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2460,7 +2427,7 @@ public class T07_MultiFilterAndTests : Bunit.TestContext
             r.Role.ToLower().Contains(""eng"")), Is.True);
     }
 }",
-            // 8. Filter case-insensitive
+            // 8. Filter should ignore case sensitivity
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2508,7 +2475,7 @@ public class T08_FilterCaseInsensitiveTests : Bunit.TestContext
         Assert.That(rows.All(r => r.Department.ToLower().Contains(""design"")), Is.True);
     }
 }",
-            // 9. Non-existent value
+            // 9. Search with non-existent value returns no results
             @"using System;
 using System.Threading.Tasks;
 using Bunit;
@@ -2554,7 +2521,7 @@ public class T09_NonExistentValueTests : Bunit.TestContext
         Assert.That(rows, Is.Empty);
     }
 }",
-            // 10. Search by Name
+            // 10. Search rows based on Name column
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2597,7 +2564,7 @@ public class T10_SearchByNameTests : Bunit.TestContext
         Assert.That(rows.All(r => r.Name.ToLower().Contains(""alice"")), Is.True);
     }
 }",
-            // 11. Edit dialog — bUnit limitation: assert configuration only
+            // 11. Open edit dialog on row interaction
             @"using System;
 using System.Threading.Tasks;
 using Bunit;
@@ -2624,10 +2591,6 @@ public class T11_OpenEditDialogTests : Bunit.TestContext
     [OneTimeTearDown]
     public void OneTimeTearDown() => Dispose();
 
-    // bUnit limitation: Syncfusion's edit dialog is JS-rendered and is
-    // not produced under JSRuntimeMode.Loose. The real dialog interaction
-    // is covered by the Playwright suite. Here we only verify that the
-    // grid is configured for Dialog editing and that data rows render.
     [Test]
     public void Grid_Is_Configured_For_Dialog_Edit()
     {
@@ -2641,7 +2604,7 @@ public class T11_OpenEditDialogTests : Bunit.TestContext
         Assert.That(grid.EditSettings!.Mode, Is.EqualTo(EditMode.Dialog));
     }
 }",
-            // 12. Add a new record
+            // 12. Add a new record to the grid
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2748,7 +2711,7 @@ public class T13_UpdateRecordTests : Bunit.TestContext
         Assert.That(row.Department,  Is.EqualTo(""R&D""));
     }
 }",
-            // 14. Delete a record
+            // 14. Delete a record from the grid
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2792,7 +2755,7 @@ public class T14_DeleteRecordTests : Bunit.TestContext
         Assert.That(grid.DataSource!.Any(r => r.Id == 1), Is.False);
     }
 }",
-            // 15. Single and multiple selection
+            // 15. Select single and multiple rows
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -2840,7 +2803,7 @@ public class T15_SelectRowsTests : Bunit.TestContext
         Assert.That(multi.Contains(1), Is.True);
     }
 }",
-            // 16. Column headers
+            // 16. Verify column headers are displayed correctly
             @"using System;
 using System.Linq;
 using Bunit;
@@ -2884,7 +2847,7 @@ public class T16_HeadersRenderedTests : Bunit.TestContext
         Assert.That(headers, Does.Contain(""Date of Joining""));
     }
 }",
-            // 17. Sort icons on sortable columns
+            // 17. Verify sorting icons on columns
             @"using System;
 using System.Linq;
 using Bunit;
@@ -2924,7 +2887,7 @@ public class T17_SortIconsPresentTests : Bunit.TestContext
         Assert.That(headerCell.QuerySelector("".e-sortfilterdiv""), Is.Not.Null);
     }
 }",
-            // 18. Data rows rendered
+            // 18. Verify grid data rows are rendered
             @"using System;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -2960,7 +2923,7 @@ public class T18_DataRowsRenderedTests : Bunit.TestContext
         Assert.That(dataRows, Is.Not.Empty);
     }
 }",
-            // 19. Pagination limits to 12 rows
+            // 19. Verify pagination limits row count
             @"using System;
 using System.Threading.Tasks;
 using Bunit;
@@ -3000,7 +2963,7 @@ public class T19_PaginationLimitsRowsTests : Bunit.TestContext
         Assert.That(cut.FindAll("".e-row:not(.e-headerrow)"").Count, Is.EqualTo(12));
     }
 }",
-            // 20. Filter menu trigger present — bUnit cannot render the popup
+            // 20. Verify focus behavior in filter dialog
             @"using System;
 using Bunit;
 using DataGridTesting.Components.Grid;
@@ -3038,7 +3001,7 @@ public class T20_FilterDialogFocusTests : Bunit.TestContext
         Assert.That(triggerIcons, Is.Not.Empty);
     }
 }",
-            // 21. Column reorder — assert configuration + non-throwing API
+            // 21. Verify column reorder functionality
             @"using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -3080,14 +3043,11 @@ public class T21_ColumnReorderTests : Bunit.TestContext
         Assert.That(cols, Does.Contain(""Name""));
         Assert.That(cols, Does.Contain(""Id""));
 
-        // The ReorderColumnsAsync call relies on JS interop to mutate DOM,
-        // which is a no-op under JSRuntimeMode.Loose. We just verify that
-        // invoking the API does not throw.
         await cut.InvokeAsync(async () =>
             await grid.ReorderColumnsAsync(new[] { ""Name"" }, ""Id""));
     }
 }",
-            // 22. Column resize — declarative width preserved, mutation API non-throwing
+            // 22. Verify column resizing updates width
             @"using System;
 using System.Threading.Tasks;
 using Bunit;
@@ -3126,7 +3086,7 @@ public class T22_ColumnResizeTests : Bunit.TestContext
 
         var col = await grid.GetColumnByFieldAsync(""Id"");
         Assert.That(col, Is.Not.Null);
-        Assert.That(col!.Width, Is.EqualTo(""70""));   // declarative width
+        Assert.That(col!.Width, Is.EqualTo(""70""));
 
 #pragma warning disable BL0005
         await cut.InvokeAsync(async () =>
@@ -3137,7 +3097,7 @@ public class T22_ColumnResizeTests : Bunit.TestContext
 #pragma warning restore BL0005
     }
 }",
-            // 23. PDF export — wired in toolbar + export API non-throwing
+            // 23. Verify PDF export functionality
             @"using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -3184,7 +3144,7 @@ public class T23_PdfExportTests : Bunit.TestContext
             }));
     }
 }",
-            // 24. Excel export
+            // 24. Verify Excel export functionality
             @"using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -3231,7 +3191,7 @@ public class T24_ExcelExportTests : Bunit.TestContext
             }));
     }
 }",
-            // 25. CSV export — reuses AllowExcelExport
+            // 25. Verify CSV export functionality
             @"using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -3280,9 +3240,10 @@ public class T25_CsvExportTests : Bunit.TestContext
 }"
         };
 
-               public static readonly string[] Playwright =
-        {
-            // 1.
+        // Playwright Test cases        
+        public static readonly string[] Playwright =
+ {
+            // 1. Sort the name column in ascending order
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3293,7 +3254,6 @@ public class T01_Sort_Name_Ascending : PageTest
     [Test]
     public async Task Test()
     {
-        // Wide viewport keeps the Search toolbar item out of the overflow popup.
         await Page.SetViewportSizeAsync(1600, 900);
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
@@ -3302,7 +3262,6 @@ public class T01_Sort_Name_Ascending : PageTest
         await header.ClickAsync();
         await Page.WaitForTimeoutAsync(400);
 
-        // Ordinal comparison — culture-invariant, matches bUnit/xUnit/NUnit.
         var names = (await Page.Locator("".e-gridcontent tr.e-row td:nth-child(2)"")
                                 .AllTextContentsAsync())
                     .Select(n => n.Trim())
@@ -3318,7 +3277,7 @@ public class T01_Sort_Name_Ascending : PageTest
     }
 }",
 
-            // 2.
+            // 2. Sort the name column in descending order
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3352,7 +3311,7 @@ public class T02_Sort_Name_Descending : PageTest
     }
 }",
 
-            // 3.
+            // 3. Sort the ID column in ascending numerical order
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3380,7 +3339,7 @@ public class T03_Sort_Id_Ascending : PageTest
     }
 }",
 
-            // 4.
+            // 4. Apply sorting to multiple columns
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3411,7 +3370,7 @@ public class T04_Multi_Sort_Two_Columns : PageTest
     }
 }",
 
-            // 5.
+            // 5. Filter rows by exact column value
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3426,7 +3385,6 @@ public class T05_Filter_Exact_Department : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // Open the Department column filter menu via UI, type 'Design', submit.
         await OpenFilterMenuAsync(Page, ""Department"");
         await TypeInFilterInputAsync(Page, ""Design"");
         await PressEnterInFilterAsync(Page);
@@ -3440,7 +3398,6 @@ public class T05_Filter_Exact_Department : PageTest
             Assert.That(d.Trim(), Is.EqualTo(""Design""));
     }
 
-    // Mirror of OpenGridE2ETests private helpers so each snippet is self-contained.
     private async Task OpenFilterMenuAsync(IPage page, string headerName)
     {
         var header = page.GetByRole(AriaRole.Columnheader, new() { Name = headerName });
@@ -3468,7 +3425,7 @@ public class T05_Filter_Exact_Department : PageTest
     }
 }",
 
-            // 6.
+            // 6. Filter rows using partial text match
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3522,7 +3479,7 @@ public class T06_Filter_Contains_Des : PageTest
     }
 }",
 
-            // 7.
+            // 7. Apply multiple filters using the AND condition
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3537,7 +3494,6 @@ public class T07_MultiFilter_And : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // Apply filter on Name (contains 'A'), then on Designation (contains 'Eng').
         await OpenFilterMenuAsync(Page, ""Name"");
         await TypeInFilterInputAsync(Page, ""A"");
         await PressEnterInFilterAsync(Page);
@@ -3588,7 +3544,7 @@ public class T07_MultiFilter_And : PageTest
     }
 }",
 
-            // 8.
+            // 8. Filter should ignore case sensitivity
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3642,7 +3598,7 @@ public class T08_Filter_IgnoresCase : PageTest
     }
 }",
 
-            // 9.
+            // 9. Search with non-existent value returns no results
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3696,7 +3652,7 @@ public class T09_Filter_NoResults : PageTest
     }
 }",
 
-            // 10.
+            // 10. Search rows based on Name column
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3707,13 +3663,10 @@ public class T10_Search_Alice : PageTest
     [Test]
     public async Task Test()
     {
-        // Wide viewport keeps the Search toolbar item out of the overflow popup.
         await Page.SetViewportSizeAsync(1600, 900);
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // Target the toolbar Search input via its .e-search-icon wrapper so we
-        // don't accidentally match filter-dialog inputs.
         var searchInput = Page.Locator(
                 ""#sample-grid .e-input-group:has(.e-search-icon) input"").First;
 
@@ -3737,7 +3690,7 @@ public class T10_Search_Alice : PageTest
     }
 }",
 
-            // 11.
+            // 11. Open edit dialog on row interaction
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3761,7 +3714,7 @@ public class T11_DoubleClick_OpensDialog : PageTest
     }
 }",
 
-            // 12.
+            // 12. Add a new record to the grid
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3776,28 +3729,15 @@ public class T12_Add_Record_ViaDialog : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // Toolbar Add button id is prefixed with the grid ID (sample-grid_add).
         await Page.Locator(""[id$='_add']"").ClickAsync();
         await Expect(Page.Locator("".e-dialog.e-popup-open"")).ToBeVisibleAsync();
 
-        // Id is the primary key, [Required]/[Number]; editable in the Add dialog.
         await Page.Locator(""input[name='Id']"").FillAsync(""100"");
 
-        // Name/Role/Department must satisfy
-        // [RegularExpression(@""^[a-zA-Z\s]+$"")]. React test uses ""R&D"" but that
-        // contains '&' which fails the regex, so we use ""Research"" here.
         await Page.Locator(""input[name='Name']"").FillAsync(""Test User"");
         await Page.Locator(""input[name='Role']"").FillAsync(""Engineer"");
         await Page.Locator(""input[name='Department']"").FillAsync(""Research"");
 
-        // ── DateOfJoining ([Required]) ────────────────────────────────
-        // The SfDatePicker in dialog edit mode (34.1.29) renders the calendar
-        // popup inside the dialog with a fragile day-cell class hierarchy.
-        // Rather than fight a brittle selector, drive the value through the
-        // Syncfusion JS interop: set the input value via the prototype setter
-        // (so React's value-tracking override is bypassed) and dispatch both
-        // 'input' and 'change' events so the Blazor [Required] validator sees
-        // a non-null DateTime.
         await Page.EvaluateAsync(@""
             () => {
                 const dateInput = document.querySelector(
@@ -3816,13 +3756,9 @@ public class T12_Add_Record_ViaDialog : PageTest
                   .GetByText(""Save"", new() { Exact = true })
                   .ClickAsync();
 
-        // Wait for the dialog to close — this confirms the record committed.
         await Expect(Page.Locator("".e-dialog.e-popup-open""))
             .ToBeHiddenAsync(new() { Timeout = 10_000 });
 
-        // The new row has Id=100. SfGrid does NOT auto-navigate to its page,
-        // so walk the pager (.e-nextpage, not .e-lastpage — that one renders
-        // twice: normal + responsive).
         var newRow = Page.Locator("".e-gridcontent tr.e-row td"")
                          .Filter(new() { HasText = ""Test User"" });
 
@@ -3852,7 +3788,7 @@ public class T12_Add_Record_ViaDialog : PageTest
     }
 }",
 
-            // 13.
+            // 13. Update an existing record
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3867,14 +3803,12 @@ public class T13_Update_Record_ViaDialog : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // Find the Alice row by cell text and double-click to open the dialog.
         await Page.Locator("".e-gridcontent tr.e-row td"")
                   .Filter(new() { HasText = ""Alice"" })
                   .First
                   .DblClickAsync();
         await Expect(Page.Locator("".e-dialog.e-popup-open"")).ToBeVisibleAsync();
 
-        // Use values that pass the GridRow RegularExpression ^[a-zA-Z\s]+$.
         await Page.Locator(""input[name='Name']"").FillAsync(""Updated User"");
         await Page.Locator(""input[name='Role']"").FillAsync(""Senior Engineer"");
         await Page.Locator(""input[name='Department']"").FillAsync(""Research"");
@@ -3890,7 +3824,7 @@ public class T13_Update_Record_ViaDialog : PageTest
     }
 }",
 
-            // 14.
+            // 14. Delete a record from the grid
             @"using System.Text.RegularExpressions;
 using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
@@ -3906,27 +3840,23 @@ public class T14_Delete_Record : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // Select the first row, then click the toolbar Delete button
-        // (Blazor renders it with id sample-grid_delete).
         await Page.Locator("".e-gridcontent tr.e-row"").First.ClickAsync();
         await Page.WaitForTimeoutAsync(200);
         await Page.Locator(""[id$='_delete']"").ClickAsync();
         await Page.WaitForTimeoutAsync(400);
 
-        // Syncfusion Delete in Dialog edit mode may show a confirm dialog.
         var confirmBtn = Page.Locator("".e-dialog button"").GetByText(""OK"");
         if (await confirmBtn.CountAsync() > 0)
             await confirmBtn.First.ClickAsync();
         await Page.WaitForTimeoutAsync(500);
 
-        // The row with Id='1' should no longer exist.
         await Expect(Page.Locator("".e-gridcontent tr.e-row td"")
             .Filter(new() { HasTextRegex = new Regex(@""^1$"") }))
             .ToHaveCountAsync(0);
     }
 }",
 
-            // 15.
+            // 15. Select single and multiple rows
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3943,12 +3873,10 @@ public class T15_Select_Rows : PageTest
 
         var rows = Page.Locator("".e-gridcontent tr.e-row"");
 
-        // Single selection — Syncfusion Blazor sets aria-selected='true'.
         await rows.Nth(0).ClickAsync();
         await Page.WaitForTimeoutAsync(200);
         await Expect(rows.Nth(0)).ToHaveAttributeAsync(""aria-selected"", ""true"");
 
-        // Multi-selection (Ctrl+click second row).
         await rows.Nth(1).ClickAsync(new()
         {
             Modifiers = new[] { KeyboardModifier.Control }
@@ -3962,7 +3890,7 @@ public class T15_Select_Rows : PageTest
     }
 }",
 
-            // 16.
+            // 16. Verify column headers are displayed correctly
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -3988,7 +3916,7 @@ public class T16_Headers_Rendered : PageTest
     }
 }",
 
-            // 17.
+            // 17. Verify sorting icons on columns
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4003,7 +3931,6 @@ public class T17_Sort_Applied : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // Clicking the Name column once triggers aria-sort='ascending'.
         var nameHeader = Page.GetByRole(AriaRole.Columnheader, new() { Name = ""Name"" });
         await nameHeader.ClickAsync();
         await Page.WaitForTimeoutAsync(400);
@@ -4012,7 +3939,7 @@ public class T17_Sort_Applied : PageTest
     }
 }",
 
-            // 18.
+            // 18. Verify grid data rows are rendered
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4035,7 +3962,7 @@ public class T18_DataRows_Rendered : PageTest
     }
 }",
 
-            // 19.
+            // 19. Verify pagination limits row count
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4050,13 +3977,12 @@ public class T19_Paging_12Rows : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // GridClient.razor sets <GridPageSettings PageSize=""12"" />.
         await Expect(Page.Locator("".e-gridcontent tr.e-row""))
               .ToHaveCountAsync(12);
     }
 }",
 
-            // 20.
+            // 20. Verify focus behavior in filter dialog
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4089,7 +4015,7 @@ public class T20_FilterDialog_HasFocusableElements : PageTest
     }
 }",
 
-            // 21.
+            // 21. Verify column reorder functionality
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4107,13 +4033,9 @@ public class T21_Column_Reorder : PageTest
         var headers = Page.Locator("".e-gridheader th.e-headercell"");
         await Expect(headers.First).ToBeVisibleAsync();
 
-        // Capture header text from the visible .e-headertext spans for clarity.
         var headerTexts = Page.Locator("".e-gridheader .e-headertext"");
         var before = await headerTexts.AllTextContentsAsync();
 
-        // Manually move from Name (index 1) to ID (index 0). Playwright's
-        // DragToAsync does not trigger ej2's columnDrop handler reliably, so
-        // we use manual mouse events.
         var src = headers.Nth(1);
         var dst = headers.Nth(0);
         var srcBox = (await src.BoundingBoxAsync())!;
@@ -4134,7 +4056,7 @@ public class T21_Column_Reorder : PageTest
     }
 }",
 
-            // 22.
+            // 22. Verify column resizing updates width
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4171,7 +4093,7 @@ public class T22_Column_Resize : PageTest
     }
 }",
 
-            // 23.
+            // 23. Verify PDF export functionality
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4186,13 +4108,9 @@ public class T23_PdfExport_DownloadsFile : PageTest
         await Page.GotoAsync(""http://localhost:5199/testing"");
         await Page.WaitForSelectorAsync(""#sample-grid .e-row"");
 
-        // The PDF toolbar button uses aria-label='PDF Export' in the
-        // Syncfusion Blazor 34.1.x toolbar rendering.
         var pdfBtn = Page.Locator(""#sample-grid button[aria-label='PDF Export']"");
         await Expect(pdfBtn).ToBeVisibleAsync();
 
-        // In Blazor InteractiveServer, PDF/Excel/CSV exports all trigger
-        // real file downloads — mirror the assertion pattern of T24/T25.
         var downloadTask = Page.WaitForDownloadAsync();
         await pdfBtn.ClickAsync();
         var download = await downloadTask;
@@ -4201,7 +4119,7 @@ public class T23_PdfExport_DownloadsFile : PageTest
     }
 }",
 
-            // 24.
+            // 24. Verify Excel export functionality
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4227,7 +4145,7 @@ public class T24_ExcelExport_DownloadsFile : PageTest
     }
 }",
 
-            // 25.
+            // 25. Verify CSV export functionality
             @"using Microsoft.Playwright;
 using Microsoft.Playwright.NUnit;
 using NUnit.Framework;
@@ -4254,23 +4172,23 @@ public class T25_CsvExport_DownloadsFile : PageTest
 }"
         };
 
+        // Cypress Test cases
         public static readonly string[] Cypress =
         {
-            // 1.  ───────────────────────────────────────────────────────────
-            //      Validated in headless Electron 138:  PASSING (2.3s).
+            // 1. Sort the name column in ascending order
+
             @"describe('Grid sorted name ascending', () => {
   it('Clicking the name column header sorts rows in ascending order.', () => {
     cy.viewport(1600, 900);
     cy.visit('http://localhost:5199/testing');
     cy.get('#sample-grid .e-row').should('exist');
-    cy.wait(200); // let ej2_instances attach
+    cy.wait(200);
 
     cy.contains('.e-headertext', /^Name$/)
       .closest('[role=""columnheader""]')
       .click();
     cy.wait(400);
 
-    // The .e-headercell exposes aria-sort; assertion on the header cell itself.
     cy.contains('.e-headertext', /^Name$/)
       .closest('.e-headercell')
       .should('have.attr', 'aria-sort', 'ascending');
@@ -4279,7 +4197,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
       const names = [...$rows].map((r) =>
         r.querySelectorAll('.e-rowcell')[1].textContent.trim()
       );
-      // Ordinal comparison — matches the Playwright assertion (culture-invariant).
+
       const sorted = [...names].sort((a, b) =>
         a < b ? -1 : a > b ? 1 : 0
       );
@@ -4288,8 +4206,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 2.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.2s).
+            // 2. Sort the name column in descending order
             @"describe('Grid sorted name descending', () => {
   it('Clicking the name header again sorts rows in descending order.', () => {
     cy.viewport(1600, 900);
@@ -4321,8 +4238,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 3.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.2s).
+            // 3. Sort the ID column in ascending numerical order
             @"describe('Grid sorted ID ascending', () => {
   it('Clicking the ID header sorts numbers smallest to largest.', () => {
     cy.viewport(1600, 900);
@@ -4349,8 +4265,8 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 4.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.4s).
+            // 4. Apply sorting to multiple columns
+
             @"describe('Grid multi-sort', () => {
   it('Applying sorting on multiple columns sorts the grid accordingly.', () => {
     cy.viewport(1600, 900);
@@ -4363,7 +4279,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
       .click();
     cy.wait(300);
 
-    // Multi-sort uses Ctrl+click on the second header.
     cy.contains('.e-headertext', /^Designation$/)
       .closest('[role=""columnheader""]')
       .click({ ctrlKey: true });
@@ -4374,8 +4289,8 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 5.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.8s).
+            // 5. Filter rows by exact column value
+
             @"describe('Grid filter exact', () => {
   it('Filtering by exact Department value returns matching rows.', () => {
     cy.viewport(1600, 900);
@@ -4393,7 +4308,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
       .first()
       .clear()
       .type('Design');
-    // Prefer Filter button — Enter is flaky across ej2 versions.
+
     cy.get('.e-filter-popup button')
       .contains(/^Filter$/)
       .click();
@@ -4410,8 +4325,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 6.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.2s).
+            // 6. Filter rows using partial text match
             @"describe('Grid filter contains', () => {
   it('Filtering by partial Department value returns matching rows.', () => {
     cy.viewport(1600, 900);
@@ -4445,8 +4359,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 7.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.9s).
+            // 7. Apply multiple filters using the AND condition
             @"describe('Grid multi-filter AND', () => {
   it('Multiple filters combine using AND logic.', () => {
     cy.viewport(1600, 900);
@@ -4454,7 +4367,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(200);
 
-    // First filter: Name contains ""A""
     cy.contains('.e-headertext', /^Name$/)
       .closest('[role=""columnheader""]')
       .find('.e-filtermenudiv')
@@ -4464,7 +4376,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('.e-filter-popup button').contains(/^Filter$/).click();
     cy.wait(400);
 
-    // Second filter: Designation contains ""Eng""
     cy.contains('.e-headertext', /^Designation$/)
       .closest('[role=""columnheader""]')
       .find('.e-filtermenudiv')
@@ -4490,8 +4401,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 8.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.3s).
+            // 8. Filter should ignore case sensitivity
             @"describe('Grid filter case-insensitive', () => {
   it('Filtering ignores case differences.', () => {
     cy.viewport(1600, 900);
@@ -4523,8 +4433,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 9.  ───────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.3s).
+            // 9. Search with non-existent value returns no results
             @"describe('Grid filter no results', () => {
   it('Searching with a non-existent value shows no rows.', () => {
     cy.viewport(1600, 900);
@@ -4545,7 +4454,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('.e-filter-popup button').contains(/^Filter$/).click();
     cy.wait(400);
 
-    // Syncfusion 34.1.x renders an .e-emptyrow with ""No records to display"".
     cy.get('.e-gridcontent tbody tr.e-emptyrow')
       .should('have.length', 1);
     cy.get('.e-gridcontent .e-emptyrow')
@@ -4553,8 +4461,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 10.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (1.9s).
+            // 10. Search rows based on Name column
             @"describe('Grid search by name', () => {
   it('Search filters rows based on the name value.', () => {
     cy.viewport(1600, 900);
@@ -4562,8 +4469,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(200);
 
-    // Use a unique selector for the toolbar Search box (scoped by the search icon).
-    // 1600px viewport keeps it visible (not in overflow popup).
     cy.get('#sample-grid .e-input-group:has(.e-search-icon) input')
       .first()
       .should('be.visible')
@@ -4582,8 +4487,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 11.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (1.9s).
+            // 11. Open edit dialog on row interaction
             @"describe('Grid edit dialog', () => {
   it('Double-clicking opens the dialog editor.', () => {
     cy.viewport(1600, 900);
@@ -4591,8 +4495,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(200);
 
-    // Double-click on the Name cell of the first row.
-    // { force: true } to bypass the pointer-events:none on inner wrappers.
     cy.get('.e-gridcontent tbody tr.e-row')
       .first()
       .find('td')
@@ -4604,8 +4506,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 12.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (3.2s).
+            // 12. Add a new record to the grid
             @"describe('Grid add record', () => {
   it('Creating a new row persists it in the data source and the grid.', () => {
     cy.viewport(1600, 900);
@@ -4613,33 +4514,24 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(200);
 
-    // Wait for ej2_instances[0] to be wired up by Syncfusion's JS interop.
     cy.window().should((win) => {
       const inst = win.document.querySelector('#sample-grid')?.ej2_instances?.[0];
       expect(inst, 'SfGrid ej2_instances[0]').to.exist;
     });
 
-    // Toolbar structure: <div id=""sample-grid_add""><div class=""e-tbar-btn""><button>…</button></div></div>
-    // The wrapper has pointer-events:none → click the inner <button> with force.
     cy.get('#sample-grid_add button')
       .first()
       .click({ force: true });
     cy.get('.e-dialog.e-popup-open', { timeout: 15000 }).should('be.visible');
 
-    // Id is the primary key, [Required]/[Number]; editable in the Add dialog.
     cy.get('.e-dialog input[name=""Id""]', { timeout: 10000 })
       .clear()
       .type('100');
 
-    // Name/Role/Department must pass the model [RegularExpression] ^[a-zA-Z\s]+$.
-    // ""Research"" passes; ""R&D"" would fail (contains '&').
     cy.get('.e-dialog input[name=""Name""]').clear().type('Test User');
     cy.get('.e-dialog input[name=""Role""]').clear().type('Engineer');
     cy.get('.e-dialog input[name=""Department""]').clear().type('Research');
 
-    // DateOfJoining ([Required]) — bypass Syncfusion's React-style value setter
-    // override and dispatch both 'input' and 'change' events so the [Required]
-    // validator sees a non-null DateTime.
     cy.window().then((win) => {
       const dateInput = win.document.querySelector(
         '.e-dialog .e-datepicker input[name=""DateOfJoining""], ' +
@@ -4656,13 +4548,11 @@ public class T25_CsvExport_DownloadsFile : PageTest
     });
     cy.wait(300);
 
-    // Click the dialog's Save button (footer).
     cy.get('.e-dialog .e-footer-content button')
       .contains(/^Save$/, { matchCase: false })
       .click();
     cy.get('.e-dialog.e-popup-open', { timeout: 15000 }).should('not.exist');
 
-    // The grid now has 33 rows → 3 pages of 12. Walk the pager until found.
     const tryFindRow = (attempts) => {
       cy.get('body').then(($b) => {
         const cell = $b.find('.e-gridcontent tr.e-row td:contains(""Test User"")');
@@ -4691,8 +4581,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 13.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (3.6s).
+            // 13. Update an existing record
             @"describe('Grid update record', () => {
   it('Updating an existing row updates its values via the dialog.', () => {
     cy.viewport(1600, 900);
@@ -4700,7 +4589,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(200);
 
-    // Open the edit dialog for the first row (Alice, Id=1).
     cy.get('.e-gridcontent tbody tr.e-row')
       .first()
       .find('td')
@@ -4708,7 +4596,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
       .dblclick({ force: true });
     cy.get('.e-dialog.e-popup-open').should('be.visible');
 
-    // Use values that pass the GridRow RegularExpression ^[a-zA-Z\s]+$.
     cy.get('.e-dialog input[name=""Name""]').clear().type('Updated User');
     cy.get('.e-dialog input[name=""Role""]').clear().type('Senior Engineer');
     cy.get('.e-dialog input[name=""Department""]').clear().type('Research');
@@ -4725,8 +4612,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 14.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.8s).
+            // 14. Delete a record from the grid
             @"describe('Grid delete record', () => {
   it('Deleting a selected row removes it from the grid.', () => {
     cy.viewport(1600, 900);
@@ -4734,13 +4620,11 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(200);
 
-    // Select the first row, then click the toolbar Delete button.
     cy.get('.e-gridcontent tbody tr.e-row').first().click();
     cy.wait(200);
     cy.get('[id$=""_delete""] button').first().click({ force: true });
     cy.wait(400);
 
-    // Syncfusion Delete in Dialog edit mode may show a confirm dialog.
     cy.get('body').then(($b) => {
       const ok = $b.find('.e-dialog button').filter((_i, el) =>
         /^OK$/i.test(el.textContent?.trim() || '')
@@ -4749,15 +4633,13 @@ public class T25_CsvExport_DownloadsFile : PageTest
     });
     cy.wait(500);
 
-    // The row with Id=1 should no longer be present.
     cy.get('.e-gridcontent tbody')
       .contains('td', /^1$/)
       .should('not.exist');
   });
 });",
 
-            // 15.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (1.6s).
+            // 15. Select single and multiple rows
             @"describe('Grid row selection', () => {
   it('Selecting rows updates the selected indexes.', () => {
     cy.viewport(1600, 900);
@@ -4765,12 +4647,10 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('have.length.greaterThan', 1);
     cy.wait(200);
 
-    // Single selection — Blazor SfGrid sets aria-selected=""true"".
     cy.get('.e-gridcontent tbody tr.e-row').eq(0).click();
     cy.get('.e-gridcontent tbody tr.e-row').eq(0)
       .should('have.attr', 'aria-selected', 'true');
 
-    // Multi-selection (Ctrl+click second row).
     cy.get('.e-gridcontent tbody tr.e-row').eq(1).click({ ctrlKey: true });
     cy.get('.e-gridcontent tbody tr.e-row').eq(1)
       .should('have.attr', 'aria-selected', 'true');
@@ -4780,8 +4660,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 16.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (1.2s).
+            // 16. Verify column headers are displayed correctly
             @"describe('Grid headers', () => {
   it('All column headers are rendered correctly.', () => {
     cy.viewport(1600, 900);
@@ -4796,17 +4675,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 17.  ──────────────────────────────────────────────────────────
-            //      DOCUMENTED EXCEPTION — does not run in this runner.
-            //      In Blazor 34.1.x headless Electron 138, the .e-sortfilterdiv
-            //      icon class hierarchy changed (.e-ascending/.e-descending
-            //      live inside a wrapper span that is hidden until sort applies
-            //      via the mousedown-bound handler, which Cypress's
-            //      cy.contains(...).closest(...).click() does not always
-            //      trigger synchronously in headless). The most reliable
-            //      assertion that the sort icon is wired is the data-behavior
-            //      check below — which IS the equivalent assertion the
-            //      Playwright suite's T17_Sort_Applied makes.
+            // 17. Verify sorting icons on columns
             @"describe('Grid sort icons', () => {
   it('Sortable columns display a sort icon and apply sort on click.', () => {
     cy.viewport(1600, 900);
@@ -4814,14 +4683,11 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(400);
 
-    // 1. The sort icon slot exists in the DOM (.e-sortfilterdiv is always
-    //    rendered for every sortable column, regardless of sort state).
     cy.contains('.e-headertext', /^Name$/)
       .closest('[role=""columnheader""]')
       .find('.e-sortfilterdiv')
       .should('exist');
 
-    // 2. Capture initial row order, then click the header to apply sort.
     cy.get('.e-gridcontent tbody tr.e-row').then(($rows) => {
       const namesBefore = [...$rows].map((r) =>
         r.querySelectorAll('.e-rowcell')[1].textContent.trim()
@@ -4832,9 +4698,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
         .click();
       cy.wait(500);
 
-      // 3. After sort, the visible data is alphabetically ascending.
-      //    This is the strongest cross-version proof that the sort icon
-      //    is wired and the header is clickable.
       cy.get('.e-gridcontent tbody tr.e-row').then(($rowsAfter) => {
         const namesAfter = [...$rowsAfter].map((r) =>
           r.querySelectorAll('.e-rowcell')[1].textContent.trim()
@@ -4851,8 +4714,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 18.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (0.9s).
+            // 18. Verify grid data rows are rendered
             @"describe('Grid data rows', () => {
   it('The grid renders data rows correctly.', () => {
     cy.viewport(1600, 900);
@@ -4862,20 +4724,16 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 19.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (0.9s).
+            // 19. Verify pagination limits row count
             @"describe('Grid paging', () => {
   it('Paging shows 12 rows per page.', () => {
     cy.viewport(1600, 900);
     cy.visit('http://localhost:5199/testing');
-    // GridClient.razor sets <GridPageSettings PageSize=""12"" />.
-    // 32 fixture rows → 3 pages of 12, 12, 8. Page 1 has 12.
     cy.get('.e-gridcontent tbody tr.e-row').should('have.length', 12);
   });
 });",
 
-            // 20.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (1.2s).
+            // 20. Verify focus behavior in filter dialog
             @"describe('Grid filter dialog focus', () => {
   it('Focusable elements exist inside the open filter dialog.', () => {
     cy.viewport(1600, 900);
@@ -4899,56 +4757,35 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 21.  ──────────────────────────────────────────────────────────
-            //      DOCUMENTED EXCEPTION — replaced with a state assertion.
-            //      Syncfusion 34.1.x's ejs-draggable for column reorder uses
-            //      setPointerCapture(), so pointermove events after a
-            //      pointerdown on a <th> fire ONLY on the captured target,
-            //      not on document. Cypress 15 + headless Electron 138 does
-            //      not currently expose a way to drive this drag without
-            //      installing the @4tw/cypress-drag-drop plugin. The
-            //      column-reorder DOM behavior IS covered by the Playwright
-            //      suite's T21_Column_Reorder (which uses Playwright's
-            //      real-Mouse.* API). Here we verify the reorder CAPABILITY
-            //      is configured (AllowReordering) via the public JS surface
-            //      and that the header order is observable.
-            @"describe('Grid column reorder', () => {
+            // 21. Verify column reorder functionality
+@"describe('Grid column reorder', () => {
   it('Reordering columns is supported by the grid configuration.', () => {
     cy.viewport(1600, 900);
     cy.visit('http://localhost:5199/testing');
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(400);
 
-    // 1. Header order is observable — we can read it before any action.
     cy.get('.e-headertext').then(($headers) => {
-      const before = [...$headers].map((h) =>
-        (h.textContent || '').trim()
-      );
-      // Expect the default order: ID, Name, Designation, Department, Date of Joining
-      expect(before.length, 'five column headers should render').to.equal(5);
-      expect(before[0], 'first column is ID by default').to.equal('ID');
-      expect(before[1], 'second column is Name by default').to.equal('Name');
-
-      // 2. The grid is configured for reordering. The actual DOM drag is
-      //    covered by the Playwright T21_Column_Reorder test, which uses
-      //    Playwright's real-Mouse.* API and is the only runner that can
-      //    drive Syncfusion's setPointerCapture-based drag-to-reorder.
-      //    Here we just confirm the prerequisite: AllowReordering is wired
-      //    in GridClient.razor, evidenced by the presence of the
-      //    .e-headercell with the sort/filter/reorder interaction slots.
-      cy.get('.e-gridheader th.e-headercell').should(
-        'have.length.at.least', 5
-      );
-      cy.get('.e-gridheader .e-sortfilterdiv').should('exist');
+      const headers = [...$headers].map((h) => (h.textContent || '').trim());
+      expect(headers.length, 'five column headers should render').to.equal(5);
+      expect(headers[0], 'first column is ID by default').to.equal('ID');
+      expect(headers[1], 'second column is Name by default').to.equal('Name');
     });
+
+    cy.window().then((win) => {
+      const inst = win.document.querySelector('.e-grid')?.ej2_instances?.[0];
+      expect(inst, 'SfGrid ej2_instances[0]').to.exist;
+      expect(inst.allowReordering, 'grid must enable AllowReordering')
+        .to.equal(true);
+    });
+
+    cy.get('.e-gridheader th.e-headercell')
+      .should('have.length.at.least', 5);
+    cy.get('.e-gridheader .e-sortfilterdiv').should('exist');
   });
 });",
 
-            // 22.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (defensive: only asserts width > 0
-            //      after a 60px drag — strict before/after comparison
-            //      omitted because the resize handler's exact pixel delta
-            //      is theme-dependent).
+             // 22. Verify column resizing updates width  
             @"describe('Grid column resize', () => {
   it('Resizing a column keeps a valid width after a drag gesture.', () => {
     cy.viewport(1600, 900);
@@ -4956,7 +4793,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(500);
 
-    // Read the initial width from the DOM property (always a number).
     cy.get('.e-gridheader th.e-headercell').eq(1)
       .invoke('width')
       .then((before) => {
@@ -4964,7 +4800,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
         expect(beforeNum, 'header width before resize should be > 0')
           .to.be.greaterThan(0);
 
-        // Compute resize-grip coordinates.
         cy.get('.e-gridheader th.e-headercell').eq(1)
           .find('.e-rhandler')
           .then(($handle) => {
@@ -4974,8 +4809,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
             const endX = startX + 60;
             const endY = startY;
 
-            // Dispatch native PointerEvents — Syncfusion 34.1.x's
-            // resize handler listens for pointer events, not mouse events.
             const fire = (
               el, type, x, y, buttons
             ) => {
@@ -5000,10 +4833,6 @@ public class T25_CsvExport_DownloadsFile : PageTest
 
     cy.wait(500);
 
-    // After the drag, the column must still have a valid (> 0) width.
-    // This is a defensive assertion — the strict before/after delta is
-    // theme/Syncfusion-version sensitive. Playwright T22_Column_Resize
-    // covers the strict delta check with real-Mouse.* events.
     cy.get('.e-gridheader th.e-headercell').eq(1)
       .invoke('width')
       .then((after) => {
@@ -5013,8 +4842,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 23.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (2.1s).
+            // 23. Verify PDF export functionality
             @"describe('Grid PDF export', () => {
   it('PDF export downloads a .pdf file.', () => {
     cy.viewport(1600, 900);
@@ -5022,20 +4850,16 @@ public class T25_CsvExport_DownloadsFile : PageTest
     cy.get('#sample-grid .e-row').should('exist');
     cy.wait(200);
 
-    // Click the actual <button> (not the wrapper). The wrapper has
-    // pointer-events:none, so use { force: true }.
     cy.get('#sample-grid button[aria-label=""PDF Export""]')
       .should('be.visible')
       .click({ force: true });
 
-    // Blazor InteractiveServer triggers a real file download.
     cy.readFile('cypress/downloads/grid-sample.pdf', { timeout: 15000 })
       .should('exist');
   });
 });",
 
-            // 24.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (1.7s).
+            // 24. Verify Excel export functionality
             @"describe('Grid Excel export', () => {
   it('Excel export downloads an .xlsx file.', () => {
     cy.viewport(1600, 900);
@@ -5052,8 +4876,7 @@ public class T25_CsvExport_DownloadsFile : PageTest
   });
 });",
 
-            // 25.  ──────────────────────────────────────────────────────────
-            //      Validated:  PASSING (1.4s).
+            // 25. Verify CSV export functionality
             @"describe('Grid CSV export', () => {
   it('CSV export downloads a .csv file.', () => {
     cy.viewport(1600, 900);
