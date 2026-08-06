@@ -1,0 +1,104 @@
+﻿@page "/"
+@using Syncfusion.Blazor.Cards
+
+@inject NavigationManager Nav
+
+<div class="home-container">
+
+    <!-- HERO SECTION -->
+    <SfCard CssClass="hero-card">
+        
+
+        <CardContent>
+            <h2>Welcome to Syncfusion Blazor Shopping Cart</h2>
+            <p>Discover amazing products, add to wishlist, and shop smarter.</p>
+           <img src="images/banner.png" />
+        </CardContent>
+        
+    </SfCard>
+
+    <!-- NAVIGATION CARDS -->
+    <div class="nav-card-container">
+
+        <!-- Catalog Card -->
+        <SfCard CssClass="nav-card" 
+                @onclick="@(() => Nav.NavigateTo("/catalog"))">
+            <CardContent>
+                <img src="images/catalog.png" />
+            </CardContent>
+        </SfCard>
+
+        <!-- Wishlist Card -->
+        <SfCard CssClass="nav-card"
+                @onclick="@(() => Nav.NavigateTo("/wishlist"))">
+            <CardContent>
+                <img src="images/wishlist.png" />
+            </CardContent>
+        </SfCard>
+
+    </div>
+</div>
+
+<style>
+    /* PAGE LAYOUT */
+.home-container {
+    max-width: 1000px;
+    margin: auto;
+    padding: 30px;
+}
+
+/* HERO CARD */
+.hero-card {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    margin-bottom: 40px;
+}
+.content {
+    text-align: center;
+}
+.hero-image {
+    width: 100%;
+    height: auto;
+   
+}
+
+.hero-card h2 {
+    margin-top: 15px;
+    font-size: 26px;
+    text-align: center;
+}
+
+.hero-card p {
+    color: #666;
+    font-size: 16px;
+    text-align: center;
+}
+
+/* NAV CARDS */
+.nav-card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+}
+
+.nav-card {
+    cursor: pointer;
+    text-align: center;
+}
+
+.nav-card img {
+    width: 130px;
+    margin-bottom: 15px;
+}
+
+.nav-card h3 {
+    margin-bottom: 5px;
+}
+
+.nav-card p {
+    color: #666;
+    font-size: 14px;
+}
+
+</style>

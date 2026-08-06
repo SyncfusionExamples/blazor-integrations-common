@@ -1,0 +1,267 @@
+@page "/checkout"
+@using Microsoft.Extensions.Options
+@using ShoppingCart.Models
+@inject ICartService CartService
+@inject IOrderService OrderService
+@inject IStripePaymentService StripeService
+@inject IOptions<StripeOptions> StripeOptionsAccessor
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject ILogger<Checkout> Logger
+
+<PageTitle>Checkout</PageTitle>
+
+<div class="container-fluid py-5">
+    <h1>📦 Checkout</h1>
+
+    @if (!CartService.Items.Any())
+    {
+        <div class="alert alert-warning">
+            Your cart is empty. <a href="/catalog">Continue shopping</a>
+        </div>
+    }
+    else
+    {
+        @if (string.IsNullOrEmpty(stripePublishableKey))
+        {
+            <div class="alert alert-danger">
+                <strong>Stripe is not configured.</strong>
+                <p>Set <code>Stripe:PublishableKey</code> in user-secrets or appsettings.</p>
+                <pre>dotnet user-secrets set "Stripe:PublishableKey" "pk_test_..."</pre>
+            </div>
+        }
+
+        <EditForm Model="@order" OnValidSubmit="ProcessOrder">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="row">
+                <div class="col-md-7">
+                    <!-- Shipping Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>📍 Shipping Information</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <label class="form-label">Full Name *</label>
+                                    <SfTextBox Placeholder="Full name" @bind-Value="order.Shipping.FullName" />
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Address *</label>
+                                    <SfTextBox Placeholder="Street address" @bind-Value="order.Shipping.Address" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">City *</label>
+                                    <SfTextBox Placeholder="City" @bind-Value="order.Shipping.City" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">State *</label>
+                                    <SfTextBox Placeholder="State" @bind-Value="order.Shipping.State" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">ZIP Code *</label>
+                                    <SfTextBox Placeholder="ZIP code" @bind-Value="order.Shipping.ZipCode" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Country *</label>
+                                    <SfTextBox Placeholder="Country" @bind-Value="order.Shipping.Country" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone *</label>
+                                    <SfMaskedTextBox Mask="(000) 000-0000"
+                                                     Placeholder="(555) 555-5555"
+                                                     @bind-Value="order.Shipping.Phone" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email (for receipt)</label>
+                                    <SfTextBox Placeholder="you@example.com"
+                                               @bind-Value="order.Shipping.Email" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Information (Stripe Elements) -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h4>💳 Payment Information</h4>
+                            <small class="text-muted">Card details are collected securely by Stripe. Your data never touches our server.</small>
+                        </div>
+                        <div class="card-body" style="position: relative;">
+                            <div id="stripe-payment-element" style="min-height: 280px;">
+                                <!-- Stripe Payment Element will mount here -->
+                            </div>
+                            
+                            @if (isPreparingPayment)
+                            {
+                                <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.8); display: flex; align-items: center; justify-content: center; z-index: 10; border-radius: 0.25rem;">
+                                    <SfSpinner Visible="true" Label="Loading secure payment form..." />
+                                </div>
+                            }
+
+                            @if (!string.IsNullOrEmpty(paymentError))
+                            {
+                                <div class="alert alert-danger mt-3">@paymentError</div>
+                            }
+                        </div>
+                    </div>
+
+                    <SfButton Content="@(isProcessing ? "Processing..." : $"Pay {order.TotalAmount.ToString("C")} & Place Order")"
+                              Type="ButtonType.Submit"
+                              Disabled="@(isProcessing || isPreparingPayment || !CartService.Items.Any())"
+                              CssClass="e-primary e-block mb-3" />
+                </div>
+
+                <div class="col-md-5">
+                    <div class="card sticky-top" style="top: 20px;">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0">Order Summary</h4>
+                        </div>
+                        <div class="card-body">
+                            @foreach (var item in CartService.Items)
+                            {
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span>@item.ProductName × @item.Quantity</span>
+                                    <span>@item.Subtotal.ToString("C")</span>
+                                </div>
+                            }
+                            <hr />
+                            <div class="d-flex justify-content-between fw-bold">
+                                <span>Subtotal:</span>
+                                <span>@CartService.Total.ToString("C")</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-3">
+                                <span>Shipping:</span>
+                                <span>$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between fs-5 fw-bold text-success">
+                                <span>Total:</span>
+                                <span>@CartService.Total.ToString("C")</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    private Order order = new();
+    private string stripePublishableKey = string.Empty;
+    private IJSObjectReference? jsModule;
+    private bool isPreparingPayment = true;
+    private bool isProcessing = false;
+    private string? paymentError;
+    private string? clientSecret;
+    private bool paymentElementMounted;
+
+    protected override async Task OnInitializedAsync()
+    {
+        stripePublishableKey = StripeOptionsAccessor.Value.PublishableKey;
+
+        // Hydrate order from cart
+        order.Items = CartService.Items.ToList();
+        order.TotalAmount = CartService.Total;
+        order.Currency = StripeOptionsAccessor.Value.Currency;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && CartService.Items.Any() && !paymentElementMounted)
+        {
+            try
+            {
+                isPreparingPayment = true;
+                StateHasChanged();
+
+                // 1) Save the order server-side so it has an ID
+                order.OrderDate = DateTime.Now;
+                await OrderService.PlaceOrderAsync(order);
+
+                // 2) Create a PaymentIntent and get the client secret
+                var pi = await StripeService.CreateOrUpdatePaymentIntentAsync(order);
+                clientSecret = pi.ClientSecret;
+
+                // 3) Import the JS module and mount Stripe Payment Element
+                jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "/js/payment.js");
+                
+                // Ensure the DOM is fully updated before mounting
+                isPreparingPayment = false;
+                StateHasChanged();
+                await Task.Delay(100); // Brief delay to ensure DOM is ready
+                
+                await jsModule.InvokeVoidAsync("mountPaymentElement",
+                    stripePublishableKey, clientSecret, "stripe-payment-element");
+
+                paymentElementMounted = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Failed to initialize Stripe Payment Element");
+                paymentError = "Could not load the secure payment form. Please refresh the page.";
+            }
+            finally
+            {
+                if (!paymentElementMounted)
+                {
+                    isPreparingPayment = false;
+                    StateHasChanged();
+                }
+            }
+        }
+    }
+
+    private async Task ProcessOrder()
+    {
+        if (isProcessing || jsModule is null) return;
+
+        try
+        {
+            isProcessing = true;
+            paymentError = null;
+            StateHasChanged();
+
+            var returnUrl = NavigationManager.BaseUri.TrimEnd('/') + $"/order-confirmation/{order.OrderId}";
+
+            var result = await jsModule.InvokeAsync<PaymentResult>("confirmPayment", returnUrl);
+
+            if (!result.Ok)
+            {
+                paymentError = result.Error ?? "Payment failed. Please try a different card.";
+                isProcessing = false;
+                StateHasChanged();
+                return;
+            }
+
+            // Card payment succeeded without 3DS redirect.
+            // (3DS challenges are handled by redirecting to returnUrl.)
+            order.PaymentIntentId = result.PaymentIntentId;
+            order.PaymentStatus = result.Status;
+            order.Status = "Paid";
+
+            // Pull latest card details (brand + last 4) for display
+            await OrderService.UpdateAsync(order);
+
+            CartService.ClearCart();
+            NavigationManager.NavigateTo($"/order-confirmation/{order.OrderId}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Payment confirmation error");
+            paymentError = "Unexpected error during payment. Please try again.";
+            isProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    public class PaymentResult
+    {
+        public bool Ok { get; set; }
+        public string? Error { get; set; }
+        public string? PaymentIntentId { get; set; }
+        public string? Status { get; set; }
+    }
+}
