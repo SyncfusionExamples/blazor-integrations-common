@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>.shoes { fill: #f97316; stroke: #ea580c; stroke-width: 1; }</style>
+  </defs>
+  <g class="shoes">
+    <!-- Left shoe sole -->
+    <path d="M 15 55 Q 15 65 25 65 L 35 65 Q 40 65 40 60 L 40 50 Q 35 48 25 48 Q 15 48 15 55" fill="#ea580c"/>
+    <!-- Left shoe upper -->
+    <path d="M 15 55 Q 15 40 25 35 Q 35 35 40 50" fill="#f97316" stroke="#ea580c" stroke-width="1.5"/>
+    <!-- Right shoe sole -->
+    <path d="M 60 55 Q 60 65 70 65 L 80 65 Q 85 65 85 60 L 85 50 Q 80 48 70 48 Q 60 48 60 55" fill="#ea580c"/>
+    <!-- Right shoe upper -->
+    <path d="M 60 55 Q 60 40 70 35 Q 80 35 85 50" fill="#f97316" stroke="#ea580c" stroke-width="1.5"/>
+    <!-- Lace details -->
+    <circle cx="22" cy="48" r="2" fill="#ea580c"/>
+    <circle cx="32" cy="48" r="2" fill="#ea580c"/>
+    <circle cx="67" cy="48" r="2" fill="#ea580c"/>
+    <circle cx="77" cy="48" r="2" fill="#ea580c"/>
+  </g>
+</svg>

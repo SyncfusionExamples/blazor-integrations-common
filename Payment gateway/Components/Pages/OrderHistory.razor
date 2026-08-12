@@ -1,0 +1,81 @@
+@page "/orders"
+@inject IOrderService OrderService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Order History</PageTitle>
+
+<div class="container py-5">
+    <h2>Order History</h2>
+
+    @if (orders == null)
+    {
+        <SfSpinner Visible="true"></SfSpinner>
+    }
+    else if (!orders.Any())
+    {
+        <div class="card p-4 text-center">
+            <h4>No orders yet</h4>
+            <p class="text-muted">You haven't placed any orders. Start shopping now!</p>
+            <SfButton CssClass="e-primary" OnClick="@(() => NavigationManager.NavigateTo("/catalog"))">Browse Catalog</SfButton>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
+            @foreach (var o in orders)
+            {
+                <div class="col-12">
+                    <div class="card p-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5>Order #@o.OrderId</h5>
+                                <div class="text-muted">@o.OrderDate.ToString("MMM d, yyyy")</div>
+                                <div class="mt-1">
+                                    <span class="badge @StatusBadgeClass(o.Status)">@o.Status</span>
+                                    @if (!string.IsNullOrEmpty(o.PaymentStatus))
+                                    {
+                                        <small class="text-muted ms-2">Payment: @o.PaymentStatus</small>
+                                    }
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">@o.TotalAmount.ToString("C")</div>
+                                <SfButton CssClass="e-outline e-small mt-2"
+                                           OnClick="@(() => NavigationManager.NavigateTo($"/order-confirmation/{o.OrderId}"))">
+                                    View
+                                </SfButton>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="small text-muted">Items:</div>
+                        <ul class="mb-0">
+                            @foreach (var it in o.Items)
+                            {
+                                <li>@it.ProductName — @it.Quantity × @it.UnitPrice.ToString("C")</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Order>? orders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await OrderService.GetOrdersAsync();
+    }
+
+    private string StatusBadgeClass(string? status) => (status ?? "").ToLowerInvariant() switch
+    {
+        "paid" => "bg-success",
+        "awaiting payment" => "bg-warning text-dark",
+        "payment failed" => "bg-danger",
+        "refunded" => "bg-secondary",
+        "confirmed" => "bg-primary",
+        _ => "bg-light text-dark"
+    };
+}

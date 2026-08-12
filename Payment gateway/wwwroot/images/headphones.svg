@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <style>.headphones { fill: #6366f1; stroke: #4f46e5; stroke-width: 1; }</style>
+  </defs>
+  <g class="headphones">
+    <!-- Headband -->
+    <path d="M 30 35 Q 30 20 50 20 Q 70 20 70 35" fill="none" stroke="#4f46e5" stroke-width="4" stroke-linecap="round"/>
+    <!-- Left ear cup -->
+    <circle cx="30" cy="60" r="12" />
+    <!-- Right ear cup -->
+    <circle cx="70" cy="60" r="12" />
+    <!-- Left speaker detail -->
+    <circle cx="30" cy="60" r="8" fill="#8b5cf6"/>
+    <!-- Right speaker detail -->
+    <circle cx="70" cy="60" r="8" fill="#8b5cf6"/>
+    <!-- Connector left -->
+    <rect x="27" y="35" width="6" height="12" rx="2"/>
+    <!-- Connector right -->
+    <rect x="67" y="35" width="6" height="12" rx="2"/>
+  </g>
+</svg>
