@@ -1,0 +1,93 @@
+@page "/employees"
+@rendermode InteractiveServer
+@inject IEmployeeService EmployeeService
+@inject ILogger<Employees> Logger
+
+<PageTitle>Employees</PageTitle>
+
+<div class="d-flex align-items-center gap-2 my-3">
+    <button class="btn btn-primary" @onclick="LoadAsync" disabled="@isLoading">
+        @if (isLoading)
+        {
+            <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+            <span>Loading…</span>
+        }
+        else
+        {
+            <span>Load from cache</span>
+        }
+    </button>
+    <button class="btn btn-outline-secondary" @onclick="RefreshAsync" disabled="@isLoading">
+        Refresh cache
+    </button>
+
+    @if (!string.IsNullOrEmpty(source))
+    {
+        <span class="badge bg-info text-dark">@source</span>
+    }
+</div>
+
+@if (employees is null)
+{
+    <p><em>Click <strong>Load from cache</strong> to fetch employees.</em></p>
+}
+else
+{
+    <SfGrid DataSource="@employees"
+            AllowPaging="true"
+            AllowSorting="true"
+            AllowFiltering="true"
+            AllowResizing="true"
+            Toolbar="@toolbar">
+        <GridPageSettings PageSize="5"></GridPageSettings>
+        <GridColumns>
+            <GridColumn Field=@nameof(Employee.EmployeeId) HeaderText="ID" Width="80" TextAlign="TextAlign.Right" IsPrimaryKey="true"></GridColumn>
+            <GridColumn Field=@nameof(Employee.Name) HeaderText="Name" Width="160"></GridColumn>
+            <GridColumn Field=@nameof(Employee.Designation) HeaderText="Designation" Width="160"></GridColumn>
+            <GridColumn Field=@nameof(Employee.Department) HeaderText="Department" Width="140"></GridColumn>
+            <GridColumn Field=@nameof(Employee.Location) HeaderText="Location" Width="120"></GridColumn>
+            <GridColumn Field=@nameof(Employee.JoinDate) HeaderText="Join Date" Format="d" Type="ColumnType.Date" Width="120"></GridColumn>
+            <GridColumn Field=@nameof(Employee.Salary) HeaderText="Salary" Format="C0" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+        </GridColumns>
+    </SfGrid>
+}
+
+@code {
+    private List<Employee>? employees;
+    private bool isLoading;
+    private string? source;
+
+    private readonly List<string> toolbar = new() { "Search" };
+
+    private async Task LoadAsync()
+    {
+        if (isLoading) return;
+        isLoading = true;
+        try
+        {
+            employees = await EmployeeService.GetEmployeesAsync();
+            source = employees.Count > 0 ? "Loaded" : "Empty result";
+            Logger.LogInformation("UI loaded {Count} employees.", employees.Count);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task RefreshAsync()
+    {
+        if (isLoading) return;
+        isLoading = true;
+        try
+        {
+            await EmployeeService.RefreshCacheAsync();
+            employees = await EmployeeService.GetEmployeesAsync();
+            source = "Cache refreshed";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}
