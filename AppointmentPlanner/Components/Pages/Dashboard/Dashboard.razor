@@ -1,0 +1,592 @@
+﻿@page "/"
+@page "/dashboard"
+
+@using AppointmentPlanner.Data;
+@using AppointmentPlanner.Models;
+@using System;
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Lists
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+
+@if (isDataLoaded)
+{
+    <section class="planner-dashboard">
+        @* ===== Page header ===== *@
+        <header class="dashboard-header">
+            <div class="dashboard-title-block">
+                <h1 class="dashboard-title">Dashboard</h1>
+                <p class="dashboard-subtitle">@greeting, Jane — here is your clinic at a glance.</p>
+            </div>
+            <div class="dashboard-header-controls">
+                <SfDateRangePicker TValue="DateTime?" aria-label="Appointment date range" Placeholder="Select range" StartDate="@rangeStart" EndDate="@rangeEnd" CssClass="dashboard-date" ShowClearButton="true">
+                    <DateRangePickerEvents TValue="DateTime?" ValueChange="OnRangeChanged"></DateRangePickerEvents>
+                </SfDateRangePicker>
+                <SfDropDownList TValue="string" TItem="Specialization" aria-label="Filter by department" DataSource="@departments" @bind-Value="@selectedDepartmentId"
+                                Placeholder="All departments" CssClass="dashboard-dept" AllowClear="true" ShowClearButton="true">
+                    <DropDownListFieldSettings Text="Text" Value="Id"></DropDownListFieldSettings>
+                    <DropDownListEvents TValue="string" TItem="Specialization" ValueChange="OnDepartmentChanged"></DropDownListEvents>
+                </SfDropDownList>
+            </div>
+        </header>
+
+        @* ===== Alerts strip ===== *@
+        @if (alerts != null && alerts.Count > 0)
+        {
+            <div class="dashboard-alerts">
+                @foreach (var alert in alerts)
+                {
+                    <SfMessage Severity="@alertSeverity(alert)" CssClass="@alert.Css" ShowIcon="true" Variant="MessageVariant.Filled">@alert.Message</SfMessage>
+                }
+            </div>
+        }
+
+        @* ===== KPI row ===== *@
+        <div class="dashboard-kpi-row">
+            <SfCard CssClass="kpi-card kpi-card--today">
+                @* <CardHeader>
+                    <CardHeaderTitle>
+                        <span class="kpi-label">Total Appointments — Today</span>
+                    </CardHeaderTitle>
+                    <CardHeaderAvatar>
+                        <span class="e-icons e-day kpi-avatar kpi-avatar--icon"></span>
+                    </CardHeaderAvatar>
+                </CardHeader> *@
+                <CardContent>
+                    @* <div class="kpi-content">
+                        <div class="kpi-text">
+                            <div class="kpi-value-row">
+                                <span class="kpi-value">@todayKpi.Value</span>
+                                <SfChip CssClass="@todayKpi.DeltaCss" LeadingIconCss="@todayKpi.DeltaIconCss">
+                                    <ChipText>@todayKpi.DeltaLabel</ChipText>
+                                </SfChip>
+                            </div>
+                        </div>
+                        <div class="kpi-spark">
+                            <SfSparkline ID="sparkToday" DataSource="@todayKpi.Sparkline" ValueType="Syncfusion.Blazor.Charts.SparklineValueType.Numeric"
+                                         LineWidth="2" Fill="#5851e1" Height="56px" Width="100%">
+                                <SparklineTooltipSettings TValue="int" Visible="true" Format="Day count: ${value}"></SparklineTooltipSettings>
+                            </SfSparkline>
+                        </div>
+                    </div> *@
+
+                            <div class="e-card card day-events-container">
+                                <div class="e-card-content">
+                            <span class="card-text label-text">Total Appointments - Today</span>
+                            <div class="count-container">
+                                <span class="icon-day"><img src="css/appoinment/assets/Icons/Today_Widget.svg" alt="Today" /></span>
+                                <span class="day-event-count">@todayKpi.Value</span>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            <SfCard CssClass="kpi-card kpi-card--week">
+                @* <CardHeader>
+                    <CardHeaderTitle>
+                        <span class="kpi-label">Total Appointments — This Week</span>
+                    </CardHeaderTitle>
+                    <CardHeaderAvatar>
+                        <span class="e-icons e-week kpi-avatar kpi-avatar--icon"></span>
+                    </CardHeaderAvatar>
+                </CardHeader> *@
+                <CardContent>
+                    @* <div class="kpi-content">
+                        <div class="kpi-text">
+                            <div class="kpi-value-row">
+                                <span class="kpi-value">@weekKpi.Value</span>
+                                <SfChip CssClass="@weekKpi.DeltaCss" LeadingIconCss="@weekKpi.DeltaIconCss">
+                                    <ChipText>@weekKpi.DeltaLabel</ChipText>
+                                </SfChip>
+                            </div>
+                        </div>
+                        <div class="kpi-spark">
+                            <SfSparkline ID="sparkWeek" DataSource="@weekKpi.Sparkline" ValueType="Syncfusion.Blazor.Charts.SparklineValueType.Numeric"
+                                         LineWidth="2" Fill="#00bdae" Height="56px" Width="100%">
+                                <SparklineTooltipSettings TValue="int" Visible="true" Format="Day count: ${value}"></SparklineTooltipSettings>
+                            </SfSparkline>
+                        </div>
+                    </div> *@
+                    <div class="e-card card week-events-container">
+                     <div class="e-card-content">
+                            <span class="card-text label-text">Total Appointments - This Week</span>
+                            <div class="count-container">
+                                <span class="icon-week"><img src="css/appoinment/assets/Icons/ThisWeek_Widget.svg" alt="ThisWeek" /></span>
+                                <span class="week-event-count">@weekKpi.Value</span>
+                            </div>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard>
+        </div>
+
+        @* ===== Main two-column area ===== *@
+        <div class="dashboard-main">
+            <SfCard CssClass="panel-card panel-card--grid">
+                <CardHeader Title="Today's Appointments" SubTitle="Tap a row to open the doctor, or use the actions to manage.">
+                    <CardHeaderAvatar>
+                        <span class="e-icons e-schedule panel-icon"></span>
+                    </CardHeaderAvatar>
+                    <CardActionSettings>
+                        <CardAction Button="primary" Content="Book Appointment" OnClick="@OpenNewAppointment"></CardAction>
+                    </CardActionSettings>
+                </CardHeader>
+                <CardContent>
+                    <SfToolbar CssClass="dashboard-toolbar">
+                        <ToolbarItems>
+                            <ToolbarItem Type="ItemType.Input">
+                                <Template>
+                                    <SfTextBox aria-label="Search patient or doctor" Placeholder="Search patient or doctor" Width="220px" ShowClearButton="true" ValueChange="@OnSearchChanged"></SfTextBox>
+                                </Template>
+                            </ToolbarItem>
+                            <ToolbarItem Type="ItemType.Input">
+                                <Template>
+                                    <SfDropDownList TValue="string" TItem="StatusOption" aria-label="Filter by appointment status" DataSource="@statusOptions" @bind-Value="@statusFilter"
+                                                    Placeholder="All statuses" Width="160px" ShowClearButton="true" AllowClear="true">
+                                        <DropDownListFieldSettings Text="Text" Value="Value"></DropDownListFieldSettings>
+                                        <DropDownListEvents TValue="string" TItem="StatusOption" ValueChange="@OnStatusFilterChanged"></DropDownListEvents>
+                                    </SfDropDownList>
+                                </Template>
+                            </ToolbarItem>
+                            <ToolbarItem Align="ItemAlign.Right">
+                                <ChildContent>
+                                    <SfButton IsPrimary="true" IconCss="e-icons e-plus" Content="New Appointment" OnClick="@OpenNewAppointment"></SfButton>
+                                </ChildContent>
+                            </ToolbarItem>
+                        </ToolbarItems>
+                    </SfToolbar>
+                    <SfGrid ID="Grid" DataSource="@filteredAppointments" Height="320px" Width="100%" AllowPaging="true" AllowSorting="true" GridLines="GridLine.None">
+                        <GridPageSettings PageSize="7"></GridPageSettings>
+                        <GridColumns>
+                            <GridColumn Field="Time" HeaderText="Time" TextAlign="TextAlign.Left" Width="70"></GridColumn>
+                            <GridColumn Field="Name" HeaderText="Patient" Width="110">
+                                <Template>
+                                    @{ var a = (context as Appointment); }
+                                    <div class="grid-patient">
+                                        <span class="grid-patient-name">@a.Name</span>
+                                        <span class="grid-patient-dept">@a.DepartmentName</span>
+                                    </div>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn HeaderText="Doctor" TextAlign="TextAlign.Left" Width="110">
+                                <Template>
+                                    @{ var a = (context as Appointment); }
+                                    <NavLink class="grid-doctor-link" href="@($"doctors/doctorsdetails/{a.DoctorId}")">@a.DoctorName</NavLink>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Symptoms" HeaderText="Symptoms" TextAlign="TextAlign.Left" Width="160"></GridColumn>
+                            <GridColumn HeaderText="Status" TextAlign="TextAlign.Center" Width="100">
+                                <Template>
+                                    @{ var a = (context as Appointment); }
+                                    <SfChip CssClass="@a.StatusCss">
+                                        <ChipText>@a.StatusLabel</ChipText>
+                                    </SfChip>
+                                </Template>
+                            </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </CardContent>
+            </SfCard>
+
+            <SfCard CssClass="panel-card panel-card--side">
+                <CardHeader Title="Activity &amp; Availability" SubTitle="Live operational feed">
+                    <CardHeaderAvatar>
+                        <span class="e-icons e-timeline panel-icon"></span>
+                    </CardHeaderAvatar>
+                </CardHeader>
+                <CardContent>
+                    <SfAccordion CssClass="dashboard-accordion" ExpandMode="ExpandMode.Single">
+                        <AccordionItems>
+                            <AccordionItem Expanded="true">
+                                <HeaderTemplate>@activitiesHeader</HeaderTemplate>
+                                <ContentTemplate>@activitiesContent</ContentTemplate>
+                            </AccordionItem>
+                            <AccordionItem>
+                                <HeaderTemplate>@doctorsHeader</HeaderTemplate>
+                                <ContentTemplate>@doctorsContent</ContentTemplate>
+                            </AccordionItem>
+                        </AccordionItems>
+                    </SfAccordion>
+                </CardContent>
+            </SfCard>
+        </div>
+
+        <SfCard CssClass="panel-card panel-card--chart">
+            <CardHeader Title="Consultation Trend" SubTitle="Appointments per day, by department">
+                    @* <CardHeaderAvatar>
+                        <span class="e-icons e-chart panel-icon"></span>
+                    </CardHeaderAvatar> *@
+            </CardHeader>
+            <CardContent>
+                 <SfChart Title="Consultation">
+                                <ChartArea><ChartAreaBorder Width="0"></ChartAreaBorder></ChartArea>
+                                <ChartTitleStyle TextAlignment="@Alignment.Near"></ChartTitleStyle>
+                                <ChartPrimaryXAxis Title="Date" ValueType="Syncfusion.Blazor.Charts.ValueType.DateTime" Interval="1" IntervalType="@IntervalType.Days" LabelFormat="MM/dd" Minimum="@firstDayOfWeek" Maximum="@max" EdgeLabelPlacement="@EdgeLabelPlacement.Shift">
+                                    <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+                                    <ChartAxisMinorGridLines Width="0"></ChartAxisMinorGridLines>
+                                    <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                                </ChartPrimaryXAxis>
+                                <ChartPrimaryYAxis Title="Patient" Minimum="0" Maximum="6" Interval="2"></ChartPrimaryYAxis>
+                                <ChartLegendSettings Visible="true" Position="@LegendPosition.Top" Padding="20"></ChartLegendSettings>
+                    <ChartSeriesCollection>
+                        @foreach (var series in departmentSeries)
+                        {
+                            <ChartSeries DataSource="@series.Data" Type="ChartSeriesType.Spline" Width="2" XName="Date" YName="EventCount"
+                                         Name="@series.Name" LegendShape="LegendShape.Circle" Fill="@series.Color">
+                                <ChartMarker Visible="true" Width="6" Height="6" Shape="ChartShape.Circle" Fill="@series.Color"></ChartMarker>
+                            </ChartSeries>
+                        }
+                    </ChartSeriesCollection>
+                </SfChart>
+            </CardContent>
+        </SfCard>
+
+        @* ===== New Appointment Dialog (only renders when opened) ===== *@
+        @if (isNewAptOpen)
+        {
+            <SfDialog ID="newAptDialog" @bind-IsOpen="@isNewAptOpen" Width="420px" CssClass="new-apt-dialog" ShowCloseIcon="true" Header="New Appointment" IsModal="true">
+                <ChildContent>
+                    <div class="new-apt-form">
+                    <div class="form-row">
+                        <label>Patient</label>
+                        <SfDropDownList TValue="int" TItem="Patient" DataSource="@Service.Patients" @bind-Value="@newPatientId" Placeholder="Select patient">
+                            <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+                    <div class="form-row">
+                        <label>Doctor</label>
+                        <SfDropDownList TValue="int" TItem="Doctor" DataSource="@availableDoctors" @bind-Value="@newDoctorId" Placeholder="Select doctor">
+                            <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+                    <div class="form-row">
+                        <label>Time</label>
+                        <SfTimePicker TValue="DateTime?" @bind-Value="@newAptTime" Placeholder="Select time" Format="hh:mm tt" CssClass="apt-time-picker"></SfTimePicker>
+                    </div>
+                    <div class="form-row">
+                        <label>Symptoms</label>
+                        <SfTextBox @bind-Value="@newSymptoms" Placeholder="Enter symptoms" CssClass="apt-symptoms"></SfTextBox>
+                    </div>
+                    <div class="form-actions">
+                        <SfButton Content="Cancel" OnClick="@(() => isNewAptOpen = false)"></SfButton>
+                        <SfButton IsPrimary="true" Content="Add Appointment" OnClick="@AddNewAppointment"></SfButton>
+                    </div>
+                </div>
+            </ChildContent>
+            </SfDialog>
+        }
+    </section>
+}
+else
+{
+    <section class="planner-dashboard planner-dashboard--loading">
+        <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="56px" Width="100%" CssClass="skel-h"></SfSkeleton>
+        <div class="kpi-row">
+            <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="140px" Width="100%"></SfSkeleton>
+            <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="140px" Width="100%"></SfSkeleton>
+        </div>
+        <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="360px" Width="100%"></SfSkeleton>
+    </section>
+}
+
+@code {
+    [Inject] protected AppointmentService Service { get; set; }
+    [Inject] protected NavigationManager Navigation { get; set; }
+
+    private string greeting = "Good day";
+    private DateTime? rangeStart;
+    private DateTime? rangeEnd;
+
+    private string selectedDepartmentId = "";
+
+    private DashboardKpi todayKpi = new() { Label = "Today" };
+    private DashboardKpi weekKpi = new() { Label = "This Week" };
+
+    private List<Appointment> appointments = new();
+    private List<Appointment> filteredAppointments = new();
+    private string searchTerm = "";
+    private string statusFilter = "";
+
+    private List<Activity> activities = new();
+    private List<Doctor> availableDoctors = new();
+    private List<Specialization> departments = new();
+    private List<DepartmentSeries> departmentSeries = new();
+    private List<AlertItem> alerts = new();
+
+    private DateTime startDate = new DateTime(2026, 2, 5, 0, 0, 0, 0);
+    private DateTime endDate;
+    private DateTime firstDayOfWeek;
+    private DateTime max;
+    private bool isDataLoaded;
+
+    // New appointment dialog state
+    private bool isNewAptOpen = false;
+    private int newPatientId;
+    private int newDoctorId;
+    private DateTime? newAptTime;
+    private string newSymptoms = "";
+
+    private List<StatusOption> statusOptions = new()
+    {
+        new StatusOption { Value = "Confirmed", Text = "Confirmed" },
+        new StatusOption { Value = "Waiting", Text = "Waiting" },
+        new StatusOption { Value = "InProgress", Text = "In Progress" },
+        new StatusOption { Value = "Completed", Text = "Completed" },
+        new StatusOption { Value = "Cancelled", Text = "Cancelled" }
+    };
+
+    public class StatusOption
+    {
+        public string Value { get; set; }
+        public string Text { get; set; }
+    }
+
+    private RenderFragment activitiesHeader => __builder =>
+    {
+        <span class="accordion-header">
+            <span class="e-icons e-clock"></span>
+            <span>Recent Activities</span>
+            <span class="accordion-count">@activities.Count</span>
+        </span>
+    };
+
+    private RenderFragment activitiesContent => __builder =>
+    {
+        <SfListView Height="320px" Width="100%" TValue="Activity" DataSource="@activities" CssClass="activity-template" ShowHeader="false">
+            <ListViewTemplates TValue="Activity">
+                <Template>
+                    <div class="activity-container @((context as Activity).Type)">
+                        <div class="activity-message">
+                            <span class="type-name">@((context as Activity).Name)</span>
+                            <span class="activity-text">@((context as Activity).Message)</span>
+                        </div>
+                        <span class="activity-time">@Service.TimeSince((context as Activity).ActivityTime)</span>
+                    </div>
+                </Template>
+            </ListViewTemplates>
+            <ListViewFieldSettings TValue="Activity" Text="Name" Id="Name"></ListViewFieldSettings>
+        </SfListView>
+    };
+
+    private RenderFragment doctorsHeader => __builder =>
+    {
+        <span class="accordion-header">
+            <span class="e-icons e-user"></span>
+            <span>Doctor's Availability</span>
+            <span class="accordion-count">@availableDoctors.Count</span>
+        </span>
+    };
+
+    private RenderFragment doctorsContent => __builder =>
+    {
+        <div class="doctor-availability-scroll" role="region" aria-label="Doctor availability list" tabindex="0">
+            <ul class="doctor-availability-items">
+                @foreach (var doctor in availableDoctors)
+                {
+                    <li class="doctor-availability-item">
+                        <span class="doctor-image">
+                            <img src="css/appoinment/assets/images/@(doctor.Text).png" alt="" />
+                            <span class="availability @doctor.Availability"></span>
+                        </span>
+                        <span class="doctor-detail">
+                            <span class="doctor-name">Dr. @doctor.Name</span>
+                            <span class="doctor-speciality">@getSpecializationText(doctor.Specialization)</span>
+                        </span>
+                    </li>
+                }
+            </ul>
+        </div>
+    };
+
+    private MessageSeverity alertSeverity(AlertItem a)
+    {
+        return a.Severity switch
+        {
+            "warning" => MessageSeverity.Warning,
+            "danger" => MessageSeverity.Error,
+            "success" => MessageSeverity.Success,
+            _ => MessageSeverity.Info
+        };
+    }
+
+    protected override void OnInitialized()
+    {
+        availableDoctors = Service.Doctors;
+        activities = Service.Activities;
+        departments = Service.Specializations;
+        firstDayOfWeek = Service.GetWeekFirstDate(Service.StartDate);
+        max = firstDayOfWeek.AddDays(6);
+        endDate = Service.StartDate.AddDays(1);
+        rangeStart = firstDayOfWeek;
+        rangeEnd = max;
+        SetGreeting();
+    }
+
+    private void SetGreeting()
+    {
+        var h = DateTime.Now.Hour;
+        greeting = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
+    }
+
+    private void LoadData()
+    {
+        var currentDayEvents = Service.GetFilteredData(startDate, endDate);
+        var currentWeekEvents = Service.GetFilteredData(firstDayOfWeek, firstDayOfWeek.AddDays(7));
+
+        var prevDay = startDate.AddDays(-1);
+        var prevDayEnd = startDate;
+        var prevWeekStart = firstDayOfWeek.AddDays(-7);
+        var prevWeekEnd = firstDayOfWeek;
+        var yesterdayEvents = Service.GetFilteredData(prevDay, prevDayEnd);
+        var prevWeekEvents = Service.GetFilteredData(prevWeekStart, prevWeekEnd);
+
+        var todaySpark = Service.GetSparkline(startDate, day => Service.GetFilteredData(day, day.AddDays(1)).Count);
+        var weekSpark = Service.GetSparkline(firstDayOfWeek, day => Service.GetFilteredData(day, day.AddDays(1)).Count);
+
+        todayKpi = Service.BuildKpi("Today", currentDayEvents.Count, yesterdayEvents.Count, "e-day", "primary", todaySpark.Select(p => p.Count).ToList());
+        weekKpi = Service.BuildKpi("This Week", currentWeekEvents.Count, prevWeekEvents.Count, "e-week", "accent", weekSpark.Select(p => p.Count).ToList());
+
+        appointments = BuildAppointments(currentDayEvents);
+        filteredAppointments = new List<Appointment>(appointments);
+
+        departmentSeries = Service.GetDepartmentSeries(currentWeekEvents, firstDayOfWeek, departments);
+        alerts = Service.BuildAlerts(availableDoctors, currentDayEvents);
+
+        isDataLoaded = true;
+    }
+
+    private List<Appointment> BuildAppointments(List<Hospital> events)
+    {
+        var patients = Service.Patients;
+        var doctors = Service.Doctors;
+        var list = new List<Appointment>();
+        var today = Service.StartDate;
+        foreach (var e in events)
+        {
+            var p = patients.FirstOrDefault(x => x.Id == e.PatientId);
+            var d = doctors.FirstOrDefault(x => x.Id == e.DoctorId);
+            if (p != null && d != null)
+            {
+                list.Add(new Appointment(
+                    Service.GetFormatDate(e.StartTime, "hh:mm tt"),
+                    p.Name,
+                    d.Name,
+                    e.Symptoms,
+                    d.Id,
+                    Service.ResolveStatus(e, today),
+                    e.DepartmentName));
+            }
+        }
+        return list.OrderBy(a => a.Time).ToList();
+    }
+
+    private string getSpecializationText(string text)
+    {
+        var s = Service.Specializations.FirstOrDefault(x => x.Id == text);
+        return s == null ? "" : s.Text.ToUpper();
+    }
+
+    private void OpenNewAppointment()
+    {
+        newPatientId = 0;
+        newDoctorId = 0;
+        newAptTime = null;
+        newSymptoms = "";
+        isNewAptOpen = true;
+    }
+
+    private void AddNewAppointment()
+    {
+        if (newPatientId <= 0 || newDoctorId <= 0 || newAptTime == null)
+        {
+            return;
+        }
+
+        var patient = Service.Patients.FirstOrDefault(p => p.Id == newPatientId);
+        var doctor = Service.Doctors.FirstOrDefault(d => d.Id == newDoctorId);
+        if (patient == null || doctor == null) return;
+
+        var timeText = Service.GetFormatDate(newAptTime.Value, "hh:mm tt");
+        var apt = new Appointment(
+            timeText,
+            patient.Name,
+            doctor.Name,
+            string.IsNullOrWhiteSpace(newSymptoms) ? "Not specified" : newSymptoms,
+            doctor.Id,
+            AppointmentStatus.Waiting,
+            Service.GetSpecializationText(doctor.Specialization).ToUpperInvariant());
+
+        appointments.Insert(0, apt);
+        ApplyFilters();
+        isNewAptOpen = false;
+        StateHasChanged();
+    }
+
+    private void OnSearchChanged(Syncfusion.Blazor.Inputs.ChangedEventArgs args)
+    {
+        searchTerm = args.Value ?? "";
+        ApplyFilters();
+        StateHasChanged();
+    }
+
+    private void OnStatusFilterChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, StatusOption> args)
+    {
+        statusFilter = args.Value ?? "";
+        ApplyFilters();
+        StateHasChanged();
+    }
+
+    private void OnRangeChanged(RangePickerEventArgs<DateTime?> args)
+    {
+        if (args.StartDate.HasValue && args.EndDate.HasValue)
+        {
+            firstDayOfWeek = Service.GetWeekFirstDate(args.StartDate.Value);
+            max = args.EndDate.Value;
+            LoadData();
+            ApplyFilters();
+            StateHasChanged();
+        }
+    }
+
+    private void OnDepartmentChanged(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, Specialization> args)
+    {
+        selectedDepartmentId = args.Value ?? "";
+        ApplyFilters();
+        StateHasChanged();
+    }
+
+    private void ApplyFilters()
+    {
+        IEnumerable<Appointment> q = appointments;
+        if (!string.IsNullOrWhiteSpace(statusFilter) && Enum.TryParse<AppointmentStatus>(statusFilter, out var s))
+            q = q.Where(a => a.Status == s);
+        if (!string.IsNullOrWhiteSpace(selectedDepartmentId))
+        {
+            var dept = Service.Specializations.FirstOrDefault(x => x.Id == selectedDepartmentId);
+            if (dept != null && dept.DepartmentId.HasValue)
+            {
+                var depId = dept.DepartmentId.Value;
+                q = q.Where(a => a.DoctorId > 0 && Service.Doctors.Any(d => d.Id == a.DoctorId && d.DepartmentId == depId));
+            }
+        }
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLowerInvariant();
+            q = q.Where(a => (a.Name ?? "").ToLowerInvariant().Contains(term) || (a.DoctorName ?? "").ToLowerInvariant().Contains(term));
+        }
+        filteredAppointments = q.ToList();
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            LoadData();
+            StateHasChanged();
+        }
+    }
+}
