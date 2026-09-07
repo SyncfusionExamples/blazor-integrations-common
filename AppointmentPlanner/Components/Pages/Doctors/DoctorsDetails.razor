@@ -9,21 +9,284 @@
 
 <link href="css/appoinment/doctordetails.css" rel="stylesheet" />
 <div class="doctor-details-container">
-    <header>
-        <div class="detail-header-title">
-            <span class="back-icon icon-previous" @onclick="@onBackIconClick"></span>
-            <div class="module-title">
-                <div class='title'>DOCTOR DETAILS</div>
-                <div class='underline'></div>
+   <header id="doctorHeader">
+
+        <div id="headerLeft">
+
+            <button id="backButton"
+                    type="button"
+                    aria-label="Go back"
+                    @onclick="onBackIconClick">
+
+                <span class="icon-previous"></span>
+
+            </button>
+
+            <div id="headerTitleContainer">
+
+                <h1 id="pageTitle">
+                    Doctor Details
+                </h1>
+
+                <div id="titleUnderline"></div>
+
             </div>
+
         </div>
-        <div class='doctor-detail'>
-            <SfButton Disabled="@((activeData != null) ? false : true)" CssClass="e-small delete-details" @onclick="@onDoctorDelete">Delete</SfButton>
-            <SfButton Disabled="@((activeData != null) ? false : true)" CssClass="e-small edit-details" @onclick="@onDoctorEdit">Edit</SfButton>
+
+        <div id="headerActions">
+
+            <SfButton Disabled="@(! (activeData != null))"
+                    CssClass="delete-details"
+                    aria-label="Delete Doctor"
+                    @onclick="onDoctorDelete">
+
+                Delete
+
+            </SfButton>
+
+            <SfButton Disabled="@(! (activeData != null))"
+                    CssClass="edit-details"
+                    aria-label="Edit Doctor Profile"
+                    @onclick="onDoctorEdit">
+
+                Edit
+
+            </SfButton>
+
         </div>
+
     </header>
     @if (activeData != null) {
-    <div class="active-doctor">
+        <main id="doctor-page">
+
+            <!-- HERO -->
+
+            @* <SfCard ID="doctorHeroCard">
+
+                <CardContent>
+
+                    <section id="doctorHeroSection">
+
+                        <div id="doctorAvatarContainer">
+
+                            <img id="doctorAvatar"
+                                src="css/appoinment/assets/images/@(activeData.Text).png"
+                                alt="Doctor profile name"/>
+                            <h1>
+                                Dr. @activeData.Name
+                            </h1>
+
+                            <div id="doctorDepartment">
+                                @getSpecializationText
+                            </div>
+
+                            <div id="doctorEducation">
+                                @activeData.Education
+                            </div>
+
+                            <div id="doctorDesignation">
+                                @activeData.Designation
+                            </div>
+
+                        </div>
+
+                        <div id="doctorStatusArea">
+
+                            <span id="doctorStatus">
+                                @activeData.Availability
+                            </span>
+
+                        </div>
+
+                    </section>
+
+                </CardContent>
+
+            </SfCard> *@
+            <SfCard ID="doctorHeroCard">
+
+                <CardContent>
+
+                    <section id="doctorHeroSection">
+
+                        <div id="doctorAvatarContainer">
+
+                            <img id="doctorAvatar"
+                                src="css/appoinment/assets/images/@(activeData.Text).png"
+                                alt="Doctor profile name"/>
+
+                        </div>
+
+                        <div id="doctorInfo">
+
+                            <h1 id="doctorName">
+                                Dr. @activeData.Name
+                            </h1>
+
+                            <div id="doctorDepartment">
+                                @getSpecializationText
+                            </div>
+
+                            <div id="doctorEducation">
+                                @activeData.Education
+                            </div>
+
+                            <div id="doctorDesignation">
+                                @activeData.Designation
+                            </div>
+
+                        </div>
+
+                        <div id="doctorStatusArea">
+
+                            <span id="doctorStatus">
+                                @activeData.Availability
+                            </span>
+
+                        </div>
+
+                    </section>
+
+                </CardContent>
+
+            </SfCard>
+
+            <!-- KPI -->
+
+            <section id="kpiSection">
+
+                <SfCard ID="experienceCard">
+                    <CardContent>
+
+                        <div id="experienceValue">
+                            @activeData.Experience
+                        </div>
+
+                        <div id="experienceLabel">
+                            Experience
+                        </div>
+
+                    </CardContent>
+                </SfCard>
+
+                <SfCard ID="workingDaysCard">
+                    <CardContent>
+
+                        <div id="workingDaysValue">
+                            @WorkingDaysCount
+                        </div>
+
+                        <div id="workingDaysLabel">
+                            Working Days
+                        </div>
+
+                    </CardContent>
+                </SfCard>
+
+                <SfCard ID="contactCard">
+                    <CardContent>
+
+                        <div id="contactValue">
+                            @activeData.Mobile
+                        </div>
+
+                        <div id="contactLabel">
+                            Contact
+                        </div>
+
+                    </CardContent>
+                </SfCard>
+
+            </section>
+
+            <!-- DETAILS -->
+
+            <section id="detailsSection">
+
+                <SfCard ID="professionalCard">
+
+                    <CardContent>
+
+                        <h3>Professional Information</h3>
+
+                        <div class="detail-row">
+                            <label>Department</label>
+                            <span>@getSpecializationText</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <label>Designation</label>
+                            <span>@activeData.Designation</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <label>Experience</label>
+                            <span>@activeData.Experience</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <label>Education</label>
+                            <span>@activeData.Education</span>
+                        </div>
+
+                    </CardContent>
+
+                </SfCard>
+
+                <SfCard ID="contactInfoCard">
+
+                    <CardContent>
+
+                        <h3>Contact Information</h3>
+
+                        <div class="detail-row">
+                            <label>Mobile</label>
+                            <span>@activeData.Mobile</span>
+                        </div>
+
+                        <div class="detail-row">
+                            <label>Email</label>
+                            <span>@activeData.Email</span>
+                        </div>
+
+                    </CardContent>
+
+                </SfCard>
+
+            </section>
+
+            <!-- SCHEDULE -->
+
+            <SfCard ID="scheduleCard">
+
+                <CardContent>
+
+                    <h3 id="scheduleTitle">
+                        Weekly Schedule
+                    </h3>
+
+                    @foreach (var data in activeData.WorkDays)
+                    {
+                        <div class="schedule-row">
+
+                            <span class="day-column">
+                                @(char.ToUpper(data.Day[0]) + data.Day.Substring(1))
+                            </span>
+
+                            <span class="time-column @data.State">
+                                @getBreakDetails(data)
+                            </span>
+
+                        </div>
+                    }
+
+                </CardContent>
+
+            </SfCard>
+
+        </main>
+    @* <div class="active-doctor">
         <div class="active-doctor-image">
             <img class="value" src="css/appoinment/assets/images/@(activeData.Text).png" alt="doctor" />
             <span class='availability @(activeData.Availability)'></span>
@@ -62,15 +325,7 @@
                 </div>
             </div>
         </div>
-    </div>
-    }
-    else
-    {
-        <div class="doctor-not-found" role="status">
-            <h2>Doctor not found</h2>
-            <p>The requested doctor is no longer available.</p>
-            <SfButton CssClass="e-primary" @onclick="@onBackIconClick">Back to Doctors</SfButton>
-        </div>
+    </div> *@
     }
 </div>
 
@@ -81,7 +336,7 @@
 <SfDialog Target="body" @ref="EdiDialogObj" Width="390px" CssClass='new-doctor-dialog' IsModal="true" @bind-Visible="@editVisible" ShowCloseIcon="true" Header="@editHeader">
     <ChildContent>
         <DialogAnimationSettings Effect="DialogEffect.Zoom"></DialogAnimationSettings>
-        <EditForm class="new-doctor-form" Model="@doctorEditModel" OnValidSubmit="@UpdateEditModel">
+        <EditForm class="new-doctor-form" Model="@doctorEditModel" OnValidSubmit="@handleSubmit">
             <DataAnnotationsValidator></DataAnnotationsValidator>
             <div class="name-container">
                 <SfTextBox CssClass='doctor-name e-field' Placeholder='Doctor Name' FloatLabelType="@FloatLabelType.Always" @bind-Value="@doctorEditModel.Name"></SfTextBox>
@@ -132,7 +387,7 @@
             <div class="e-footer-content">
                 <div class="button-container">
                     <button type="button" class="e-btn e-normal" @onclick="@onCancelClick">Cancel</button>
-                    <button type="submit" class="e-btn e-normal e-primary">Save</button>
+                    <button type="button" class="e-btn e-normal e-primary" @onclick="@UpdateEditModel">Save</button>
                 </div>
             </div>
         </EditForm>
@@ -156,16 +411,15 @@
     private Doctor activeData { get; set; }
     private string getSpecializationText { get; set; }
     private string getAvailability { get; set; }
+    private int WorkingDaysCount =>activeData?.AvailableDays?.Length ?? 0;
 
     protected override void OnInitialized()
     {
         activeData = Service.GetDoctorDetails(Id);
-        if (activeData != null)
-        {
-            activeData.WorkDays = activeData.WorkDays != null ? activeData.WorkDays : new List<WorkDay>();
-            getSpecializationText = Service.GetSpecializationText(activeData.Specialization);
-            getAvailability = Service.GetAvailability(activeData);
-        }
+        activeData = (activeData == null) ? Service.GetDoctorDetails(1) : activeData;
+        activeData.WorkDays = activeData.WorkDays != null ? activeData.WorkDays : new List<WorkDay>();
+        getSpecializationText = Service.GetSpecializationText(activeData.Specialization);
+        getAvailability = Service.GetAvailability(activeData);
 
         this.specializationData = Service.Specializations;
         this.experienceData = Service.Experience;
@@ -209,6 +463,7 @@
     {
         Service.Doctors = Service.Doctors.Where(item => item.Id != activeData.Id).ToList();
         Service.Hospitals = Service.Hospitals.Where(i => i.DoctorId != activeData.Id).ToList();
+        Service.WaitingLists = Service.WaitingLists.Where(item => item.DepartmentId != activeData.DepartmentId).ToList();
         if(Service.Doctors.Any())
         {
             this.getSpecializationText = Service.Doctors[0].Specialization;
@@ -248,13 +503,13 @@
 
     private List<Specialization> specializationData { get; set; }
 
-    public void UpdateEditModel(EditContext context)
+    public void UpdateEditModel(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
     {
         Doctor getHours = updateWorkHours(activeData);
         string mobileNo = this.maskObj.GetMaskedValue();
-        var specialize = Service.Specializations.FirstOrDefault(i => i.DepartmentId == doctorEditModel.DepartmentId)?.Id ?? activeData.Specialization;
+        var specialize = Service.Doctors.Where(i => i.DepartmentId == doctorEditModel.DepartmentId).FirstOrDefault().Specialization;
         activeData = new Doctor(doctorEditModel.Name, doctorEditModel.Gender, activeData.Text, activeData.Id, doctorEditModel.DepartmentId, activeData.Color, doctorEditModel.Education, specialize, doctorEditModel.Experience, doctorEditModel.Designation, doctorEditModel.DutyTiming, doctorEditModel.Email, mobileNo, activeData.Availability, getHours.StartHour, getHours.EndHour, activeData.AvailableDays, getHours.WorkDays);
-        getSpecializationText = Service.GetSpecializationText(activeData.Specialization);
+        getSpecializationText = activeData.Specialization;
         int doctorIndex = Service.Doctors.FindIndex(item => item.Id == activeData.Id);
         if (doctorIndex  > -1)
         {
@@ -265,6 +520,10 @@
         editVisible = false;
     }
 
+    private void handleSubmit()
+    {
+        editVisible = false;
+    }
     private Doctor updateWorkHours(Doctor data)
     {
         string dutyString = Service.DutyTimings.Where(item => item.Id.Equals(doctorEditModel.DutyTiming)).FirstOrDefault().Text;
@@ -296,8 +555,10 @@
         for (int i=0; i< data.WorkDays.Count;i++)
         {
             var item = data.WorkDays[i];
-            item.WorkStartHour = ((DateTime)item.WorkStartHour).Date.AddHours(startValue);
-            item.WorkEndHour = ((DateTime)item.WorkEndHour).Date.AddHours(endValue);
+            item.WorkStartHour = ((DateTime)item.WorkStartHour).AddHours(startValue);
+            item.WorkEndHour = ((DateTime)item.WorkEndHour).AddHours(endValue);
+            item.BreakStartHour = item.BreakStartHour;
+            item.BreakEndHour = item.BreakEndHour;
         }
         return new Doctor { StartHour = startHour, EndHour = endHour, WorkDays=data.WorkDays };
     }

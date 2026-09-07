@@ -4,6 +4,38 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* ------------------------------------------------------------------
+   Skip to main content (WCAG 2.4.1) — visually hidden until focused
+   ------------------------------------------------------------------ */
+.skip-link {
+    position: absolute;
+    top: -48px;
+    left: 8px;
+    z-index: 10000;
+    padding: 10px 18px;
+    background: #0f172a;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 0 0 8px 8px;
+    text-decoration: none;
+    transition: top .15s ease-in;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
+/* ------------------------------------------------------------------
+   Global keyboard focus visibility (WCAG 2.4.7) — applies to the
+   app shell (sidebar, appbar, footer) in addition to page-scoped
+   dashboard rules.
+   ------------------------------------------------------------------ */
+.planner-wrapper :is(button, a, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid #0a8a8a !important;
+    outline-offset: 2px !important;
+}
+
 a, .btn-link {
     color: #0366d6;
 }
@@ -179,9 +211,8 @@ app {
     cursor: pointer;
 }
 .nav-item.e-list-item:hover {
-    background-color: #f5f5f5;
-    border-color: transparent;
-    color: rgba(51,51,51,.87);
+
+    color: #666;
 }
 ul.nav.flex-column {
     margin: 0 16px;
@@ -194,7 +225,10 @@ ul.nav.flex-column {
     font-weight: 400;
 }
 .footer {
-    position: relative;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -202,40 +236,6 @@ ul.nav.flex-column {
     border: 1px solid #D8DEE9;
     z-index: 10000;
     padding: 12px;
-}
-
-.planner-wrapper .footer {
-    margin-top: auto;
-}
-
-@media screen and (max-width: 700px) {
-    .footer {
-        padding: 10px 12px;
-    }
-
-    .footer-container,
-    .footer-content {
-        width: 100%;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .footer-content {
-        justify-content: flex-start;
-    }
-
-    .footer-content .title span {
-        font-size: 11px;
-    }
-
-    .footer-content .buttons {
-        width: 100%;
-    }
-
-    .footer-content .e-trial-btn,
-    .footer-content .e-demo-btn {
-        min-height: 44px;
-    }
 }
 
 .footer-container {

@@ -1,7 +1,7 @@
 ﻿.planner-patient-wrapper {
-    margin: 24px 44px 12px;
-    max-width: calc(100% - 88px);
-    overflow: hidden;
+    padding:24px;
+    background:#F8FAFC;
+    min-height:100vh;
 }
 
     .planner-patient-wrapper header {
@@ -20,7 +20,7 @@
             .planner-patient-wrapper header .add-patient .e-icon-add {
                 padding: 9px 0 10px 20px;
                 font-size: 10px;
-                color: #7575ff;
+                color: #0a8a8a;
             }
 
                 .planner-patient-wrapper header .add-patient .e-icon-add::before {
@@ -30,7 +30,7 @@
             .planner-patient-wrapper header .add-patient .add-patient-label {
                 font-weight: 600;
                 font-size: 13px;
-                color: #7575ff;
+                color: #0a8a8a;
                 letter-spacing: 0.39px;
                 padding: 5px;
             }
@@ -38,15 +38,7 @@
     .planner-patient-wrapper .patients-detail-wrapper .patient-operations {
         display: flex;
         justify-content: flex-end;
-        align-items: center;
-        gap: 12px;
     }
-
-        .planner-patient-wrapper .patients-detail-wrapper .patient-operations .patient-count {
-            margin-right: auto;
-            color: #666;
-            font-size: 13px;
-        }
 
         .planner-patient-wrapper .patients-detail-wrapper .patient-operations .planner-patient-search.search-wrapper {
             width: 190px;
@@ -63,22 +55,11 @@
 
     .planner-patient-wrapper .patients-detail-wrapper .patient-display {
         margin-top: 17px;
-        max-width: 100%;
-        overflow: hidden;
     }
 
-        .planner-patient-wrapper .patients-detail-wrapper .patient-display .e-grid {
-            max-width: 100%;
-        }
-
         .planner-patient-wrapper .patients-detail-wrapper .patient-display .e-grid .e-gridcontent tr.e-row td.e-rowcell .patient-name {
-            color: #7575ff;
+            color: #0a8a8a;
             cursor: pointer;
-            border: 0;
-            background: transparent;
-            padding: 0;
-            font: inherit;
-            text-align: left;
         }
 
 .e-dialog.e-edit-dialog {
@@ -122,7 +103,7 @@
             }
 
                 .e-dialog.e-edit-dialog .e-dlg-content .grid-edit-dialog .field-row.history-row label {
-                    color: #7575ff !important;
+                    color: #0a8a8a !important;
                 }
 
                 .e-dialog.e-edit-dialog .e-dlg-content .grid-edit-dialog .field-row.history-row .history-content {
@@ -145,7 +126,6 @@
 @media (max-width: 850px) {
     .planner-patient-wrapper {
         margin: 20px 10px;
-        max-width: calc(100% - 20px);
     }
 
         .planner-patient-wrapper header .module-title {
@@ -178,10 +158,6 @@
                 .planner-patient-wrapper .patients-detail-wrapper .patient-operations .planner-patient-search.search-wrapper {
                     flex: 1;
                     margin: 0;
-                }
-
-                .planner-patient-wrapper .patients-detail-wrapper .patient-operations .patient-count {
-                    display: none;
                 }
 
             .planner-patient-wrapper .patients-detail-wrapper .patient-display {
@@ -233,11 +209,6 @@
     font-size: 10px;
 }
 
-.patient-search.e-input-group .e-clear-icon {
-    border: 0;
-    background: transparent;
-}
-
 .e-btn-group .e-radio-wrapper {
     padding: 4px;
 }
@@ -260,18 +231,137 @@
     .planner-patient-skeleton {
         display: none;
     }
+}
+#patientStatsContainer {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin:25px;
+}
 
-    .planner-patient-wrapper .patient-display {
-        overflow-x: auto;
+#patientCard1,
+#patientCard2,
+#patientCard3,
+#patientCard4,#totalPatientsCard,
+#newPatientsCard,
+#followupPatientsCard,
+#criticalPatientsCard{
+
+    border:none;
+    border-radius:22px;
+
+    box-shadow:0 4px 20px rgb(0 0 0 / 6%);
+}
+.stat-title{
+    color:#64748B;
+    font-size:13px;
+}
+
+.stat-value{
+    font-size:32px;
+    font-weight:700;
+    color:#111827;
+    margin-top:10px;
+}
+
+.stat-growth{
+    margin-top:10px;
+    color:#8B5CF6;
+    font-weight:600;
+}
+
+.danger{
+    color:#EF4444;
+}
+#patientToolbar{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:20px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 4px 20px rgb(0 0 0 / 5%);
+}
+#filterSection{
+    display:flex;
+    gap:15px;
+}
+#searchSection{
+
+    width:300px;
+}#addPatientButton{
+
+    border-radius:14px;
+    height:40px;
+}#patientInfoWrapper{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}#patientNameText{
+    font-weight:600;
+    color:#111827;
+}#patientCodeText{
+    font-size:12px;
+    color:#94A3B8;
+}#PatientsGrid{
+
+    border:none;
+
+    border-radius:20px;
+
+    overflow:hidden;
+
+    box-shadow:0 4px 24px rgb(0 0 0 / 5%);
+}#PatientsGrid .e-gridheader{
+    background:#FAFAFA;
+}#PatientsGrid .e-headercell{
+    color:#64748B;
+    font-weight:600;
+}#PatientsGrid .e-row:hover{
+    background:#F3F4F6;
+}.e-dialog{
+
+    border-radius:24px !important;
+}.e-dialog .e-dlg-header{
+
+    font-size:18px;
+    font-weight:700;
+}@media(max-width:768px){
+
+    #patientStatsContainer{
+        grid-template-columns:1fr;
     }
 
-    .planner-patient-wrapper .patient-display .e-grid .e-headercell:nth-child(n+4),
-    .planner-patient-wrapper .patient-display .e-grid .e-rowcell:nth-child(n+4) {
-        display: none;
+    #patientToolbar{
+        flex-direction:column;
+        gap:15px;
     }
 
-    .planner-patient-wrapper .patient-display .e-grid .e-headercontent,
-    .planner-patient-wrapper .patient-display .e-grid .e-content {
-        min-width: 100%;
+    #searchSection{
+        width:100%;
     }
+
+    #filterSection{
+        width:100%;
+        flex-direction:column;
+    }
+}
+.patient-title {
+    font-size: 16px;
+    color: #64748b;
+    margin-bottom: 10px;
+    font-weight: 600;
+    margin-left: 25px;
+}
+.patient-value {
+    font-weight: 600;
+    margin-top: 4px;
+    margin-left: 50px;
 }

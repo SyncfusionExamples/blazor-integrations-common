@@ -13,7 +13,7 @@
 <div id="patients" class="planner-patient-wrapper">
     <header>
         <div class="module-title">
-            <h1 class="title">PATIENT LIST</h1>
+            <div class="title">PATIENT LIST</div>
             <div class="underline"></div>
         </div>
         <div class="add-patient" @onclick="@onAddPatient">
@@ -22,32 +22,149 @@
         </div>
     </header>
     <div class="patients-detail-wrapper">
-        <div class="patient-operations">
-            <div id="searchTemplate" class="search-wrapper planner-patient-search">
-                <SfTextBox ID="patient-searchbar" aria-label="Search patients" CssClass="patient-search" @bind-Value="searchValue" Placeholder="Search patient" ValueChange="@patientSearch" ShowClearButton="true"></SfTextBox>
+        <div id="patientStatsContainer">
+            <SfCard ID="totalPatientsCard">
+                <CardContent>
+                    <div class="patient-title">Total Patients</div>
+                    <div class="patient-value">@TotalPatients</div>
+                    <div class="patient-subtitle">
+                        Registered Patients
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            <SfCard ID="newPatientsCard">
+                <CardContent>
+                    <div class="patient-title">New Patients</div>
+                    <div class="patient-value">@NewPatients</div>
+                    <div class="patient-subtitle">
+                        Last 30 Days
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            <SfCard ID="followupPatientsCard">
+                <CardContent>
+                    <div class="patient-title">Follow Up</div>
+                    <div class="patient-value">@FollowUpPatients</div>
+                    <div class="patient-subtitle">
+                        Active Follow-Up Cases
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            <SfCard ID="recoveryCard">
+                <CardContent>
+                    <div class="patient-title">Recovery Rate</div>
+                    <div class="patient-value">
+                        @RecoveryPercentage%
+                    </div>
+                    <div class="patient-subtitle">
+                        Based On Patient History
+                    </div>
+                </CardContent>
+            </SfCard>
+
+        </div>
+        <div id="patientToolbar">
+            @* <div id="searchSection">
+                <SfTextBox Placeholder="Search patient..."
+                        @bind-Value="searchValue" ValueChange="OnSearchChanged">
+                </SfTextBox>
+            </div> *@
+
+            <div id="filterSection">
+                <SfDropDownList TValue="string"
+                                TItem="Doctor"
+                                Placeholder="Doctor"
+                                DataSource="@doctorsData">
+
+                    <DropDownListFieldSettings
+                        Text="Name"
+                        Value="Name">
+                    </DropDownListFieldSettings>
+
+                </SfDropDownList>
+
+                <SfButton ID="addPatientButton"
+                        IsPrimary="true"
+                        @onclick="onAddPatient">
+
+                    Add New Patient
+
+                </SfButton>
             </div>
-            <span class="patient-count" role="status">@filteredPatients.Count patient@(filteredPatients.Count == 1 ? "" : "s")</span>
-           <SfButton CssClass="e-normal add-details" @onclick="@onAddPatient" IsPrimary="true">
-                Add
-                New Patient
-            </SfButton>
+
         </div>
         <div class="patient-display">
-            <SfGrid ID="Grid" @ref="gridObj" DataSource="@filteredPatients" AllowPaging="true" AllowSorting="true" AllowResizing="true">
-                <GridPageSettings PageSize="8"></GridPageSettings>
-                <GridEvents TValue="Patient" OnRecordDoubleClick="onDoubleClick"></GridEvents>
-                <GridEditSettings AllowAdding="true" AllowEditing="true" AllowEditOnDblClick="false" Mode="EditMode.Dialog">
-                </GridEditSettings>
-                <GridColumns>
+                    <SfGrid ID="PatientsGrid"
+                        @ref="gridObj"
+                        DataSource="@filteredPatients"
+                        AllowPaging="true"
+                        AllowSorting="true"
+                        AllowFiltering="true"
+                        RowHeight="60">
+                    <GridEditSettings AllowAdding="true" AllowEditing="true" AllowEditOnDblClick="false" Mode="EditMode.Dialog">
+                    </GridEditSettings>
+                    <GridPageSettings PageSize="10"></GridPageSettings>
+
+                    <GridEvents TValue="Patient"
+                                RowSelected="onRowSelected"
+                                OnRecordDoubleClick="onDoubleClick">
+                    </GridEvents>
+
+                    <GridColumns>
                     <GridColumn IsPrimaryKey="true" Field=@nameof(Patient.Id) Width="50" HeaderText="ID" TextAlign="@TextAlign.Left"></GridColumn>
-                    <GridColumn HeaderText="Name" TextAlign="@TextAlign.Left" Width="100">
+                    <GridColumn HeaderText="Patient Name" Width="120">
                         <Template>
-                            <button type="button" class="patient-name" @onclick="@(e => showDialog(context as Patient))">@((context as Patient).Name)</button>
+                            @{
+                                var patient = context as Patient;
+                            }
+
+                            <div id="patientInfoWrapper">
+                                @* <SfAvatar Content="@patient.Name.Substring(0,1)"
+                                        Size="AvatarSize.Small">
+                                </SfAvatar> *@
+
+                                <div>
+                                    <div id="patientNameText">
+                                        @patient.Name
+                                    </div>
+
+                                    @* <div id="patientCodeText">
+                                        MDF-P@(patient.Id.ToString("000"))
+                                    </div> *@
+                                </div>
+                            </div>
                         </Template>
                     </GridColumn>
+                    <GridColumn HeaderText="Status"
+                            Width="120">
+
+                    <Template>
+
+                        @{
+                            var patient = context as Patient;
+
+                            string status = patient.Id % 3 == 0
+                                ? "Recovery"
+                                : patient.Id % 2 == 0
+                                ? "Follow-Up"
+                                : "New";
+                        }
+
+                        <SfChip ID="statusChip">
+
+                            @status
+
+                        </SfChip>
+
+                    </Template>
+
+                </GridColumn>
                     <GridColumn Field=@nameof(Patient.Gender) HeaderText="Gender" TextAlign="@TextAlign.Left" Width="80"></GridColumn>
                     <GridColumn Field=@nameof(Patient.BloodGroup) HeaderText="Blood Group" TextAlign="@TextAlign.Left" Width="100"></GridColumn>
-                    <GridColumn Field=@nameof(Patient.Symptoms) HeaderText="Symptoms" TextAlign="@TextAlign.Left" Width="150"></GridColumn>
+                    <GridColumn Field=@nameof(Patient.Symptoms) HeaderText="Symptoms" ClipMode="Syncfusion.Blazor.Grids.ClipMode.EllipsisWithTooltip" TextAlign="@TextAlign.Left" Width="250"></GridColumn>
                     <GridColumn Field=@nameof(Patient.Mobile) HeaderText="Mobile Number" TextAlign="@TextAlign.Left" Width="100"></GridColumn>
                     <GridColumn Field=@nameof(Patient.Email) HeaderText="Email" TextAlign="@TextAlign.Left" Width="120"></GridColumn>
                 </GridColumns>
@@ -91,16 +208,9 @@
                     <label>Appointment History</label>
                     <div ID="history-wrapper">
 
-                        @if (historyData?.Any() == true)
+                        @foreach (var item in historyData)
                         {
-                            @foreach (var item in historyData)
-                            {
-                                <div class="history-content">@(getHistoryFormatDate(item))</div>
-                            }
-                        }
-                        else
-                        {
-                            <div class="empty-container">No appointment history.</div>
+                            <div class="history-content">@(getHistoryFormatDate(item))</div>
                         }
                     </div>
                 </div>
@@ -213,6 +323,8 @@ else
     private string saveButton { get; set; } = "Save";
 
     private List<Hospital> historyData { get; set; }
+    private bool isPatientClicked { get; set; } = false;
+
     private Patient activePatientData { get; set; }
 
     private bool IsShowPatientEditDialog { get; set; } = false;
@@ -229,11 +341,19 @@ else
     private bool isDataLoaded;
     private bool showDeleteMsg { get; set; }
 
+    private int TotalPatients;
+    private int NewPatients;
+    private int FollowUpPatients;
+    private int MalePatients;
+    private int FemalePatients;
+    private double RecoveryPercentage;
+
     protected override void OnInitialized()
     {
         filteredPatients = Service.Patients;
-        this.bloodGroupData = Service.BloodGroups;
+       this.bloodGroupData = Service.BloodGroups;
         this.doctorsData = Service.Doctors;
+        CalculateDashboardMetrics();
     }
 
     private void onAddPatient(Microsoft.AspNetCore.Components.Web.MouseEventArgs args)
@@ -249,37 +369,37 @@ else
     }
     public async Task HandleValidSubmit()
     {
-        Patient getRecord;
+        Patient getRecord = null;
         string message = "";
         string name = "";
         string mobileNo = this.maskObj.GetMaskedValue();
         if (saveButton == "Save")
         {
-            var templatePatient = Service.Patients.FirstOrDefault() ?? new Patient();
-            var nextId = Service.Patients.Any() ? Service.Patients.Max(item => item.Id) + 1 : 1;
-            getRecord = new Patient(nextId, patientEditModel.Name, patientEditModel.Name, patientEditModel.DOB, mobileNo, patientEditModel.Email, templatePatient.Address, templatePatient.Disease, templatePatient.DepartmentName, patientEditModel.BloodGroup, patientEditModel.Gender, patientEditModel.Symptoms);
-            Service.Patients.Add(getRecord);
-            filteredPatients = ApplyPatientSearch();
+            getRecord = new Patient(Service.Patients.LastOrDefault().Id + 1, patientEditModel.Name, patientEditModel.Name, patientEditModel.DOB, mobileNo, patientEditModel.Email, Service.Patients[0].Address, Service.Patients[0].Disease, Service.Patients[0].DepartmentName, patientEditModel.BloodGroup, patientEditModel.Gender, patientEditModel.Symptoms);
+            await gridObj.AddRecordAsync(getRecord, Service.Patients.Count());
+            filteredPatients = Service.Patients;
             message = " " + getRecord.Name + " for " + getRecord.Symptoms;
             name = "Added New Patient";
         }
         else
         {
             getRecord = new Patient(activePatientData.Id, patientEditModel.Name, patientEditModel.Name, patientEditModel.DOB, mobileNo, patientEditModel.Email, activePatientData.Address, activePatientData.Disease, activePatientData.DepartmentName, patientEditModel.BloodGroup, patientEditModel.Gender, patientEditModel.Symptoms);
-            var patientIndex = Service.Patients.FindIndex(item => item.Id == activePatientData.Id);
-            if (patientIndex >= 0)
-            {
-                Service.Patients[patientIndex] = getRecord;
-            }
-            filteredPatients = ApplyPatientSearch();
+            await gridObj.UpdateRowAsync((activePatientData.Id - 1), getRecord);
             message = " " + getRecord.Name + " for " + getRecord.Symptoms;
             name = "Updated Patient";
         }
         Service.Activities.Insert(0, new Activity { Name = name, Message = message, Time = "10 mins ago", Type = "patient", ActivityTime = DateTime.Now });
-        IsShowPatientEditDialog = false;
-        await InvokeAsync(StateHasChanged);
+        await this.dialogObj.HideAsync();
     }
 
+    public void onRowSelected(RowSelectEventArgs<Patient> args)
+    {
+        if (isPatientClicked)
+        {
+            this.showDialog(args.Data);
+            this.isPatientClicked = false;
+        }
+    }
     public void onDoubleClick(RecordDoubleClickEventArgs<Patient> args)
     {
         this.showDialog(args.RowData);
@@ -314,19 +434,17 @@ else
         this.IsShowPatientEditDialog = true;
     }
 
-
-    private void patientSearch(Syncfusion.Blazor.Inputs.ChangedEventArgs args)
+    private void onPatientClick(Microsoft.AspNetCore.Components.Web.MouseEventArgs args, int Id)
     {
-        var search = args.Value?.ToString()?.Trim() ?? string.Empty;
-        this.filteredPatients = ApplyPatientSearch();
-        }
+        this.isPatientClicked = true;
+    }
 
-        private List<Patient> ApplyPatientSearch()
-        {
-        var search = searchValue?.Trim() ?? string.Empty;
-        return (from cust in Service.Patients
-            where string.IsNullOrWhiteSpace(search) || (cust.Name?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) || (cust.Gender?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) || (cust.Email?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) || cust.Id.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) || (cust.Mobile?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false) || (cust.BloodGroup?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false)
-            select cust).ToList();
+    private void patientSearch(Microsoft.AspNetCore.Components.ChangeEventArgs args)
+    {
+        var patientData = Service.Patients;
+        this.filteredPatients = (from cust in patientData
+                                 where (cust.Name.Contains(args.Value.ToString(), StringComparison.OrdinalIgnoreCase)) || (cust.Gender.Contains(args.Value.ToString(), StringComparison.OrdinalIgnoreCase)) || (cust.Email.Contains(args.Value.ToString(), StringComparison.OrdinalIgnoreCase)) || (cust.Id.ToString().Contains(args.Value.ToString(), StringComparison.OrdinalIgnoreCase)) || (cust.Mobile.Contains(args.Value.ToString(), StringComparison.OrdinalIgnoreCase)) || ((cust.BloodGroup as string).Contains(args.Value.ToString(), StringComparison.OrdinalIgnoreCase))
+                                 select cust).ToList();
     }
 
     private string getHistoryFormatDate(Hospital data)
@@ -336,25 +454,24 @@ else
 
     private string getDoctorName(int Id)
     {
-        return doctorsData.FirstOrDefault(item => item.Id.Equals(Id))?.Name ?? "Unknown doctor";
+        return doctorsData.Where(item => item.Id.Equals(Id)).FirstOrDefault().Name;
     }
 
     private void clearText()
     {
         this.searchValue = "";
-        this.filteredPatients = Service.Patients.ToList();
+        this.filteredPatients = Service.Patients;
     }
 
-    private Task DeleteBtnClick()
+    private async Task DeleteBtnClick()
     {
-        var deleteData = activePatientData;
-        Service.Patients = Service.Patients.Where(item => item.Id != deleteData.Id).ToList();
-        filteredPatients = ApplyPatientSearch();
+        Service.Patients = filteredPatients = ((List<Patient>)filteredPatients).Where(item => item.Id != activePatientData.Id).ToList();
         Service.WaitingLists = Service.WaitingLists.Where(item => item.PatientId != activePatientData.Id).ToList();
+        var deleteData = ((List<Patient>)filteredPatients).Where(item => item.Id == activePatientData.Id).FirstOrDefault();
+        await this.gridObj.DeleteRecordAsync(null, deleteData);
 
         this.showGridEditDialog = false;
         this.IsShowPatientEditDialog = false;
-        return Task.CompletedTask;
     }
 
     public void Dispose()
@@ -363,6 +480,32 @@ else
         gridEditDialogObj = null;
         dialogObj = null;
         maskObj = null;
+    }
+    private void CalculateDashboardMetrics()
+    {
+        TotalPatients = Service.Patients?.Count ?? 0;
+
+        FollowUpPatients = Service.WaitingLists?
+            .Select(x => x.PatientId)
+            .Distinct()
+            .Count() ?? 0;
+
+        MalePatients = Service.Patients?
+            .Count(x => x.Gender == "Male") ?? 0;
+
+        FemalePatients = Service.Patients?
+            .Count(x => x.Gender == "Female") ?? 0;
+
+        NewPatients = Service.Patients?
+            .Count(x => x.DOB >= DateTime.Now.AddMonths(-1))
+            ?? 0;
+
+        RecoveryPercentage =
+            TotalPatients == 0
+                ? 0
+                : Math.Round(
+                    ((double)(TotalPatients - FollowUpPatients)
+                    / TotalPatients) * 100, 1);
     }
 
     private async void LoadData()

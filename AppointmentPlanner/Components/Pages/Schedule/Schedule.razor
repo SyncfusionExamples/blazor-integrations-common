@@ -5,153 +5,370 @@
 @using Microsoft.JSInterop;
 @implements IDisposable;
 
-@if(isDataLoaded){
-<div class="planner-calendar">
-    <header class="schedule-page-header">
-        <div>
-            <h1 class="schedule-page-title">Schedule</h1>
-            <p class="schedule-page-subtitle">Coordinate appointments, doctor availability, and the waiting list.</p>
-        </div>
-        <SfButton CssClass="schedule-reset-button" IconCss="e-icons e-refresh" OnClick="ResetSchedule">Reset view</SfButton>
-    </header>
-    <div class="schedule-summary" aria-label="Schedule summary">
-        <div class="e-card schedule-summary-card">
-            <div class="e-card-content">
-                <span class="schedule-summary-label">Appointments loaded</span>
-                <strong class="schedule-summary-value">@(scheduleEventData?.Count ?? 0)</strong>
-            </div>
-        </div>
-        <div class="e-card schedule-summary-card">
-            <div class="e-card-content">
-                <span class="schedule-summary-label">Current doctor</span>
-                <strong class="schedule-summary-value">@(activeDoctorData?.FirstOrDefault()?.Name ?? "All doctors")</strong>
-            </div>
-        </div>
-        <div class="e-card schedule-summary-card">
-            <div class="e-card-content">
-                <span class="schedule-summary-label">Waiting list</span>
-                <strong class="schedule-summary-value">@(waitingList?.Count ?? 0)</strong>
-            </div>
+<a href="#schedule-main" class="skip-link">Skip to main content</a>
+
+@if (loadFailed)
+{
+    <div class="planner-calendar" id="schedule-main" role="alert" aria-live="assertive">
+        <div class="schedule-error">
+            <span class="e-icons e-warning" aria-hidden="true"></span>
+            <span>We couldn't load the schedule. Please refresh the page or try again in a moment.</span>
         </div>
     </div>
-    <div class="drag-sample-wrapper droppable">
-        <div class="col-lg-9 col-md-9 col-sm-9" style="padding: 0px">
-            <div class="schedule-container e-droppable">
-                <SfSchedule ID="schedule" TValue="Hospital" @ref="scheduleObj" Width="100%" Height="800px" EnableAutoRowHeight="true" CssClass="doctor-appointment-planner" ShowWeekend="false" StartHour="@startHour" EndHour="@endHour" @bind-SelectedDate="@currentDate" WorkDays="@workDay" FirstDayOfWeek="@calendarDayOfWeek" @bind-CurrentView="@sceduleView">
-                    <ScheduleEvents TValue="Hospital" OnPopupOpen="OnPopupOpen" OnPopupClose="OnPopupClose" OnActionBegin="OnActionBegin"></ScheduleEvents>
-                    <ScheduleWorkHours Start="08:00" End="21:00"></ScheduleWorkHours>
-                    <ScheduleEventSettings DataSource="@scheduleEventData" ResourceColorField="@resourceColorField" AllowEditFollowingEvents="@editUpcoming">
-                        <ScheduleField>
-                            <FieldSubject Name="Name"></FieldSubject>
-                            <FieldStartTime Name="StartTime" Title="From"></FieldStartTime>
-                            <FieldEndTime Name="EndTime" Title="To"></FieldEndTime>
-                            <FieldDescription Name="Symptoms" Title="Symptoms"></FieldDescription>
-                        </ScheduleField>
-                    </ScheduleEventSettings>
-                    <ScheduleTimeScale Enable="true" Interval="@this.viewInterval"></ScheduleTimeScale>
-                    <ScheduleResources>
-                        <ScheduleResource TItem="Specialization" TValue="int?" DataSource="@specialistCategory" Field="DepartmentId" Title="Department" Name="Departments" TextField="Text" IdField="DepartmentId" ColorField="Color"></ScheduleResource>
-                        <ScheduleResource TItem="Doctor" TValue="int" DataSource="@resourceDataSource" Query="@queryData" Field="DoctorId" Title="Consultation" Name="Doctors" TextField="Name" IdField="Id" ColorField="Color" GroupIDField="DepartmentId" WorkDaysField="AvailableDays" StartHourField="StartHour" EndHourField="EndHour"></ScheduleResource>
-                    </ScheduleResources>
-                    <ScheduleViews>
-                        <ScheduleView Option="@View.Day"></ScheduleView>
-                        <ScheduleView Option="@View.Week"></ScheduleView>
-                        <ScheduleView Option="@View.Month"></ScheduleView>
-                        <ScheduleView Option="@View.TimelineDay">
-                            <ScheduleViewGroup EnableCompactView="false" Resources="@resourceGroup"></ScheduleViewGroup>
-                        </ScheduleView>
-                        <ScheduleView Option="@View.TimelineWeek">
-                            <ScheduleViewGroup EnableCompactView="false" Resources="@resourceGroup"></ScheduleViewGroup>
-                        </ScheduleView>
-                        <ScheduleView Option="@View.TimelineWorkWeek">
-                            <ScheduleViewGroup EnableCompactView="false" Resources="@resourceGroup"></ScheduleViewGroup>
-                        </ScheduleView>
-                        <ScheduleView Option="@View.TimelineMonth">
-                            <ScheduleViewGroup EnableCompactView="false" Resources="@resourceGroup"></ScheduleViewGroup>
-                        </ScheduleView>
-                    </ScheduleViews>
-                    <ScheduleTemplates>
-                        <DateHeaderTemplate>
-                            <div class="e-custom-date-header date-text" title="@(getDateHeaderText((context as TemplateContext).Date))">@(getDateHeaderText((context as TemplateContext).Date).ToUpper())</div>
-                        </DateHeaderTemplate>
-                    </ScheduleTemplates>
-                </SfSchedule>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-3 col-sm-3 treeview-container-wrapper">
-            <div class="treeview-container">
-                <div>
-                    <SfDropDownList aria-label="Filter by doctor" @ref="ddlObj" Placeholder="Choose Specialist" Width="220px" TItem="Doctor" PopupHeight="auto" DataSource="@resourceDataSource" TValue="int?" CssClass="planner-dropdown" ShowClearButton="true">
-                        <DropDownListEvents TItem="Doctor" TValue="int?" ValueChange="onValueChange"></DropDownListEvents>
-                        <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
-                        <DropDownListTemplates TItem="Doctor">
-                            <ItemTemplate>
-                                <div class="specialist-item">
-                                    <img class="value" src="css/appoinment/assets/images/@((context as Doctor).Text).png" alt="doctor" />
-                                    <div class="doctor-details">
-                                        <div class="name">Dr.@((context as Doctor).Name)</div>
-                                        <div class="designation">@((context as Doctor).Designation)</div>
-                                    </div>
-                                </div>
-                            </ItemTemplate>
-                            <FooterTemplate>
-                                <div class="add-doctor">
-                                    <div class="e-icon-add e-icons"></div><div class="add-doctor-text">
-                                        <NavLink Match="NavLinkMatch.Prefix" href="@($"doctors")">Add New Doctor</NavLink>
-                                    </div>
-                                </div>
-                            </FooterTemplate>
-                        </DropDownListTemplates>
-                    </SfDropDownList>
-                </div>
-                <div class="title-container">
-                    <div class="waiting-list-heading">
-                        <h2 class="title-text">Waiting List</h2>
-                        <span class="waiting-list-count">@(waitingList?.Count ?? 0)</span>
-                    </div>
-                </div>
-                <SfTextBox aria-label="Search waiting list" Placeholder="Search waiting list" @bind-Value="waitingListSearch" ShowClearButton="true" CssClass="waiting-list-search">
-                    <TextBoxEvents ValueChange="OnWaitingListSearchChanged"></TextBoxEvents>
-                </SfTextBox>
-            @if (waitingList != null && waitingList.Count > 0)
-            {
-            <SfTreeView TValue="WaitingList" LoadOnDemand="false" CssClass="treeview-external-drag" AllowDragAndDrop="true">
-                <TreeViewFieldsSettings Id="Id" Text="Name" DataSource="@waitingList"></TreeViewFieldsSettings>
-                <TreeViewEvents TValue="WaitingList" OnNodeDragStop="NodeDragStop"></TreeViewEvents>
-                <TreeViewTemplates TValue="WaitingList">
-                    <NodeTemplate>
-                        <div id="waiting">
-                            <div id="waitdetails">
-                                <div id="waitlist">@((context as WaitingList).Name)</div>
-                                <div id="event-time">@(getEventTime((context as WaitingList)))</div>
-                                <div id="waitcategory">
-                                    @(getDepartmentName((context as WaitingList).DepartmentId)) - @(getTreatmentDetail((context as WaitingList)))
-                                </div>
-                            </div>
-                            <div id="item-icon-container">
-                                <span class="item-icon icon-reorder"></span>
-                            </div>
-                        </div>
-                    </NodeTemplate>
-                </TreeViewTemplates>
-            </SfTreeView>
-            }
-            else
-            {
-                <div class="waiting-list-empty" role="status">No patients are currently waiting.</div>
-            }
-            </div>
-        </div>
-    </div>
-</div>
 }
-else{
-    <div class="planner-dashboard-skeleton">
-        <div class="appointments-skeleton">
-            <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="780px" Width="90%"></SfSkeleton><br/>
+else if (isDataLoaded)
+{
+    <div class="planner-calendar" id="schedule-main" tabindex="-1">
+
+        <header class="appointment-header">
+            <div>
+                @* <p class="appointment-eyebrow">Clinical operations</p> *@
+                <h1 class="appointment-title">Appointment Schedule</h1>
+                <p class="appointment-subtitle">
+                    Coordinate appointments, doctor availability and waiting queue
+                </p>
+            </div>
+
+            <div class="header-actions">
+                <SfButton CssClass="outline-btn"
+                          IconCss="e-icons e-refresh"
+                          OnClick="ResetSchedule"
+                          aria-label="Reset schedule filters">
+                    Reset
+                </SfButton>
+
+                <SfButton CssClass="primary-btn"
+                          IconCss="e-icons e-plus"
+                          OnClick="CreateAppointment"
+                          aria-label="Create new appointment">
+                    New Appointment
+                </SfButton>
+            </div>
+        </header>
+
+        <!-- KPI Metrics -->
+        <section class="dashboard-cards" aria-label="Key performance indicators">
+
+            <SfCard CssClass="dashboard-card" ID="today-appointments-card">
+                <CardContent>
+                    <span class="card-title">Today's Appointments</span>
+                    <div class="card-body">
+                        <div class="icon-box appointment-icon" aria-hidden="true">
+                            <span class="e-icons e-timeline-week"></span>
+                        </div>
+                        <div class="card-info">
+                            <h2>@TodayAppointments</h2>
+                            <span class="trend @(TodayTrendDirection)" aria-label="@TodayTrendAriaLabel">
+                                <span class="e-icons @(TodayTrendDirection == "up" ? "e-arrow-up" : TodayTrendDirection == "down" ? "e-arrow-down" : "e-horizontal-line")" aria-hidden="true"></span>
+                                @TodayTrendText vs. yesterday
+                            </span>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            @* <SfCard CssClass="dashboard-card" ID="current-doctor-card">
+                <CardContent>
+                    <span class="card-title">Current Doctor</span>
+                    <div class="card-body">
+                        <div class="icon-box doctor-icon" aria-hidden="true">
+                            <span class="e-icons e-user"></span>
+                        </div>
+                        <div class="card-info">
+                            <h2>@(activeDoctorData?.Count == 1 ? activeDoctorData.FirstOrDefault()?.Name
+                                        : $"{Service.Doctors?.Count ?? 0} Doctors")
+                            </h2>
+                            <span class="trend flat">@DoctorCountActive active today</span>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard> *@
+         <SfCard CssClass="dashboard-card capacity-card" ID="current-doctor-card">
+                <CardContent>
+                    <span class="card-title">Capacity Utilization</span>
+                    <div class="card-body">
+                        <div class="icon-box utilization-icon">
+                            <span class="e-icons e-chart"></span>
+                        </div>
+
+                        <div class="card-info">
+                            <h2>@CapacityUtilization%</h2>
+                            <span class="trend @CapacityStatusClass">
+                                @CapacityStatus
+                            </span>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            <SfCard CssClass="dashboard-card" ID="waiting-queue-card">
+                <CardContent>
+                    <span class="card-title">Waiting Queue</span>
+                    <div class="card-body">
+                        <div class="icon-box waiting-icon" aria-hidden="true">
+                            <span class="e-icons e-clock"></span>
+                        </div>
+                        <div class="card-info">
+                            <h2>@PendingCount</h2>
+                            <div class="wait-prediction">
+
+                                    Estimated Wait
+
+                                    <strong>
+                                        @PredictedWaitMinutes min
+                                    </strong>
+
+                                </div>
+                            <span class="trend @(WaitingTrendDirection)" aria-label="@WaitingTrendAriaLabel">
+                                <span class="e-icons @(WaitingTrendDirection == "up" ? "e-arrow-up" : WaitingTrendDirection == "down" ? "e-arrow-down" : "e-horizontal-line")" aria-hidden="true"></span>
+                                @WaitingTrendText vs. yesterday
+                            </span>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            <SfCard CssClass="dashboard-card" ID="confirmed-card">
+                <CardContent>
+                    <span class="card-title">Confirmed (this week)</span>
+                    <div class="card-body">
+                        <div class="icon-box department-icon" aria-hidden="true">
+                            <span class="e-icons e-check"></span>
+                        </div>
+                        <div class="card-info">
+                            <h2>@ConfirmedCount</h2>
+                            <span class="trend flat">across @DepartmentCount departments</span>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard>
+
+            @* <SfCard CssClass="dashboard-card forecast-card">
+                <CardContent>
+                    <span class="card-title">Queue Forecast</span>
+
+                    <div class="card-body">
+                        <div class="card-info">
+                            <h2>@ForecastQueue</h2>
+                            <span>
+                                Expected by 2 PM
+                            </span>
+                        </div>
+                    </div>
+                </CardContent>
+            </SfCard> *@
+        </section>
+
+        <!-- Live region for status changes (a11y) -->
+        <div class="sr-only" aria-live="polite" aria-atomic="true">@LiveStatusAnnouncement</div>
+
+        <div class="appointment-layout droppable">
+
+            <div class="scheduler-section" style="padding: 0">
+                <div class="schedule-container e-droppable">
+
+                    <div class="planner-toolbar" role="search" aria-label="Schedule filters">
+                        @* <SfTextBox Placeholder="Search patient..."
+                                   Value="@waitingListSearch"
+                                   ValueChanged="@(async (string v) => await OnSearchChanged(v))"
+                                   aria-label="Search patient by name">
+                        </SfTextBox> *@
+
+                        <SfDropDownList TValue="int?"
+                                        TItem="Doctor"
+                                        DataSource="@resourceDataSource"
+                                        Placeholder="Doctor"
+                                        Value="@selectedDoctorId"
+                                        ValueChanged="@(async (int? v) => await OnDoctorChanged(v))"
+                                        aria-label="Filter by doctor">
+                            <DropDownListFieldSettings Text="Name" Value="Id"></DropDownListFieldSettings>
+                        </SfDropDownList>
+
+                        <SfDropDownList TValue="int?"
+                                        TItem="Specialization"
+                                        DataSource="@specialistCategory"
+                                        Placeholder="Department"
+                                        Value="@selectedDepartmentId"
+                                        ValueChanged="@(async (int? v) => await OnDepartmentChanged(v))"
+                                        aria-label="Filter by department">
+                            <DropDownListFieldSettings Text="Text" Value="DepartmentId"></DropDownListFieldSettings>
+                        </SfDropDownList>
+                    </div>
+
+                    @if (scheduleEventData != null && scheduleEventData.Count > 0)
+                    {
+                        <div class="schedule-legend">
+
+                            <span class="legend-item">
+                                🟢 Confirmed
+                            </span>
+
+                            <span class="legend-item">
+                                🟡 Waiting
+                            </span>
+
+                            <span class="legend-item">
+                                🟣 Follow-up
+                            </span>
+
+                            <span class="legend-item">
+                                🔴 Urgent
+                            </span>
+
+                        </div>
+                        <SfSchedule ID="schedule" TValue="Hospital" @ref="scheduleObj" Width="100%" Height="800" CssClass="doctor-appointment-planner" ShowWeekend="false" StartHour="@startHour" EndHour="@endHour" @bind-SelectedDate="@currentDate" WorkDays="@workDay" FirstDayOfWeek="@calendarDayOfWeek" @bind-CurrentView="@sceduleView">
+                            <ScheduleEvents TValue="Hospital" OnPopupOpen="OnPopupOpen" OnPopupClose="OnPopupClose" OnActionBegin="OnActionBegin"></ScheduleEvents>
+                            <ScheduleWorkHours Start="08:00" End="21:00"></ScheduleWorkHours>
+                            <ScheduleEventSettings DataSource="@scheduleEventData" ResourceColorField="@resourceColorField" AllowEditFollowingEvents="@editUpcoming">
+                                <ScheduleField>
+                                    <FieldSubject Name="Name"></FieldSubject>
+                                    <FieldStartTime Name="StartTime" Title="From"></FieldStartTime>
+                                    <FieldEndTime Name="EndTime" Title="To"></FieldEndTime>
+                                    <FieldDescription Name="Symptoms" Title="Symptoms"></FieldDescription>
+                                </ScheduleField>
+                            </ScheduleEventSettings>
+                            <ScheduleTimeScale Enable="true" Interval="@this.viewInterval"></ScheduleTimeScale>
+                            <ScheduleResources>
+                                <ScheduleResource TItem="Specialization" TValue="int?" DataSource="@specialistCategory" Field="DepartmentId" Title="Department" Name="Departments" TextField="Text" IdField="DepartmentId" ColorField="Color"></ScheduleResource>
+                                <ScheduleResource TItem="Doctor" TValue="int" DataSource="@resourceDataSource" Query="@queryData" Field="DoctorId" Title="Consultation" Name="Doctors" TextField="Name" IdField="Id" ColorField="Color" GroupIDField="DepartmentId" WorkDaysField="AvailableDays" StartHourField="StartHour" EndHourField="EndHour"></ScheduleResource>
+                            </ScheduleResources>
+                            <ScheduleViews>
+                                <ScheduleView Option="@View.Day"></ScheduleView>
+                                <ScheduleView Option="@View.Week"></ScheduleView>
+                                <ScheduleView Option="@View.Month"></ScheduleView>
+                            </ScheduleViews>
+                            <ScheduleTemplates>
+                                <DateHeaderTemplate>
+                                    <div class="e-custom-date-header date-text" title="@(getDateHeaderText((context as TemplateContext).Date))">@(getDateHeaderText((context as TemplateContext).Date).ToUpper())</div>
+                                </DateHeaderTemplate>
+                            </ScheduleTemplates>
+                        </SfSchedule>
+                    }
+                    else
+                    {
+                        <div class="schedule-empty" role="status">
+                            <div class="empty-icon e-icons e-calendar" aria-hidden="true"></div>
+                            <h3>No appointments match your filters</h3>
+                            <p>Try adjusting the doctor or department, or clear the search to see the full schedule.</p>
+                            <SfButton CssClass="primary-btn" IconCss="e-icons e-refresh" OnClick="ResetSchedule">Reset filters</SfButton>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <aside class="appointment-sidebar" aria-label="Schedule tools and status">
+
+                <SfCard CssClass="sidebar-card">
+                    <CardHeader Title="Calendar"></CardHeader>
+                    <CardContent>
+                        <SfCalendar TValue="DateTime"
+                                    @bind-Value="currentDate">
+                        </SfCalendar>
+                    </CardContent>
+                </SfCard>
+                <SfCard CssClass="sidebar-card ai-card">
+
+                    <CardContent>
+
+                        <span class="card-title">
+                            AI Recommendations
+                        </span>
+
+                        <div class="recommendation-item">
+
+                            <span class="e-icons e-warning"></span>
+
+                            Queue expected to increase by
+                            30% after lunch.
+
+                        </div>
+
+                        <div class="recommendation-item">
+
+                            Suggested Action:
+
+                            Assign Dr. Laura.
+
+                        </div>
+
+                    </CardContent>
+
+                </SfCard>
+
+                <SfCard CssClass="sidebar-card status-card" ID="status-card">
+                    <CardContent>
+
+                        <span class="card-title">
+                            Doctor Utilization
+                        </span>
+
+                        @foreach(var doctor in DoctorUtilizations)
+                        {
+                            <div class="status-row">
+
+                                <span>@doctor.Name</span>
+
+                                <strong>@doctor.Utilization%</strong>
+
+                            </div>
+                        }
+
+                    </CardContent>
+                    @* <CardContent>
+                        <span class="card-title">Status</span>
+
+                        <div class="status-row">
+                            <div class="status-label">
+                                <span class="status-pill confirmed" aria-hidden="true">
+                                    <span class="e-icons e-check"></span>
+                                </span>
+                                <span>Confirmed (week)</span>
+                            </div>
+                            <strong aria-label="@ConfirmedCount confirmed appointments">@ConfirmedCount</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <div class="status-label">
+                                <span class="status-pill pending" aria-hidden="true">
+                                    <span class="e-icons e-clock"></span>
+                                </span>
+                                <span>Waiting</span>
+                            </div>
+                            <strong aria-label="@PendingCount waiting">@PendingCount</strong>
+                        </div>
+
+                        <div class="status-row">
+                            <div class="status-label">
+                                <span class="status-pill doctors" aria-hidden="true">
+                                    <span class="e-icons e-user"></span>
+                                </span>
+                                <span>Doctors</span>
+                            </div>
+                            <strong aria-label="@DoctorCount doctors on staff">@DoctorCount</strong>
+                        </div>
+
+                    </CardContent> *@
+                </SfCard>
+
+            </aside>
         </div>
-        <div class="activities-skeleton">
-            @for(int i=0; i < 10; i++)
+    </div>
+}
+else
+{
+    <div class="planner-calendar" id="schedule-main" tabindex="-1" aria-busy="true" aria-live="polite">
+        <div class="appointment-header">
+            <div>
+                @* <p class="appointment-eyebrow">Clinical operations</p> *@
+                <h1 class="appointment-title">Appointment Schedule</h1>
+            </div>
+        </div>
+        <div class="appointments-skeleton" aria-label="Loading schedule">
+            <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="780px" Width="90%"></SfSkeleton>
+            <br />
+        </div>
+        <div class="activities-skeleton" aria-hidden="true">
+            @for (int i = 0; i < 10; i++)
             {
                 <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="3%" Width="80%"></SfSkeleton>
                 <br />
@@ -198,24 +415,170 @@ else{
     private string waitingListSearch { get; set; } = string.Empty;
     private int? waitingListDepartmentId { get; set; }
 
+    // Bound filter values
+    private int? selectedDoctorId { get; set; }
+    private int? selectedDepartmentId { get; set; }
+
+    // Yesterday snapshot for trend deltas
+    private int YesterdayAppointments { get; set; }
+    private int YesterdayWaiting { get; set; }
+
+    // a11y live announcement
+    private string LiveStatusAnnouncement { get; set; } = string.Empty;
+    private bool loadFailed { get; set; } = false;
 
     private Query queryData { get; set; }
     private List<Doctor> activeDoctorData { get; set; }
     private bool isDataLoaded;
     private int? draggedItemID = null;
+
+    private int ConfirmedCount =>
+        scheduleEventData?.Count(x =>
+            !x.IsBlock &&
+            x.Name != "Break Time" &&
+            x.Name != "Off Work") ?? 0;
+
+    private int PendingCount =>
+        waitingList?.Count ?? 0;
+
+    private int DoctorCount =>
+        resourceDataSource?.Count ?? 0;
+
+    private int DoctorCountActive =>
+        resourceDataSource?.Count(d => d.WorkDays != null && d.WorkDays.Any(w => w.Enable)) ?? 0;
+
+    private int TodayAppointments =>
+        scheduleEventData?.Count(x =>
+            !x.IsBlock &&
+            x.Name != "Break Time" &&
+            x.Name != "Off Work" &&
+            x.StartTime.Date == currentDate.Date) ?? 0;
+
+    private int DepartmentCount =>
+        specialistCategory?.Count ?? 0;
+    private int TotalAvailableSlots =>
+    DoctorCountActive * 20;
+
+private double CapacityUtilization =>
+    TotalAvailableSlots == 0
+        ? 0
+        : Math.Round(
+            (double)TodayAppointments /
+            TotalAvailableSlots * 100);
+
+private string CapacityStatus =>
+    CapacityUtilization switch
+    {
+        >= 100 => "Overbooked",
+        >= 90 => "Busy",
+        >= 70 => "Healthy",
+        _ => "Available"
+    };
+
+private string CapacityStatusClass =>
+    CapacityUtilization >= 90 ? "danger" :
+    CapacityUtilization >= 70 ? "success" :
+    "info";
+    private int TodayDelta => TodayAppointments - YesterdayAppointments;
+    private int WaitingDelta => PendingCount - YesterdayWaiting;
+private int ForecastQueue =>
+    PendingCount + (int)Math.Ceiling(PendingCount * 0.4);
+    private string TodayTrendDirection =>
+        TodayDelta > 0 ? "up" : TodayDelta < 0 ? "down" : "flat";
+    private string WaitingTrendDirection =>
+        WaitingDelta > 0 ? "up" : WaitingDelta < 0 ? "down" : "flat";
+
+    private string TodayTrendText =>
+        TodayDelta == 0
+            ? "No change"
+            : (TodayDelta > 0 ? $"+{TodayDelta}" : TodayDelta.ToString());
+
+    private string WaitingTrendText =>
+        WaitingDelta == 0
+            ? "No change"
+            : (WaitingDelta > 0 ? $"+{WaitingDelta}" : WaitingDelta.ToString());
+
+    private string TodayTrendAriaLabel =>
+        $"{TodayAppointments} appointments today, {TodayTrendText} compared to yesterday";
+    private string WaitingTrendAriaLabel =>
+        $"{PendingCount} waiting, {WaitingTrendText} compared to yesterday";
+public string Status { get; set; }
+
+private class DoctorUsage
+{
+    public string Name { get; set; } = string.Empty;
+    public int Utilization { get; set; }
+}
+
+private IEnumerable<DoctorUsage> DoctorUtilizations =>
+    resourceDataSource?.Select(d => new DoctorUsage
+    {
+        Name = d.Name,
+        Utilization = CalculateDoctorUtilization(d)
+    })
+    ?? Enumerable.Empty<DoctorUsage>();
+
+private int CalculateDoctorUtilization(Doctor doctor)
+{
+    var appointments = scheduleEventData?
+        .Count(a =>
+            a.DoctorId == doctor.Id &&
+            !a.IsBlock &&
+            a.Name != "Break Time" &&
+            a.Name != "Off Work") ?? 0;
+
+    const int MaxSlots = 20;
+
+    return Math.Min(
+        100,
+        (int)Math.Round(
+            (double)appointments / MaxSlots * 100));
+}
+
     protected override void OnInitialized()
     {
-        sceduleView = (View)Enum.Parse(typeof(View), (Service.CalendarSettings.CurrentView as string));
-        currentDate = Service.StartDate;
-        this.viewInterval = Service.CalendarSettings.Interval;
-        this.calendarDayOfWeek = Service.CalendarSettings.FirstDayOfWeek;
-        this.resourceColorField = Service.CalendarSettings.BookingColor;
-        this.waitingList = Service.WaitingLists;
-        this.resourceDataSource = Service.Doctors;
-        this.specialistCategory = Service.Specializations;
-        this.startHour = Service.CalendarSettings.Calendar.Start;
-        this.endHour = Service.CalendarSettings.Calendar.End;
+        try
+        {
+            sceduleView = (View)Enum.Parse(typeof(View), (Service.CalendarSettings.CurrentView as string));
+            currentDate = Service.StartDate;
+            this.viewInterval = Service.CalendarSettings.Interval;
+            this.calendarDayOfWeek = Service.CalendarSettings.FirstDayOfWeek;
+            this.resourceColorField = Service.CalendarSettings.BookingColor;
+            this.waitingList = Service.WaitingLists;
+            this.resourceDataSource = Service.Doctors;
+            this.specialistCategory = Service.Specializations;
+            this.startHour = Service.CalendarSettings.Calendar.Start;
+            this.endHour = Service.CalendarSettings.Calendar.End;
+
+            // Compute "yesterday" snapshot for trend deltas (deterministic, demo data)
+            var yesterday = currentDate.Date.AddDays(-1);
+            var allEvents = Service.Hospitals ?? new List<Hospital>();
+            YesterdayAppointments = allEvents.Count(x =>
+                !x.IsBlock &&
+                x.Name != "Break Time" &&
+                x.Name != "Off Work" &&
+                x.StartTime.Date == yesterday);
+            // Waiting list baseline (demo): derive from current waiting
+            YesterdayWaiting = (int)Math.Round((Service.WaitingLists?.Count ?? 0) * 0.85);
+        }
+        catch (Exception ex)
+        {
+            loadFailed = true;
+            Console.Error.WriteLine($"[Schedule] init failed: {ex.Message}");
+        }
     }
+    private string GetStatusColor(string status)
+        {
+            return status switch
+            {
+                "Confirmed" => "#16A34A",
+                "Waiting" => "#F59E0B",
+                "Urgent" => "#DC2626",
+                "FollowUp" => "#7C3AED",
+                "Cancelled" => "#6B7280",
+                _ => "#0284C7"
+            };
+        }
 
     private string getEventTime(WaitingList data)
     {
@@ -244,7 +607,16 @@ else{
             return "CHECKUP";
         }
     }
+    private async Task CreateAppointment()
+    {
+        var data = new Hospital
+        {
+            StartTime = currentDate.Date.AddHours(9),
+            EndTime = currentDate.Date.AddHours(10)
+        };
 
+        await scheduleObj.OpenEditorAsync(data, CurrentAction.Add);
+    }
 
     public void OnPopupOpen(PopupOpenEventArgs<Hospital> args)
     {
@@ -272,13 +644,33 @@ else{
                 }
                 draggedItemID = null;
             }
-            foreach(Hospital Data in args.AddedRecords)
+            foreach(var item in args.AddedRecords)
+                {
+                    bool overlap =
+                        scheduleEventData.Any(x =>
+                            x.DoctorId == item.DoctorId &&
+                            x.StartTime < item.EndTime &&
+                            x.EndTime > item.StartTime);
+
+                    if(overlap)
+                    {
+                        args.Cancel = true;
+
+                        LiveStatusAnnouncement =
+                            "Overbooking detected.";
+
+                        return;
+                    }
+                }
+            foreach (Hospital Data in args.AddedRecords)
             {
                 Random random = new Random();
                 Data.PatientId = Data.PatientId == 0 ? random.Next(1, Service.Patients.Max(p => p.Id)) : Data.PatientId;
             }
+            LiveStatusAnnouncement = "Appointment created.";
         }
     }
+
     private async Task onValueChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<int?, Doctor> args)
     {
         if (args.Value != null)
@@ -291,9 +683,47 @@ else{
         }
     }
 
+    private async Task OnDoctorChanged(int? doctorId)
+    {
+        selectedDoctorId = doctorId;
+        if (doctorId == null)
+        {
+            setDefaultData();
+        }
+        else
+        {
+            var doc = resourceDataSource?.FirstOrDefault(d => d.Id == doctorId);
+            if (doc != null)
+            {
+                await refreshDataSource(doc.DepartmentId, doctorId.Value.ToString());
+            }
+        }
+    }
+
+    private async Task OnDepartmentChanged(int? deptId)
+    {
+        selectedDepartmentId = deptId;
+        waitingListDepartmentId = deptId;
+        applyWaitingListFilter();
+        LiveStatusAnnouncement = $"Filtered waiting list by department. {waitingList?.Count ?? 0} patient(s) shown.";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task OnSearchChanged(string value)
+    {
+        waitingListSearch = value;
+        applyWaitingListFilter();
+        LiveStatusAnnouncement = $"Search applied. {waitingList?.Count ?? 0} patient(s) match.";
+        await InvokeAsync(StateHasChanged);
+    }
+
     private async Task ResetSchedule()
     {
+        selectedDoctorId = null;
+        selectedDepartmentId = null;
+        waitingListSearch = string.Empty;
         setDefaultData();
+        LiveStatusAnnouncement = "Schedule filters reset.";
         if (scheduleObj != null)
         {
             await scheduleObj.RefreshAsync(false);
@@ -322,6 +752,10 @@ else{
             await scheduleObj.RefreshAsync(false);
         }
     }
+    private int PredictedWaitMinutes =>
+    DoctorCountActive == 0
+        ? 0
+        : (PendingCount * 8) / DoctorCountActive;
 
     private void updateWaitingList(int? deptId)
     {
@@ -364,6 +798,16 @@ else{
         workHours = Service.CalendarSettings.Calendar;
         activeDoctorData = new List<Doctor>();
     }
+
+
+    // private List<DoctorUsage> DoctorUtilizations =>
+    // resourceDataSource?
+    // .Select(d => new DoctorUsage
+    // {
+    //     Name = d.Name,
+    //     Utilization = Random.Shared.Next(45,95)
+    // })
+    // .ToList() ?? new();
     private List<Hospital> generateEvents(Doctor activeData)
     {
         List<Hospital> filteredEvents = new List<Hospital>();
@@ -493,19 +937,30 @@ else{
 
     private async void LoadData()
     {
-        this.scheduleEventData = Service.Hospitals;
-        this.workHours = Service.CalendarSettings.Calendar;
-        this.queryData = new Query();
-        await Task.Delay(500);
-        isDataLoaded = true;
-        StateHasChanged();
+        try
+        {
+            this.scheduleEventData = Service.Hospitals;
+            this.workHours = Service.CalendarSettings.Calendar;
+            this.queryData = new Query();
+            await Task.Delay(500);
+            isDataLoaded = true;
+        }
+        catch (Exception ex)
+        {
+            loadFailed = true;
+            Console.Error.WriteLine($"[Schedule] load failed: {ex.Message}");
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
     protected override void OnAfterRender(bool firstRender)
     {
-    if (firstRender)
+        if (firstRender)
         {
-        LoadData();
+            LoadData();
         }
     }
 }

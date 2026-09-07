@@ -11,7 +11,7 @@ namespace AppointmentPlanner.Data
         public AppointmentService()
         {
             this.Activities = new Activity().GetActivityData();
-            this.StartDate = new DateTime(2026, 2, 5, 0, 0, 0, 0);
+            this.StartDate = DateTime.Today;
             this.ActiveDoctors = new Doctor().GetDoctorsData().FirstOrDefault();
             this.ActivePatients = new Patient().GetPatientsData().FirstOrDefault();
             this.StartHours = new TextValueData().GetStartHours();
@@ -29,13 +29,13 @@ namespace AppointmentPlanner.Data
             this.DutyTimings = new TextIdData().DutyTimingsData();
             this.Experience = new TextIdData().ExperienceData();
             this.NavigationMenu = new NavigationMenu().GetNavigationMenuItems();
-            this.CalendarSettings = new CalendarSetting { BookingColor = "Doctors", Calendar = new AppointmentPlanner.Models.Calendar { Start = "08:00", End = "21:00" }, CurrentView = "Week", Interval = 60, FirstDayOfWeek = 0 };
+            this.CalendarSettings = new CalendarSetting { BookingColor = "Doctors", Calendar = new AppointmentPlanner.Models.Calendar { Start = "08:00", End = "21:00" }, CurrentView = "Day", Interval = 60, FirstDayOfWeek = 0 };
         }
         public DateTime StartDate { get; set; }
         public Doctor ActiveDoctors { get; set; }
 
         public Patient ActivePatients { get; set; }
-        public List<TextValueData> StartHours { get; set; } 
+        public List<TextValueData> StartHours { get; set; }
         public List<TextValueData> EndHours { get; set; }
         public List<TextValueData> Views { get; set; }
         public List<TextValueData> ColorCategory { get; set; }
@@ -55,7 +55,7 @@ namespace AppointmentPlanner.Data
         public bool ShowDeleteMsg { get; set; }
 
         public DateTime GetWeekFirstDate(DateTime date)
-        { 
+        {
             return date.AddDays(DayOfWeek.Monday - date.DayOfWeek);
         }
 
@@ -101,7 +101,7 @@ namespace AppointmentPlanner.Data
             {
                 var result = workDays.Where(item => item.Enable.Equals(true)).Select(item => item.Day.Substring(0, 3).ToUpper());
                 return string.Join(",", result).ToString();
-                
+
             }
             return string.Empty;
         }
@@ -135,108 +135,6 @@ namespace AppointmentPlanner.Data
             return chartPoints;
         }
 
-        // ----- Dashboard helpers -----
 
-        public List<DepartmentSeries> GetDepartmentSeries(List<Hospital> events, DateTime firstDay, List<Specialization> specializations)
-        {
-            var result = new List<DepartmentSeries>();
-            foreach (var spec in specializations)
-            {
-                var deptEvents = events.Where(e => e.DepartmentId == spec.DepartmentId).ToList();
-                var points = new List<ChartData>();
-                for (int i = 0; i < 7; i++)
-                {
-                    var day = firstDay.AddDays(i);
-                    var count = deptEvents.Count(e => ResetTime(e.StartTime) == ResetTime(day));
-                    points.Add(new ChartData { Date = day, EventCount = count });
-                }
-                result.Add(new DepartmentSeries
-                {
-                    Name = spec.Text,
-                    Color = spec.Color,
-                    Data = points
-                });
-            }
-            return result;
-        }
-
-        public List<SparklinePoint> GetSparkline(DateTime anchorDay, Func<DateTime, int> projector)
-        {
-            var result = new List<SparklinePoint>();
-            for (int i = 6; i >= 0; i--)
-            {
-                var day = anchorDay.AddDays(-i);
-                result.Add(new SparklinePoint { Date = day, Count = projector(day) });
-            }
-            return result;
-        }
-
-        public AppointmentStatus ResolveStatus(Hospital h, DateTime today)
-        {
-            var d = ResetTime(h.StartTime);
-            var t = ResetTime(today);
-            if (d < t) return AppointmentStatus.Completed;
-            if (d == t)
-            {
-                if (h.EndTime < DateTime.Now) return AppointmentStatus.Completed;
-                if (h.StartTime <= DateTime.Now && h.EndTime >= DateTime.Now) return AppointmentStatus.InProgress;
-                return AppointmentStatus.Waiting;
-            }
-            return AppointmentStatus.Confirmed;
-        }
-
-        public DashboardKpi BuildKpi(string label, int todayValue, int yesterdayValue, string icon, string accent, List<int> sparkline)
-        {
-            return new DashboardKpi
-            {
-                Label = label,
-                Value = todayValue,
-                PreviousValue = yesterdayValue,
-                Icon = icon,
-                Accent = accent,
-                Sparkline = sparkline ?? new List<int>()
-            };
-        }
-
-        public List<AlertItem> BuildAlerts(List<Doctor> doctors, List<Hospital> todayEvents)
-        {
-            var alerts = new List<AlertItem>();
-            var onLeave = doctors.Count(d => d.Availability == "away");
-            if (onLeave > 0)
-            {
-                alerts.Add(new AlertItem
-                {
-                    Severity = "warning",
-                    Message = $"{onLeave} doctor{(onLeave > 1 ? "s are" : " is")} currently away. Plan bookings accordingly."
-                });
-            }
-            var pending = todayEvents.Count(e => ResetTime(e.StartTime) == ResetTime(StartDate) && e.StartTime > DateTime.Now);
-            if (pending > 0)
-            {
-                alerts.Add(new AlertItem
-                {
-                    Severity = "info",
-                    Message = $"{pending} appointment{(pending > 1 ? "s" : "")} pending confirmation today."
-                });
-            }
-            if (alerts.Count == 0)
-            {
-                alerts.Add(new AlertItem
-                {
-                    Severity = "success",
-                    Message = "All clear — no operational alerts for today."
-                });
-            }
-            return alerts;
-        }
-
-        
-    } 
-}
-
-    public class DepartmentSeries
-    {
-        public string Name { get; set; }
-        public string Color { get; set; }
-        public List<ChartData> Data { get; set; } = new();
     }
+}
