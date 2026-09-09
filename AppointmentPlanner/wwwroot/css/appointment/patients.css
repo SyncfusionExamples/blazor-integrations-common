@@ -245,8 +245,8 @@
 #patientCard4,#totalPatientsCard,
 #newPatientsCard,
 #followupPatientsCard,
-#criticalPatientsCard{
-
+#criticalPatientsCard, #recoveryCard {
+    background: #eefff7;
     border:none;
     border-radius:22px;
     height:100px;
@@ -358,13 +358,13 @@
     color: #64748b;
     margin-bottom: 10px;
     font-weight: 600;
-    margin-left: 25px;
+    margin-left: 50px;
 }
 .patient-value {
     font-weight: 600;
     margin-top: 4px;
-    margin-left: 50px;
+    margin-left: 75px;
 }
 .patient-subtitle{
-    margin-left: 25px;
+    margin-left: 30px;
 }
