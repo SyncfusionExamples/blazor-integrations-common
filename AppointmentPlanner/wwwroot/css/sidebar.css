@@ -231,8 +231,8 @@ header .module-title .underline {
     height: auto !important; */
     width: 100%;
     position: fixed;
-    overflow: scroll;
-    height: calc(100vh - 20%);
+    overflow-y: scroll;
+    height: calc(100vh - 10%);
 }
 
 @media (max-width: 850px) {

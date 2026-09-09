@@ -31,8 +31,8 @@
         margin-top: 18px;
         padding: 24px 28px;
         border: 1px solid #e1e7ec;
-        border-left: 4px solid #7575ff;
-        background: #fff;
+        border-left: 4px solid #35a67a;
+        background: linear-gradient(100deg, #f4fbf8, #f7f7ff);
         box-shadow: 0 4px 14px rgba(47, 58, 85, 0.06);
     }
 
@@ -45,7 +45,7 @@
         }
 
         .preference-container .preference-section .section-icon {
-            color: #7575ff;
+            color:#35a67a;
             font-size: 20px;
             padding-top: 1px;
         }

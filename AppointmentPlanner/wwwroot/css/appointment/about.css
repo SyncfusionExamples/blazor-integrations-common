@@ -24,12 +24,12 @@
         gap: 32px;
         margin-top: 24px;
         padding: 32px;
-        border-left: 4px solid #7575ff;
-        background: #f7f7ff;
+        border-left: 4px solid #35a67a;
+        background: linear-gradient(100deg, #f4fbf8, #f7f7ff);
     }
 
     .about-container .hero-copy .eyebrow {
-        color: #7575ff;
+        color: #35a67a;
         font-size: 11px;
         font-weight: 700;
         letter-spacing: 1px;
@@ -75,7 +75,7 @@
     }
 
     .about-container .hero-signal .e-schedule {
-        color: #7575ff;
+        color: #35a67a;
         font-size: 32px;
     }
 
@@ -128,7 +128,7 @@
 
         .about-container .showcase-component-card:hover,
         .about-container .showcase-component-card:focus-within {
-            border-color: #7575ff;
+            border-color: #35a67a;
             box-shadow: 0 5px 14px rgba(117, 117, 255, .16);
             transform: translateY(-2px);
         }
@@ -144,7 +144,7 @@
         .about-container .showcase-component-card .control-icon {
             flex: 0 0 25px;
             margin: 2px 0 0;
-            color: #7575ff;
+            color: #35a67a;
             font-size: 22px;
         }
 
@@ -168,7 +168,7 @@
 
         .about-container .component-link {
             align-self: flex-end;
-            color: #7575ff;
+            color: #35a67a;
             font-size: 11px;
             text-decoration: none;
             white-space: nowrap;
@@ -176,7 +176,7 @@
 
             .about-container .component-link:focus,
             .about-container .hero-actions a:focus {
-                outline: 2px solid #7575ff;
+                outline: 2px solid #35a67a;
                 outline-offset: 2px;
             }
     }
@@ -277,112 +277,112 @@
 
 .sfimage-button::before {
     content: '\e702';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-schedule::before {
     content: '\e709';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-chart::before {
     content: '\e906';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-card::before {
     content: '\e713';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-sidebar::before {
     content: '\e705';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-autocomplete::before {
     content: '\e70b';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-datepicker::before {
     content: '\e90d';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-timepicker::before {
     content: '\e927';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-dialog::before {
     content: '\e90e';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-dropdownlist::before {
     content: '\e70a';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-grid::before {
     content: '\e913';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-checkbox::before {
     content: '\e707';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-numerictextbox::before {
     content: '\e72a';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-radiobutton::before {
     content: '\e727';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-listview::before {
     content: '\e917';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-treeview::before {
     content: '\e92b';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-textboxes::before {
     content: '\e919';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sfimage-toast::before {
     content: '\e716';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sf-icon-skeleton::before {
     content: '\e904';
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sf-icon-appbar::before {
     content: "\e900";
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sf-icon-predefineddialogs::before {
     content: "\e901";
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .sf-icon-message::before {
     content: "\e903";
-    color: #7575ff;
+    color: #35a67a;
 }
 
 .control-icon {
