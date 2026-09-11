@@ -27,9 +27,6 @@ main {
     display: flex;
     align-items: center;
 }
-.e-grid .e-groupdroparea {
-text-align: left;
-}
 
     .top-row ::deep a, .top-row ::deep .btn-link {
         white-space: nowrap;
