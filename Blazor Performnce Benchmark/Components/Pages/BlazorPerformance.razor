@@ -192,8 +192,6 @@
     // ── State ───────────────────────────────────────────────────────────
     private const int TotalRowCount = 100_000;
 
-    // Remote data service consumed by the grid via UrlAdaptor.
-    // It answers UrlAdaptor POST requests with { result: [...], count }.
     private const string RemoteDataUrl =
         "https://blazor.syncfusion.com/services/development/api/employee-data";
 
@@ -277,8 +275,6 @@
 
         if (DataMode == "remote")
         {
-            // Remote mode: the grid queries the service directly through the
-            // UrlAdaptor (page-wise skip/take requests), so no bulk fetch here.
             Employees = new();
             TotalRows = 0; // filled from the service total on data bound
         }
