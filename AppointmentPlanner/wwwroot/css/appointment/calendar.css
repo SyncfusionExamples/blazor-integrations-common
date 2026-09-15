@@ -913,13 +913,13 @@
     font-size:12px;
 }
 
-.doctor-appointment-planner {
+/* .doctor-appointment-planner {
     border:none !important;
 }
 
 .doctor-appointment-planner .e-toolbar {
     border:none !important;
-}
+} */
 
 .doctor-appointment-planner .e-appointment {
     border-radius:12px;
@@ -1194,18 +1194,6 @@
     gap:20px;
 }
 
-.doctor-appointment-planner{
-    border:none!important;
-}
-
-.doctor-appointment-planner .e-toolbar{
-    border:none!important;
-}
-
-.doctor-appointment-planner .e-appointment{
-    border-radius:12px!important;
-}
-
 @media(max-width:1200px){
 
     .appointment-layout{
@@ -1394,3 +1382,10 @@
     font-size:12px;
     font-weight:600;
 }
+.schedule-legend{
+    margin: 40px;
+}
+/* .doctor-appointment-planner .e-appointment{
+    min-height:40px;
+    border-radius:12px;
+} */

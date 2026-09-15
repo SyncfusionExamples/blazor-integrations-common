@@ -395,9 +395,11 @@
                             AllowPaging="false"
                             AllowSorting="true"
                             GridLines="Syncfusion.Blazor.Grids.GridLine.None"
-                            RowHeight="52">
-                        <GridColumns>
-                            <GridColumn Field="Name" HeaderText="Name" Width="160">
+                            RowHeight="52" AllowTextWrap="true">
+                             <GridTextWrapSettings WrapMode="WrapMode.Both"></GridTextWrapSettings>
+                        @* <GridEvents DataBound="OnDataBound" TValue="PatientRow" />*@
+                        <GridColumns> 
+                            <GridColumn Field="Name" HeaderText="Name" >
                                 <Template>
                                     @{
                                         var row = (context as PatientRow);
@@ -408,7 +410,7 @@
                                     </span>
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="Age" HeaderText="Age" Width="80">
+                            <GridColumn Field="Age" HeaderText="Age" >
                                 <Template>
                                     @{
                                         var row = (context as PatientRow);
@@ -416,9 +418,9 @@
                                     @row.Age years
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="AppointmentDate" HeaderText="Date &amp; Time" Width="180" Format="d MMM yyyy · h:mm tt" Type="Syncfusion.Blazor.Grids.ColumnType.DateTime" />
-                            <GridColumn Field="Reason" HeaderText="Appointed For" Width="140" />
-                            <GridColumn HeaderText="Status" Width="120">
+                            <GridColumn Field="AppointmentDate" HeaderText="Date &amp; Time"  Format="d MMM yyyy · h:mm tt" Type="Syncfusion.Blazor.Grids.ColumnType.DateTime" />
+                            <GridColumn Field="Reason" HeaderText="Appointed For" />
+                            @* <GridColumn HeaderText="Status" >
                                 <Template>
                                     @{ var row = (context as PatientRow); }
                                     @if (row.IsCompleted)
@@ -441,8 +443,8 @@
                                         </span>
                                     }
                                 </Template>
-                            </GridColumn>
-                            <GridColumn HeaderText="Priority" Width="100">
+                            </GridColumn> *@
+                            <GridColumn HeaderText="Priority" >
                                 <Template>
                                     @{
                                         var prow = (context as PatientRow);
@@ -451,7 +453,7 @@
                                     <span class="@GetPriorityClass(prow)" title="@priorityText">@priorityText</span>
                                 </Template>
                             </GridColumn>
-                        <GridColumn HeaderText="Actions" Width="200">
+                        <GridColumn HeaderText="Actions" Width="160">
                             <Template>
                                 @{
                                     var arow = (context as PatientRow);

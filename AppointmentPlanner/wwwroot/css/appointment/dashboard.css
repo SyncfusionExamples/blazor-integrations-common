@@ -2524,3 +2524,8 @@
     .upcoming-week { grid-template-columns: repeat(5, 1fr); }
     .metric-tile { padding: 14px; }
 }
+.patients-grid .e-rowcell,
+.patients-grid .e-headercell {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}

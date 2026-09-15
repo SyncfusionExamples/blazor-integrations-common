@@ -354,17 +354,40 @@
     }
 }
 .patient-title {
-    font-size: 16px;
+    /* font-size: 16px;
     color: #64748b;
     margin-bottom: 10px;
     font-weight: 600;
-    margin-left: 50px;
+    margin-left: 50px; */
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: #475569;
+    padding-left: 10px;
 }
 .patient-value {
-    font-weight: 600;
+    /* font-weight: 800;
     margin-top: 4px;
-    margin-left: 75px;
+    margin-left: 10px; */
+        font-size: 40px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    margin: 4px 0;
+    padding-left: 10px;
+
 }
 .patient-subtitle{
-    margin-left: 30px;
+    /* margin-left: 10px;
+        font-size: x-small; */
+        font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding-left: 10px;
 }
