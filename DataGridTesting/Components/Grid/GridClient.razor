@@ -1,0 +1,125 @@
+@inject IJSRuntime JS
+@inject GridFixture Fixture
+
+<SfGrid @ref="gridRef"
+        TValue="GridRow"
+        ID="sample-grid"
+        DataSource="@GridData"
+        AllowPaging="true"
+        AllowSorting="true"
+        AllowMultiSorting="true"
+        AllowFiltering="true"
+        AllowResizing="true"
+        AllowReordering="true"
+        AllowKeyboard="true"
+        AllowExcelExport="true"
+        AllowPdfExport="true"
+        Toolbar="@(new List<string>() { "Add", "Edit","Delete", "Update", "Cancel", "PdfExport", "ExcelExport", "CsvExport", "Search" })"
+        Height="100%"
+        Width="100%">
+
+    <GridEditSettings AllowEditing="true"
+                      AllowAdding="true"
+                      AllowDeleting="true"
+                      Mode="@Syncfusion.Blazor.Grids.EditMode.Dialog">
+        <Validator>
+            <DataAnnotationsValidator />
+        </Validator>
+    </GridEditSettings>
+
+    <GridFilterSettings Type="@Syncfusion.Blazor.Grids.FilterType.Menu" />
+
+    <GridSelectionSettings Type="@Syncfusion.Blazor.Grids.SelectionType.Multiple"
+                           Mode="@Syncfusion.Blazor.Grids.SelectionMode.Row"
+                           PersistSelection="true"
+                           CheckboxMode="@Syncfusion.Blazor.Grids.CheckboxSelectionType.Default" />
+
+    <GridPageSettings PageSize="12" />
+
+    <GridEvents OnToolbarClick="OnToolbarClick"
+                Created="OnCreated"
+                TValue="GridRow" />
+
+    <GridColumns>
+        <GridColumn Field="@nameof(GridRow.Id)"
+                    HeaderText="ID"
+                    Width="70"
+                    TextAlign="@Syncfusion.Blazor.Grids.TextAlign.Right"
+                    IsPrimaryKey="true"
+                    ValidationRules="@(new ValidationRules { Required = true, Number = true })" />
+
+        <GridColumn Field="@nameof(GridRow.Name)"
+                    HeaderText="Name"
+                    Width="90"
+                    ValidationRules="@(new ValidationRules { Required = true })" />
+
+        <GridColumn Field="@nameof(GridRow.Role)"
+                    HeaderText="Designation"
+                    Width="140"
+                    ValidationRules="@(new ValidationRules { Required = true })" />
+
+        <GridColumn Field="@nameof(GridRow.Department)"
+                    HeaderText="Department"
+                    Width="140"
+                    ValidationRules="@(new ValidationRules { Required = true })" />
+
+        <GridColumn Field="@nameof(GridRow.DateOfJoining)"
+                    HeaderText="Date of Joining"
+                    Width="160"
+                    Type="ColumnType.Date"
+                    TextAlign="@Syncfusion.Blazor.Grids.TextAlign.Right"
+                    EditType="EditType.DatePickerEdit"
+                    Format="d"
+                    ValidationRules="@(new ValidationRules { Required = true })"
+                    EditorSettings="@(new DateEditCellParams
+                    {
+                        Params = new DatePickerModel { StrictMode = true }
+                    })" />
+    </GridColumns>
+</SfGrid>
+
+@code {
+    private SfGrid<GridRow>? gridRef;
+    private List<GridRow> GridData { get; set; } = new();
+
+    [Parameter] public List<GridRow>? InitialData { get; set; }
+
+    protected override void OnInitialized()
+        => GridData = (InitialData ?? Fixture.GetData()).ToList();
+
+    private async Task OnToolbarClick(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        if (gridRef is null) return;
+        string id = args.Item?.Id ?? string.Empty;
+
+        if (id.Contains("excelexport", StringComparison.OrdinalIgnoreCase))
+            await gridRef.ExportToExcelAsync(new ExcelExportProperties
+            {
+                FileName = "grid-sample.xlsx"
+            });
+
+        if (id.Contains("csvexport", StringComparison.OrdinalIgnoreCase))
+            await gridRef.ExportToCsvAsync(new ExcelExportProperties
+            {
+                FileName = "grid-sample.csv"
+            });
+
+        if (id.Contains("pdfexport", StringComparison.OrdinalIgnoreCase))
+            await gridRef.ExportToPdfAsync(new PdfExportProperties
+            {
+                FileName = "grid-sample.pdf"
+            });
+    }
+
+    private async Task OnCreated()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("disableSearchAutofill", "sample-grid");
+        }
+        catch
+        {
+            /* swallow during SSR / pre-render */
+        }
+    }
+}

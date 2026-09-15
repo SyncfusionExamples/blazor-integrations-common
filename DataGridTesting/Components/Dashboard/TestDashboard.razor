@@ -1,0 +1,136 @@
+@inject IJSRuntime JS
+
+<div class="dashboard-wrap">
+    <SfTab Height="100%"
+           OverflowMode="OverflowMode.Scrollable"
+           EnablePersistence="false"
+           EnableLazyLoad="false"
+           LoadOn="ContentLoad.Dynamic">
+        <TabEvents Created="OnTabCreated" Selected="OnTabSelected"></TabEvents>
+        <TabItems>
+            @foreach (var framework in Frameworks)
+            {
+                var count = framework.Value.Count;
+                var frameworkKey = framework.Key;
+                var frameworkIndex = Frameworks.IndexOf(framework);
+                <TabItem>
+                    <ChildContent>
+                        <TabHeader Text="@($"{frameworkKey} ({count})")" />
+                    </ChildContent>
+                    <ContentTemplate>
+                        <div class="tool-accordion-scroll" @key="@($"pane-{frameworkIndex}-{_activeTabIndex}")">
+                            <div class="tab-cases-list">
+                                <SfAccordion ExpandMode="ExpandMode.Single"
+                                             LoadOnDemand="false">
+                                    <AccordionItems>
+                                        @foreach (var tc in framework.Value)
+                                        {
+                                            <AccordionItem Expanded="false">
+                                                <HeaderTemplate>
+                                                    <span class="accordion-case-header" title="@tc.Name">@tc.Name</span>
+                                                </HeaderTemplate>
+                                                <ContentTemplate>
+                                                    <div class="accordion-case-details">
+                                                        <div class="test-definition">
+                                                            <span>@(tc.Description ?? "No description available for this test.")</span>
+                                                        </div>
+
+                                                        <div class="case-tabs-wrap">
+                                                            <SfTab CssClass="full-height-tabs"
+                                                                   HeaderPlacement="HeaderPosition.Top"
+                                                                   EnablePersistence="false"
+                                                                   LoadOn="ContentLoad.Dynamic">
+                                                                <TabItems>
+                                                                    <TabItem>
+                                                                        <ChildContent>
+                                                                            <TabHeader Text="Code" />
+                                                                        </ChildContent>
+                                                                        <ContentTemplate>
+                                                                            @if (!string.IsNullOrEmpty(tc.Code))
+                                                                            {
+                                                                                <div class="test-code-block">
+                                                                                    <pre><code class="language-csharp">@tc.Code</code></pre>
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="test-no-details">No code available.</div>
+                                                                            }
+                                                                        </ContentTemplate>
+                                                                    </TabItem>
+                                                                    <TabItem>
+                                                                        <ChildContent>
+                                                                            <TabHeader Text="Steps" />
+                                                                        </ChildContent>
+                                                                        <ContentTemplate>
+                                                                            @if (tc.Steps != null && tc.Steps.Count > 0)
+                                                                            {
+                                                                                <div class="test-steps-panel">
+                                                                                    <ol class="test-steps-panel__list">
+                                                                                        @foreach (var step in tc.Steps)
+                                                                                        {
+                                                                                            <li>@step</li>
+                                                                                        }
+                                                                                    </ol>
+                                                                                </div>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <div class="test-no-details">No steps available.</div>
+                                                                            }
+                                                                        </ContentTemplate>
+                                                                    </TabItem>
+                                                                </TabItems>
+                                                            </SfTab>
+                                                        </div>
+                                                    </div>
+                                                </ContentTemplate>
+                                            </AccordionItem>
+                                        }
+                                    </AccordionItems>
+                                </SfAccordion>
+                            </div>
+                        </div>
+                    </ContentTemplate>
+                </TabItem>
+            }
+        </TabItems>
+    </SfTab>
+</div>
+
+@code {
+    private readonly List<KeyValuePair<string, List<TestCase>>> Frameworks = new()
+    {
+        new("bUnit",      TestCaseRepository.BUnitCases),
+        new("xUnit",      TestCaseRepository.xUnitCases),
+        new("NUnit",      TestCaseRepository.NUnitCases),
+        new("Playwright", TestCaseRepository.PlaywrightCases),
+        new("Cypress",    TestCaseRepository.CypressCases),
+    };
+
+    private int _activeTabIndex = 0;
+
+    private async Task OnTabCreated(object args)
+    {
+        // Re-key on first render so the active tab's content is fresh.
+        _activeTabIndex = 0;
+        await HighlightCodeAsync();
+    }
+
+    private async Task OnTabSelected(SelectEventArgs args)
+    {
+        _activeTabIndex = args.SelectedIndex;
+        await HighlightCodeAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await HighlightCodeAsync();
+    }
+
+    private async Task HighlightCodeAsync()
+    {
+        try { await JS.InvokeVoidAsync("highlightAllCode"); }
+        catch { /* swallow during SSR / pre-render */ }
+    }
+}
