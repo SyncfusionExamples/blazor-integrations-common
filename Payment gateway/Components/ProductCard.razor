@@ -1,0 +1,129 @@
+@inject IWishlistService WishlistService
+
+<SfCard CssClass="product-card">
+
+    <CardContent>
+        <div class="product-image">
+            <img class="card-img" 
+                 src="@Item.ImageUrl" 
+                 alt="@Item.Name"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div style="display:none; width:100%; height:150px; background:#f0f0f0; align-items:center; justify-content:center; font-size:40px; border-radius:8px;">
+                📦
+            </div>
+        </div>
+        <h6 class="fw-bold">@Item.Name</h6>
+
+        <SfRating Value="@Item.Rating" ReadOnly="true" />
+
+        <p class="small text-muted">
+            @Item.Description
+        </p>
+    </CardContent>
+
+    <CardFooter>
+        <div class="footer-row">
+            <!-- LEFT: Price -->
+            <span class="price">
+                @Item.Price.ToString("C")
+            </span>
+
+            <!-- RIGHT: Actions -->
+            <div class="footer-actions">
+                <SfButton Content="Add Cart"
+                          CssClass="e-outline e-primary e-small"
+                          Disabled="@(!Item.IsInStock)"
+                          OnClick="AddToCart" />
+
+                <!-- ❤️ Wishlist Heart -->
+                <SfButton CssClass="e-outline e-small wishlist-btn"
+                          Content="@HeartIcon"
+                          OnClick="ToggleWishlist" />
+            </div>
+        </div>
+    </CardFooter>
+</SfCard>
+@code {
+    [Parameter] public Product Item { get; set; } = default!;
+    [Parameter] public EventCallback<Product> OnAddToCart { get; set; }
+
+    private string HeartIcon =>
+        WishlistService.Contains(Item) ? "❤️" : "♡";
+
+    private void ToggleWishlist()
+        => WishlistService.Toggle(Item);
+
+    private Task AddToCart()
+    {
+        return OnAddToCart.InvokeAsync(Item);
+    }
+}
+<style>
+    .product-card {
+    border-radius: 10px;
+    transition: box-shadow 0.2s ease;
+        width: 100%;
+        min-height: 360px;
+        box-sizing: border-box;
+       
+}
+
+.product-card:hover {
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.product-image {
+    height: 150px;
+    background: #f4f6f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.card-img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+}
+
+@@media (max-width: 576px) {
+    .product-card {
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .product-image {
+        height: 120px;
+    }
+
+    .price {
+        font-size: 0.95rem;
+    }
+
+    .wishlist-btn {
+        font-size: 20px;
+    }
+}
+
+
+.footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.footer-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.price {
+    font-weight: 700;
+}
+
+.wishlist-btn {
+    font-size: 25px;
+    color: crimson;
+}
+</style>
+

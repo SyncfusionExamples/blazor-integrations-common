@@ -1,0 +1,41 @@
+@implements IDisposable
+
+<a href="/cart" class="position-relative text-decoration-none">
+    <span class="badge bg-danger position-absolute top-0 start-100 translate-middle">
+        @CartService.ItemCount
+    </span>
+   <span style="font-size: 1.5rem;" aria-hidden="true">🛒</span>
+</a>
+
+@code {
+    [Inject] ICartService CartService { get; set; } = null!;
+    [Inject] NavigationManager NavigationManager { get; set; } = null!;
+
+    private SynchronizationContext? _uiContext;
+
+    protected override void OnInitialized()
+    {
+        // Capture the UI thread's synchronization context
+        _uiContext = SynchronizationContext.Current;
+        CartService.OnCartChanged += OnCartChanged;
+    }
+
+    private void OnCartChanged()
+    {
+        // If CartService is Singleton, the event might be triggered from a different thread
+        // Use the captured UI context to schedule the state change on the UI thread
+        if (_uiContext != null)
+        {
+            _uiContext.Post(_ => StateHasChanged(), null);
+        }
+        else
+        {
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        CartService.OnCartChanged -= OnCartChanged;
+    }
+}
