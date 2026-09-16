@@ -1,0 +1,176 @@
+﻿@inherits LayoutComponentBase
+
+@inject NavigationManager UriHelper
+@using AppointmentPlanner.Data;
+@using AppointmentPlanner.Models;
+@using Microsoft.JSInterop;
+@inject IJSRuntime JSRuntime;
+
+<div class="sb-content-overlay @(hide)">
+    <div class="sb-loading">
+        <svg class="circular" height="40" width="40">
+            <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="6" stroke-miterlimit="10" />
+        </svg>
+    </div>
+    <div class="sb-caption">
+        <h4 class="my-4">Appointment planner initializing...</h4>
+    </div>
+</div>
+<div class="planner-wrapper" style="width: 100%; visibility:@(visible); opacity:@(opacity)">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <div class="planner-header">
+
+    </div>
+    <SfSidebar ID="plannerSiderBar" EnableGestures="false" @bind-IsOpen="open" MediaQuery="(min-width: 600px)" Type="SidebarType.Auto" Created="OnCreate" CloseOnDocumentClick="onDocumentClick">
+        <ChildContent>
+            <div class="dock">
+                <div class="info align-center">
+
+                 <div class="content nameContent">
+                <span class="clinic-name appointment-title">APPOINTMENT PLANNER</span>
+                </div>
+                </div>
+                @* <div class="info align-center"
+                    @* <div class="image"><img src="css/appoinment/assets/images/Admin.png" alt="Admin" /></div>
+                    <div class="content nameContent">
+                        <p class='name'>Jane Doe</p>
+                        <p class='user-type'>Admin</p>
+                    </div>
+                </div> *@
+                <div class="sideparent menulist">
+                    <nav aria-label="Primary">
+                    <ul class="nav flex-column">
+                        <li class="nav-item e-list-item">
+                            <NavLink class="nav-link sidebar-item" href="" Match="NavLinkMatch.All" @onclick="@CloseSidePane">
+                                <span class="dashboard-image" aria-hidden="true">
+                                    <span class="item-image icon-dashboard"></span>
+                                </span>
+                                <span class="text" title="Dashboard">Dashboard</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item e-list-item">
+                            <NavLink class="nav-link sidebar-item" href="schedule" @onclick="@CloseSidePane">
+                                <span class="dashboard-image">
+                                    <span class="item-image icon-schedule"></span>
+                                </span>
+                                <span class="text" title="Schedule">Schedule</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item e-list-item">
+                            <NavLink class="nav-link sidebar-item" href="doctors" @onclick="@CloseSidePane">
+                                <span class="dashboard-image">
+                                    <span class="item-image icon-doctors"></span>
+                                </span>
+                                <span class="text" title="Doctors">Doctors</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item e-list-item">
+                            <NavLink class="nav-link sidebar-item" href="patients" @onclick="@CloseSidePane">
+                                <span class="dashboard-image">
+                                    <span class="item-image icon-patients"></span>
+                                </span>
+                                <span class="text" title="Patients">Patients</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item e-list-item">
+                            <NavLink class="nav-link sidebar-item" href="preference" @onclick="@CloseSidePane">
+                                <span class="dashboard-image">
+                                    <span class="item-image icon-preference"></span>
+                                </span>
+                                <span class="text" title="Settings">Settings</span>
+                            </NavLink>
+                        </li>
+                        <li class="nav-item e-list-item">
+                            <NavLink class="nav-link sidebar-item" href="about" @onclick="@CloseSidePane">
+                                <span class="dashboard-image">
+                                    <span class="item-image icon-about"></span>
+                                </span>
+                                <span class="text" title="About">About</span>
+                            </NavLink>
+                        </li>
+                    </ul>
+                    </nav>
+                </div>
+                @* <div class='logout-container'>
+                <div class="logout-icon-container"><span class="icon-logout logout-image"></span></div>
+                <span class='logout-name'>Logout</span>
+            </div> *@
+            </div>
+
+
+        </ChildContent>
+    </SfSidebar>
+    <main class="main-content" id="main-content">
+        @Body
+    </main>
+    <div class="footer">
+        <div class="footer-container">
+            <div class="footer-icon">
+                <img class="footer-logo" src="Appointmentplanner.svg" alt="Appointment planner" />
+            </div>
+            <div class="footer-content">
+                <div class="title">
+                    <span>Want an interactive appointment planner in your app?</span>
+                    <span><strong> Try our Appointment Planner showcase sample</strong> — build, connect, and customize!</span>
+                </div>
+                <div class="buttons">
+                    <a href="https://www.syncfusion.com/downloads/blazor?tag=es-seo-blazor-demos-static-menu-trial" target="_blank" class="e-trial-btn e-btn" title="Free Trial Button" role="button"></a>
+                    <a href="https://www.syncfusion.com/request-demo?tag=blazor-server-appointment-planner-showcase" target="_blank" class="e-demo-btn e-btn" title="Request Demo Button">Request Demo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    [Inject]
+    protected AppointmentService Service { get; set; }
+    [Inject]
+    protected IJSRuntime JsRuntime { get; set; }
+
+    private bool onDocumentClick { get; set; }
+    private bool isDevice { get; set; }
+
+    private string target { get; set; } = "#loader-content";
+
+    private string visible { get; set; } = "hidden";
+    private string OverlayClass { get; set; }
+
+    private string hide { get; set; }
+    private string opacity { get; set; } = "0";
+    private bool open { get; set; }
+    private List<NavigationMenu> navigationItems { get; set; }
+
+    private void CloseSidePane()
+    {
+        if(this.isDevice){
+            open = false;
+        }
+    }
+
+    public void OnCreate()
+    {
+        this.hide = "sb-hide";
+        this.visible = "visible";
+        this.opacity = "1";
+    }
+
+    protected override void OnInitialized()
+    {
+        this.navigationItems = Service.NavigationMenu;
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            this.isDevice = await JSRuntime.InvokeAsync<bool>("checkBrowserDevice");
+            this.onDocumentClick = this.isDevice;
+        }
+    }
+
+    private void showSideBar()
+    {
+        open = true;
+    }
+}
