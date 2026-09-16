@@ -1389,3 +1389,7 @@
     min-height:40px;
     border-radius:12px;
 } */
+.e-appointment.e-lib.e-draggable{
+    height: 45px !important;
+
+}

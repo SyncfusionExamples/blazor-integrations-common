@@ -458,6 +458,8 @@
     flex-direction:column;
     gap:16px;
     width:100%;
+    transform: translateY(10px);
+    box-shadow: 0 40px 40px #ecf1e9;
 }
 
 
@@ -811,7 +813,7 @@
 }
 
 #department-card, #available-card, #doctor-card {
- background: #eefff7;
+ background: #dbf9eb;
 }
 
 .metric-title {
@@ -829,8 +831,9 @@
 
 .metric-icon {
     font-size: 46px;
-    opacity: .15;
+    /* opacity: .15; */
     font-weight: 500;
+    color: #139518;
 }
 
 /* Accent colors */

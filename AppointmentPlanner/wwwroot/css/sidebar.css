@@ -1,6 +1,6 @@
 #plannerSiderBar .info {
-    margin-top: 60px;
-    padding-bottom: 10px;
+    
+    padding-bottom: 15px;
 }
     #plannerSiderBar .info .image {
         border: 2px solid #fff;
@@ -113,10 +113,10 @@
         position: relative;
     }
 	.clinic-name.appointment-title {
-        font-size: 16px;
-        font-weight: 500;
+        font-size: 18px;
+        font-weight: 700;
         color:#fff;
-        padding-left: 10px;
+        padding-left: 10px; 
      }
 
         .planner-header div.side-bar-opener .open-icon {

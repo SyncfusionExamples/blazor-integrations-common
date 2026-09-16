@@ -77,7 +77,14 @@
     font-size: 14px;              /* readable base */
     color: var(--ap-text);
     line-height: 1.5;
+    /* Hard guard: never let the dashboard itself trigger a page-level
+       horizontal scrollbar. Children are allowed to scroll INSIDE their
+       cards (ie, the patients table) but the page must stay within
+       100vw at every breakpoint. */
+    max-width: 100%;
+    overflow-x: hidden;
 }
+.dashboard-container { max-width: 100%; min-width: 0; }
 
 /* Skip to main content link (accessibility) */
 #dashboard-modern .skip-link {
@@ -120,8 +127,8 @@
 }
 .page-title {
     margin: 0;
-    font-size: 22px;
-    font-weight: 700;
+    /* font-size: 16px; */
+    /* font-weight: 400; */
     letter-spacing: -0.3px;
     color: var(--ap-text);
     line-height: 1.2;
@@ -382,11 +389,24 @@
     box-shadow: var(--ap-shadow-2) !important;
 }
 .modern-kpi .e-card-content { padding: var(--ap-s5); }
-#active-patients-card {background: #e6f4f4; border-color: #0a8a8a;}
-#waiting-patients-card {background: #f7d5f7; border-color: #d97706;}
+#active-patients-card  {background: #e6f4f4; border-color: #0a8a8a;}
+#waiting-patients-card  {background: #f7d5f7;  border-color: #d97706;}
 #doctors-available-card {background: #dbeafe; border-color: #3b82f6;}
 #completed-visits-card {background: #dcfce7; border-color: #22c55e;}
 #care-alert-card {background: #fef2f2; border-color: #b91c1c;}
+.kpi-patient{
+color: #087c4d !important
+}
+.kpi-waiting{
+color:#de82de !important; 
+}
+.kpi-available{
+    color:#366eb9 !important;
+}
+.kpi-completed{
+    color:#34bc63 !important;
+}
+
 .kpi-header {
     display: flex;
     justify-content: space-between;
@@ -406,12 +426,12 @@
     width: 36px;
     height: 36px;
     border-radius: 10px;
-    background: var(--ap-brand-050);
-    color: var(--ap-brand-700);
+    /* background: var(--ap-brand-050); */
+    /* color: var(--ap-brand-700); */
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 25px;
 }
 .kpi-value {
     font-size: 40px;
@@ -595,57 +615,10 @@
 
 /* ---------------------------------------------------------------
    9. Donut
+   ---------------------------------------------------------------
+   Active definitions live further down (see "Donut chart"). The earlier
+   legacy block was removed to avoid conflicting heights/cascade noise.
    --------------------------------------------------------------- */
-.donut-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    height: 200px;
-}
-.donut-center {
-    position: absolute;
-    text-align: center;
-    pointer-events: none;
-}
-.donut-center .donut-total {
-    font-size: 24px;
-    font-weight: 800;
-    color: var(--ap-text);
-    line-height: 1;
-}
-.donut-center .donut-sub {
-    font-size: 11px;
-    color: var(--ap-text-muted);
-    margin-top: var(--ap-s1);
-    font-weight: 500;
-}
-.donut-legend {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--ap-s2) var(--ap-s4);
-    margin-top: var(--ap-s2);
-    padding: 0 var(--ap-s1);
-}
-.donut-legend .leg {
-    display: flex;
-    align-items: center;
-    gap: var(--ap-s2);
-    font-size: 13px;
-    color: var(--ap-text-secondary);
-}
-.donut-legend .leg .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    flex: 0 0 10px;
-}
-.donut-legend .leg .val {
-    margin-left: auto;
-    font-weight: 700;
-    color: var(--ap-text);
-    font-variant-numeric: tabular-nums;
-}
 
 /* ---------------------------------------------------------------
    10. Tabs (period switcher)
@@ -714,7 +687,14 @@
 }
 .patients-grid .e-grid table {
     width: 100% !important;
-    min-width: 800px !important;
+    /* The 800px minimum was forcing the surrounding card to overflow on
+       tablet sizes, which then produced a page-level horizontal scrollbar.
+       Keep the layout rectangular above ~900px where the 800px lock still
+       fits, but allow it to shrink for narrower viewports so the card
+       wraps its inner scroll instead of pushing the whole page sideways. */
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: auto;
 }
 .patients-grid .e-grid .e-headercell,
 .patients-grid .e-grid .e-rowcell {
@@ -1132,6 +1112,7 @@
     /* Mobile optimizations */
     #dashboard-modern { padding: var(--ap-s3) var(--ap-s3); }
     .dashboard-kpi-grid { grid-template-columns: 1fr; gap: var(--ap-s3); }
+    .dashboard-kpi-strip { grid-template-columns: 1fr 1fr; }
     .dash-tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
     .global-search-wrap { width: 100%; order: 10; }
     .cta-strip { flex-direction: column; align-items: stretch; gap: var(--ap-s2); }
@@ -1167,23 +1148,27 @@
     }
 
     /* Upcoming appointments mobile */
-    .upcoming-week { grid-template-columns: repeat(4, 1fr); gap: 4px; }
+    .upcoming-week { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
     .upcoming-week .day {
-        padding: 6px 4px;
-        min-height: 60px;
+        padding: 6px 2px;
+        min-height: 48px;
         font-size: 10px;
     }
+    .upcoming-week .day .dnum { font-size: 12px; }
     .upcoming-item {
         gap: var(--ap-s2);
         min-height: 56px;
         padding: 10px 4px;
+        flex-wrap: wrap;
     }
+    .upcoming-item .uinfo   { flex: 1 1 calc(100% - 50px); min-width: 0; }
     .upcoming-item .appointment-actions {
-        flex-direction: column;
+        flex: 1 1 100%;
+        flex-direction: row;
         gap: 4px;
-        width: 100%;
+        margin-top: 4px;
     }
-    .row-action-btn {
+    .appointment-actions .row-action-btn {
         width: 100%;
         margin-right: 0;
         min-height: 40px;
@@ -1191,6 +1176,17 @@
     .upcoming-item .ustatus {
         display: none;
     }
+}
+
+/* Tablet (640-900px): keep the upcoming row layout, just shrink type/space
+   so the card doesn't push the page past the viewport. The "Wed 16" pill
+   must stay visible without horizontal swipe. */
+@media (min-width: 641px) and (max-width: 900px) {
+    .upcoming-item { flex-wrap: wrap; padding: 10px 6px; }
+    .upcoming-item .uinfo { flex: 1 1 0; min-width: 0; }
+    .upcoming-item .appointment-actions { width: 100%; margin-top: 6px; }
+    .appointment-actions .row-action-btn { flex: 1 1 0; }
+}
 
     /* Alert banner mobile */
     .critical-banner {
@@ -2149,15 +2145,32 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+    /* Drop the fixed 375px height here so on narrow viewports the right
+       column can shrink with the donut card instead of forcing vertical
+       blank space inside a now-shallower viewport. */
+    height: 375px !important;
+    min-height: 0;
 }
 .donut-card {
     flex: 1;
     display: flex;
     flex-direction: column;
+    /* total card height ≈ header (~48) + wrap (260) + legend (~80) + padding (~40)
+       ≈ 428px → keep min/max around that band so nothing clips. */
+    min-height: 375px;
+    max-height: 470px;
+    /* Clip the Syncfusion chart wrapper so it can never overflow the card.
+       The four corner labels already have safe room inside the wrap. */
+    overflow: hidden;
+    position: relative;
 }
 .donut-card .donut-wrap {
     flex: 1;
-    min-height: 320px;
+    min-height: 230px;
+    max-height: 260px;
+    /* Use the card's 18px padding so corner labels stay inside the card. */
+    padding: 22px 18px;
+    box-sizing: border-box;
 }
 
 /* Charts row (2 col) */
@@ -2182,6 +2195,18 @@
     margin-bottom: 12px;
     align-items: center;
 }
+.donut-card .dash-card-header {
+    /* Give the title and the dominant-cohort badge a clear 2-slot layout. */
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+.donut-card .dash-card-title { flex-shrink: 0; }
+.donut-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
 .dash-card-title {
     font-size: 15px;
     font-weight: 700;
@@ -2201,77 +2226,273 @@
 }
 .dash-card-actions:hover { background: #f1f5f9; color: #475569; }
 
-/* Donut with labels around it */
+/* Donut chart: compact height with central stat + surrounding labels
+   plus a horizontal legend strip that adds counts, percentages, and
+   an age-range tooltip so each segment is self-explanatory. */
 .donut-wrap {
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    height: 220px;
+    /* Tall enough so the four corner labels clear the slice. */
+    height: 260px;
+    min-height: 250px;
+    max-height: 270px;
     width: 100%;
+    overflow: visible;
 }
 .donut-wrap .e-accumulationchart,
 .donut-wrap > div:first-child {
-    position: absolute;
-    inset: 0;
-    margin: auto;
-    padding-left: 25px;
+    /* Center a SQUARE region inside the wrap so the ring stays circular at
+       every breakpoint. Keep the four corner labels (donut-label-0..3) in
+       a radius that clears the ring but stays inside the wrap. */
+    position: relative;
+    margin: 0 auto;
+    height: 100%;
+    width: auto;
+    /* The Syncfusion chart wrapper must never exceed the donut card width. */
+    max-width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+}
+/* Every Syncfusion layer inside the chart also has to honor the wrap bounds,
+   otherwise the SVG/canvas paints past the card edge. */
+.donut-wrap .e-accumulationchart,
+.donut-wrap .e-accumulationchart svg,
+.donut-wrap .e-accumulationchart canvas,
+.donut-wrap .e-accumulationchart > div {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden;
+}
+
+/* Syncfusion ships the chart with an inline width/height attribute on the SVG.
+   Those attributes still beat CSS for SVG, so force the SVG to scale, not clip. */
+.donut-card .e-accumulationchart svg,
+.donut-card .e-accumulationchart svg.e-svg-accumulationchart {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+    /* Make the intrinsic ratio fall back to auto so it never asserts a 600px+ size. */
+    aspect-ratio: 1 / 1;
 }
 .donut-center {
     position: absolute;
     text-align: center;
     pointer-events: none;
     z-index: 1;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(2px);
+    /* Keep the badge stack from spilling over the hole boundary */
+    max-width: 70%;
 }
 .donut-center .donut-total {
-    font-size: 26px;
+    font-size: 22px;
     font-weight: 800;
     color: #0f172a;
     line-height: 1;
     font-variant-numeric: tabular-nums;
 }
 .donut-center .donut-sub {
-    font-size: 11px;
+    font-size: 9px;
     color: #64748b;
     margin-top: 4px;
-    font-weight: 500;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.donut-center .donut-delta,
+.donut-header-meta .donut-delta {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #e6f4f4;
+    color: #066b6b;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+.donut-delta.down {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
 }
 .donut-label {
+    /* Sit noticeably farther from the donut so the stacked number/category/%
+       never overlaps the slice edge — was 4/-8px, now -22 / -36px. */
     position: absolute;
     z-index: 2;
     pointer-events: none;
     text-align: center;
-    line-height: 1.05;
-    min-width: 60px;
+    line-height: 1.1;
+    min-width: 64px;
+    max-width: 90px;
+    transition: transform .15s ease;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 7px 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
 }
 .donut-label .donut-num {
     display: block;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 800;
     font-variant-numeric: tabular-nums;
+    letter-spacing: -0.2px;
 }
 .donut-label .donut-cat {
     display: block;
-    font-size: 11px;
+    font-size: 10.5px;
     color: #475569;
     margin-top: 2px;
-    font-weight: 500;
+    font-weight: 700;
 }
-/* Position the 4 labels around the donut */
-.donut-label-0 { top: 6px;     left: 50%; transform: translateX(-50%); }   /* top: Child */
-.donut-label-1 { top: 50%;     right: 6px;  transform: translateY(-50%); } /* right: Teen */
-.donut-label-2 { bottom: 6px;  left: 50%; transform: translateX(-50%); }   /* bottom: Adult */
-.donut-label-3 { top: 50%;     left: 6px;   transform: translateY(-50%); } /* left: Older */
+.donut-label .donut-pct {
+    display: block;
+    font-size: 9.5px;
+    color: #94a3b8;
+    margin-top: 1px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+/* Position the 4 labels around the donut. Top/bottom labels hug the wrap
+   edge; left/right labels sit INSIDE the wrap just outside the ring so the
+   card's 18px padding always keeps them clipped-to-card. */
+.donut-label-0 { top: -8px;        left: 50%;  transform: translateX(-50%); }   /* top: Child */
+.donut-label-1 { top: 50%;         right: 4px; transform: translateY(-50%); }   /* right: Teen */
+.donut-label-2 { bottom: -10px;    left: 50%;  transform: translateX(-50%); }   /* bottom: Adult */
+.donut-label-3 { top: 50%;         left: 4px;  transform: translateY(-50%); }   /* left: Older */
+@media (max-width: 1100px) {
+    .donut-label .donut-num { font-size: 14px; }
+    .donut-label .donut-cat { font-size: 9.5px;  }
+    .donut-label .donut-pct { font-size: 8.5px; }
+    .donut-label { padding: 4px 6px; }
+}
+
+/* At narrow widths the corner labels run out of horizontal room and start
+   colliding with the ring / clip outside the card. Hide them so the chart
+   reads cleanly on tablet/mobile; the badge in the donut center and the
+   values below already communicate the breakdown. */
 @media (max-width: 900px) {
-    .donut-label .donut-num { font-size: 16px; }
-    .donut-label .donut-cat { font-size: 10px; }
+    .donut-label { display: none; }
+    .donut-wrap  { padding: 12px 12px; }
+    .donut-card  { min-height: 280px; max-height: 360px; }
+}
+
+/* Horizontal legend strip under the donut — the "more informative" layer.
+   Each chip shows the swatch, label, count, and % share so the slice
+   meaning is clear without hovering the chart. */
+.donut-legend {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+}
+.donut-legend-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    font-size: 11.5px;
+    color: #334155;
+    cursor: default;
+    transition: background .15s ease, border-color .15s ease;
+    /* Allow long age ranges to wrap instead of clipping/squeezing the chip */
+    min-width: 0;
+    overflow: hidden;
+}
+.donut-legend-chip:hover {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+.donut-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 4px;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.7);
+}
+.donut-legend-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
+    min-width: 0;
+    flex: 1;
+}
+.donut-legend-cat {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 11.5px;
+}
+.donut-legend-meta {
+    color: #64748b;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    white-space: normal;
+    word-break: break-word;
+}
+.donut-legend-meta strong {
+    color: #0a4d4a;
+    font-weight: 700;
+}
+@media (max-width: 1100px) {
+    .donut-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+    .donut-legend { grid-template-columns: 1fr; }
+}
+
+/* Age-range tooltip — pure CSS, no JS, shows on hover/focus of chip */
+.donut-legend-chip[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #fff;
+    font-size: 10.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+    z-index: 5;
+}
+.donut-legend-chip {
+    position: relative;
+}
+.donut-legend-chip:hover::after,
+.donut-legend-chip:focus-visible::after {
+    opacity: 1;
+}
+.donut-legend-chip:focus-visible {
+    outline: 2px solid #0a8a8a;
+    outline-offset: 1px;
 }
 
 /* ---- 22. Patients table + Upcoming card row ---- */
 .dash-row-bottom {
-    display: grid;
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    /* display: grid;
     grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
-    gap: 16px;
+    gap: 16px; */
 }
 .dash-tabs {
     background: #f1f5f9;
@@ -2295,6 +2516,18 @@
 .dash-tab.active {
     background: #0a8a8a;
     color: #fff;
+}
+.dash-card.upcoming-card {
+    width: 360px !important;
+    /* right: -100px !important; */
+    /* position: relative !important;
+    top: -110px !important; */
+    height: 555px !important;
+}
+.dash-card-grid{
+     /* width: 850px !important; */
+     flex: 1 1 auto;
+     min-width: 0;
 }
 
 /* Patients grid table tweaks */
@@ -2426,6 +2659,8 @@
     padding: 10px 4px;
     border-bottom: 1px solid #f1f5f9;
     min-height: 56px;
+    /* Keep the row inside its card: stack avatar/info/actions when very narrow. */
+    flex-wrap: wrap;
 }
 .upcoming-item:last-child { border-bottom: 0; }
 .upcoming-item .uavatar {
@@ -2498,18 +2733,27 @@
 /* ---- 23. Responsive for new Helanthus layout ---- */
 @media (max-width: 1200px) {
     .dash-hero { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+    /* Slightly shrink the right column fixed heights at 1200px to leave
+       space for the corner donut labels without pushing the page down. */
+    .donut-card  { min-height: 360px; }
+    .dash-hero-right { height: auto !important; }
 }
 @media (max-width: 1000px) {
     .dashboard-kpi-strip { grid-template-columns: repeat(2, 1fr); }
     .dash-hero { grid-template-columns: minmax(0, 1fr); }
     .page-header { flex-direction: row; }
+    /* Stack the bottom row BEFORE the donut collapses so the upcoming
+       list has the full card width to lay out its week + items. */
+    .dash-row-bottom { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 900px) {
     #dashboard-modern { padding: 20px; }
     .dash-row-2col,
-    .dash-row-3col,
-    .dash-row-bottom { grid-template-columns: minmax(0, 1fr); }
+    .dash-row-3col { grid-template-columns: minmax(0, 1fr); }
     .global-search-wrap { width: 200px; }
+    /* Upcoming card: make week pills wrap to 4 columns + items flex. */
+    .upcoming-week { grid-template-columns: repeat(7, 1fr); }
+    .upcoming-item { gap: 8px; padding: 10px; }
 }
 @media (max-width: 700px) {
     .dashboard-kpi-strip { grid-template-columns: 1fr 1fr; }
@@ -2528,4 +2772,68 @@
 .patients-grid .e-headercell {
     white-space: normal !important;
     overflow-wrap: anywhere;
+}
+.e-calendar .e-btn.e-today.e-flat.e-primary, .e-calendar .e-css.e-btn.e-today.e-flat.e-primary,
+.e-calendar .e-btn.e-today.e-flat.e-primary:hover, .e-calendar .e-css.e-btn.e-today.e-flat.e-primary:hover {
+    color: #fff;
+}
+@media (max-width: 1200px)
+{
+    .dash-row-bottom {
+        flex-direction: column;
+    }
+
+    .upcoming-card {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+.dash-row-bottom {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.dash-card-grid {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.patients-grid {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.upcoming-card {
+    flex: 0 0 350px;
+    min-width: 0;
+}
+
+.e-grid {
+    width: 100% !important;
+}
+
+.dash-row-bottom {
+    display: flex;
+    gap: 20px;
+}
+
+@media (max-width: 1200px) {
+    .dash-row-bottom {
+        flex-direction: column;
+    }
+
+    .dash-card.upcoming-card {
+        margin-top: 0;
+        transform: none;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+@media (min-width: 1201px) {
+
+.dash-card.upcoming-card {
+margin-top: -110px;
+}
 }

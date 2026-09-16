@@ -246,9 +246,7 @@
 #newPatientsCard,
 #followupPatientsCard,
 #criticalPatientsCard, #recoveryCard {
-    background: #eefff7;
-    border:none;
-    border-radius:22px;
+    background: #dbf9eb;;
     height:100px;
     box-shadow:0 4px 20px rgb(0 0 0 / 6%);
 }
@@ -359,10 +357,10 @@
     margin-bottom: 10px;
     font-weight: 600;
     margin-left: 50px; */
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .07em;
+    padding-top:10px;
     color: #475569;
     padding-left: 10px;
 }
@@ -370,12 +368,12 @@
     /* font-weight: 800;
     margin-top: 4px;
     margin-left: 10px; */
-        font-size: 40px;
-    font-weight: 800;
+        font-size: 30px;
+    font-weight: 200;
     color: #0f172a;
-    line-height: 1.05;
+    /* line-height: 1.05;
     letter-spacing: -0.5px;
-    font-variant-numeric: tabular-nums;
+    font-variant-numeric: tabular-nums; */
     margin: 4px 0;
     padding-left: 10px;
 

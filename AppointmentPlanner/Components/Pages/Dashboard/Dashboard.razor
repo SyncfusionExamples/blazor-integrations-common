@@ -16,7 +16,7 @@
               <header class="page-header">
             <div class="page-title-wrap">
                 @* <span class="page-eyebrow">Clinical Operations Center</span> *@
-                <h1 class="page-title">Good Morning, Admin</h1>
+                <h6>Good Morning, Admin</h6>
                 <span class="page-meta"><p class="page-meta-text">Last refreshed @lastUpdated · data updates live</p></span>
             </div>
 
@@ -98,7 +98,7 @@
 
                     <div class="kpi-header">
                         <span class="kpi-title">Active Patients</span>
-                        <span class="kpi-icon" aria-hidden="true">
+                        <span class="kpi-icon kpi-patient" aria-hidden="true">
                             <span class="e-icons e-people"></span>
                         </span>
                     </div>
@@ -125,7 +125,7 @@
 
                     <div class="kpi-header">
                         <span class="kpi-title">Waiting</span>
-                        <span class="kpi-icon" aria-hidden="true">
+                        <span class="kpi-icon kpi-waiting" aria-hidden="true">
                             <span class="e-icons e-clock"></span>
                         </span>
                     </div>
@@ -148,7 +148,7 @@
 
                     <div class="kpi-header">
                         <span class="kpi-title">Doctors Available</span>
-                        <span class="kpi-icon" aria-hidden="true">
+                        <span class="kpi-icon kpi-available" aria-hidden="true">
                             <span class="e-icons e-user"></span>
                         </span>
                     </div>
@@ -171,7 +171,7 @@
 
                     <div class="kpi-header">
                         <span class="kpi-title">Completed Visits</span>
-                        <span class="kpi-icon" aria-hidden="true">
+                        <span class="kpi-icon kpi-completed" aria-hidden="true">
                             <span class="e-icons e-check"></span>
                         </span>
                     </div>
@@ -330,10 +330,19 @@
                 <div class="dash-card donut-card">
                     <div class="dash-card-header">
                         <h3 class="dash-card-title">Patient Overview</h3>
-                        <button class="dash-card-actions" title="More" aria-label="More">⋯</button>
+                        <div class="donut-header-meta">
+                            @if (dominantSegment != null)
+                            {
+                                <span class="donut-delta @(dominantShare >= 50 ? "down" : "")"
+                                      title="Largest cohort">
+                                    @dominantSegment.Category @dominantShare%
+                                </span>
+                            }
+                            <button class="dash-card-actions" title="More" aria-label="More">⋯</button>
+                        </div>
                     </div>
                     <div class="donut-wrap">
-                        <SfAccumulationChart Width="80%">
+                        <SfAccumulationChart Width="100%" Height="100%">
                             <AccumulationChartSeriesCollection>
                                 <AccumulationChartSeries
                                     DataSource="@donutData"
@@ -348,26 +357,53 @@
                             </AccumulationChartSeriesCollection>
                             <AccumulationChartLegendSettings Visible="false"></AccumulationChartLegendSettings>
                         </SfAccumulationChart>
-                        <div class="donut-center">
+                        <div class="donut-center" aria-label="Total patients: @donutTotal">
                             <div class="donut-total">@donutTotal</div>
-                            <div class="donut-sub">Total</div>
+                            <div class="donut-sub">Patients</div>
                         </div>
                         @foreach (var seg in donutData)
                         {
                             var idx = donutData.IndexOf(seg);
-                            <div class="donut-label donut-label-@idx" style="color:@seg.Color">
+                            var segShare = donutTotal > 0
+                                ? (int)Math.Round(seg.Value * 100.0 / Math.Max(1, donutTotal))
+                                : 0;
+                            <div class="donut-label donut-label-@idx" style="color:@seg.Color"
+                                 title="@seg.Category: @seg.Value patients (@segShare%)">
                                 <span class="donut-num">@seg.Value</span>
                                 <span class="donut-cat">@seg.Category</span>
+                                <span class="donut-pct">@segShare%</span>
                             </div>
                         }
                     </div>
+
+                    @* <!-- Legend strip: makes every slice self-explanatory without hovering the chart -->
+                    <div class="donut-legend" role="list" aria-label="Patient age cohorts">
+                        @foreach (var seg in donutData)
+                        {
+                            var segShare = donutTotal > 0
+                                ? (int)Math.Round(seg.Value * 100.0 / Math.Max(1, donutTotal))
+                                : 0;
+                            <div class="donut-legend-chip"
+                                 role="listitem"
+                                 tabindex="0"
+                                 data-tip="@seg.Category · @seg.AgeRange">
+                                <span class="donut-legend-swatch" style="background:@seg.Color" aria-hidden="true"></span>
+                                <span class="donut-legend-text">
+                                    <span class="donut-legend-cat">@seg.Category</span>
+                                    <span class="donut-legend-meta">
+                                        <strong>@seg.Value</strong> · @segShare% &middot; @seg.AgeRange
+                                    </span>
+                                </span>
+                            </div>
+                        }
+                    </div> *@
                 </div>
             </div>
         </div>
 
         <!-- ============ Bottom row: Patients table + Upcoming Appointments ============ -->
         <div class="dash-row-bottom">
-            <div class="dash-card">
+            <div class="dash-card-grid">
                 <div class="dash-card-header">
                     <h3 class="dash-card-title">Patients</h3>
                     <div class="dash-tabs" role="tablist" aria-label="Queue period">
@@ -396,10 +432,9 @@
                             AllowSorting="true"
                             GridLines="Syncfusion.Blazor.Grids.GridLine.None"
                             RowHeight="52" AllowTextWrap="true">
-                             <GridTextWrapSettings WrapMode="WrapMode.Both"></GridTextWrapSettings>
-                        @* <GridEvents DataBound="OnDataBound" TValue="PatientRow" />*@
+                             
                         <GridColumns> 
-                            <GridColumn Field="Name" HeaderText="Name" >
+                            <GridColumn Field="Name" HeaderText="Name"  Width="110" >
                                 <Template>
                                     @{
                                         var row = (context as PatientRow);
@@ -410,7 +445,7 @@
                                     </span>
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="Age" HeaderText="Age" >
+                            <GridColumn Field="Age" HeaderText="Age" Width="80" >
                                 <Template>
                                     @{
                                         var row = (context as PatientRow);
@@ -418,9 +453,9 @@
                                     @row.Age years
                                 </Template>
                             </GridColumn>
-                            <GridColumn Field="AppointmentDate" HeaderText="Date &amp; Time"  Format="d MMM yyyy · h:mm tt" Type="Syncfusion.Blazor.Grids.ColumnType.DateTime" />
-                            <GridColumn Field="Reason" HeaderText="Appointed For" />
-                            @* <GridColumn HeaderText="Status" >
+                            <GridColumn Field="AppointmentDate" HeaderText="Date &amp; Time" Width="180" Format="d MMM yyyy · h:mm tt" Type="Syncfusion.Blazor.Grids.ColumnType.DateTime" />
+                            <GridColumn Field="Reason" Width="120" HeaderText="Appointed For" />
+                            @* <GridColumn HeaderText="Status" Width="120" >
                                 <Template>
                                     @{ var row = (context as PatientRow); }
                                     @if (row.IsCompleted)
@@ -444,7 +479,7 @@
                                     }
                                 </Template>
                             </GridColumn> *@
-                            <GridColumn HeaderText="Priority" >
+                            <GridColumn HeaderText="Priority"  Width="100">
                                 <Template>
                                     @{
                                         var prow = (context as PatientRow);
@@ -453,7 +488,7 @@
                                     <span class="@GetPriorityClass(prow)" title="@priorityText">@priorityText</span>
                                 </Template>
                             </GridColumn>
-                        <GridColumn HeaderText="Actions" Width="160">
+                        <GridColumn HeaderText="Actions" Width="250">
                             <Template>
                                 @{
                                     var arow = (context as PatientRow);
@@ -507,13 +542,17 @@
                     {
                         @for (int i = 0; i < weekDays.Count; i++)
                         {
-                            var d = weekDays[i];
+                            // Capture the loop index in a local: a lambda closing over the
+                            // "for" variable always reads its FINAL value, so every button
+                            // would otherwise open the same (last) day's appointments.
+                            var dayIndex = i;
+                            var d = weekDays[dayIndex];
                             var isPast = d.Date.Date < Today.Date;
                             if (isPast) continue;
-                            <button class="day @(selectedDayIndex == i ? "selected" : "")"
-                                    @onclick="@(() => SelectDay(i))"
+                            <button class="day @(selectedDayIndex == dayIndex ? "selected" : "")"
+                                    @onclick="@(() => SelectDay(dayIndex))"
                                     aria-label="@d.Short, @d.Number"
-                                    aria-pressed="@(selectedDayIndex == i)">
+                                    aria-pressed="@(selectedDayIndex == dayIndex)">
                                 @d.Short
                                 <span class="dnum">@d.Number</span>
                             </button>
@@ -554,11 +593,11 @@
                                                     @onclick="@(() => CheckInUpcoming(a))"
                                                     aria-label="Check in @a.Name for @a.Dept appointment">Check-In</button>
                                         }
-                                        <button type="button" class="row-action-btn ghost"
+                                        @* <button type="button" class="row-action-btn ghost"
                                                 @onclick="@(() => CallUpcoming(a))"
                                                 aria-label="Call @a.Name for consultation">
                                             <span class="e-icons e-phone" aria-hidden="true"></span> Call
-                                        </button>
+                                        </button> *@
                                     </div>
                                     @* <span class="ustatus @a.StatusClass" title="Status: @a.StatusText">@a.StatusText</span> *@
                                 </li>
@@ -688,7 +727,8 @@ else
       private void StartNextConsultation()
     {
         var next = allPatients
-            .Where(p => p.AppointmentDate.Date == Today.Date && !p.IsCheckedIn && !p.IsCompleted)
+            .Where(p => p.AppointmentDate.Date == Today.Date)
+            .Where(p => !checkedInUpcomingIds.Contains(p.HospitalId) && !completedUpcomingIds.Contains(p.HospitalId))
             .OrderBy(p => p.AppointmentDate)
             .FirstOrDefault();
 
@@ -730,9 +770,9 @@ else
     {
         if (row == null || row.IsCheckedIn) return;
         row.IsCheckedIn = true;
-        // Refresh the grid so templated cells re-render with the new state
-        grid?.Refresh();
-        StateHasChanged();
+        // Shared state (by appointment Id) so the Upcoming panel stays in sync.
+        if (row.HospitalId > 0) checkedInUpcomingIds.Add(row.HospitalId);
+        RefreshPatientsPanels();
     }
 
     /// <summary>Marks a patient's visit completed — secondary row action.</summary>
@@ -741,6 +781,20 @@ else
         if (row == null || row.IsCompleted) return;
         row.IsCheckedIn = true;
         row.IsCompleted = true;
+        // Shared state (by appointment Id) so the Upcoming panel stays in sync.
+        if (row.HospitalId > 0)
+        {
+            checkedInUpcomingIds.Add(row.HospitalId);
+            completedUpcomingIds.Add(row.HospitalId);
+        }
+        RefreshPatientsPanels();
+    }
+
+    /// <summary>Re-syncs the day's upcoming list with shared state and refreshes both panels.</summary>
+    private void RefreshPatientsPanels()
+    {
+        // Upcoming list is rebuilt from tracked state so both views agree.
+        SelectDay(selectedDayIndex);
         grid?.Refresh();
         StateHasChanged();
     }
@@ -750,7 +804,10 @@ else
     {
         if (a == null || a.IsCheckedIn) return;
         a.IsCheckedIn = true;
-        StateHasChanged();
+        // Track by appointment Id so the state survives re-querying the day's list
+        // and is reflected in the patients grid as well.
+        if (a.HospitalId > 0) checkedInUpcomingIds.Add(a.HospitalId);
+        RefreshPatientsPanels();
     }
 
     // /// <summary>Places/sets up a call for an upcoming-appointment patient.</summary>
@@ -872,48 +929,55 @@ else
     private double trendYInterval => Math.Max(1, Math.Round(trendYMax / 5, 0));
 
     // ---- Donut: Patient Overview (Child/Teen/Adult/Older) ----
-    public class DonutSlice { public string Category { get; set; } public double Value { get; set; } public string Color { get; set; } }
+    public class DonutSlice
+    {
+        public string Category { get; set; }
+        public double Value { get; set; }
+        public string Color { get; set; }
+        /// <summary>Human-readable age span this cohort covers.</summary>
+        public string AgeRange { get; set; }
+        /// <summary>Live-computed share of the total, 0-100.</summary>
+        public int Share { get; set; }
+    }
     private List<DonutSlice> donutData = new();
     private int donutTotal => (int)donutData.Sum(d => d.Value);
+    private DonutSlice dominantSegment => donutTotal > 0
+        ? donutData.OrderByDescending(d => d.Value).FirstOrDefault()
+        : null;
+    private int dominantShare => (int)Math.Round(dominantSegment.Value * 100.0 / Math.Max(1, donutTotal));
 
     // ---- Upcoming appointments ----
     public class WeekDay { public string Short { get; set; } public int Number { get; set; } public DateTime Date { get; set; } }
-    public class Upcoming { public string Name { get; set; } public string Time { get; set; } public string Dept { get; set; } public string StatusText { get; set; } public string StatusClass { get; set; } public string Initial { get; set; } public bool IsCheckedIn { get; set; } }
+    public class Upcoming { public int HospitalId { get; set; } public string Name { get; set; } public string Time { get; set; } public string Dept { get; set; } public string StatusText { get; set; } public string StatusClass { get; set; } public string Initial { get; set; } public bool IsCheckedIn { get; set; } }
 
     private DateTime weekAnchor = DateTime.Today;
     private List<WeekDay> weekDays = new();
     private int selectedDayIndex = 4;
     private List<Upcoming> upcomingAppointments = new();
 
-    private Dictionary<DateTime, List<Hospital>> _weekAppointments = new();
+    private Dictionary<DateTime, List<Hospital>> upcomingByDate = new();
 
+    /// <summary>
+    /// Indexes the REAL appointments (Service.Hospitals) by their booked date.
+    /// ApplyDynamicDates already assigns each appointment a live StartTime from
+    /// today onward, so every calendar date resolves to its own distinct set.
+    /// Previously this fabricated a cycling patient list, which made every day
+    /// (and every week) render the exact same rows.
+    /// </summary>
     private void BuildWeekAppointments()
     {
-        _weekAppointments = new Dictionary<DateTime, List<Hospital>>();
+        upcomingByDate = new Dictionary<DateTime, List<Hospital>>();
         if (Service?.Hospitals == null) return;
 
-        var weekStart = weekAnchor.Date;
-        var ordered = Service.Hospitals.OrderBy(h => h.Id).ToList();
-        int cursor = 0;
-
-        for (int dayIndex = 0; dayIndex < 7; dayIndex++)
+        foreach (var h in Service.Hospitals)
         {
-            var day = weekStart.AddDays(dayIndex);
-            var perDay = new List<Hospital>();
-            int slots = 2 + (dayIndex % 2);
-            for (int s = 0; s < slots; s++)
+            var date = h.StartTime.Date;
+            if (!upcomingByDate.TryGetValue(date, out var list))
             {
-                if (cursor >= ordered.Count) cursor = 0;
-                var h = ordered[cursor++];
-                var hour = 9 + ((h.Id + dayIndex) % 8);
-                var minute = ((h.Id * 13) + (dayIndex * 17)) % 60;
-                perDay.Add(new Hospital(
-                    h.Id, h.Name,
-                    day.AddHours(hour).AddMinutes(minute),
-                    day.AddHours(hour).AddMinutes(minute).AddMinutes(30),
-                    h.Disease, h.DepartmentName, h.DepartmentId, h.DoctorId, h.PatientId, h.Symptoms));
+                list = new List<Hospital>();
+                upcomingByDate[date] = list;
             }
-            _weekAppointments[day] = perDay;
+            list.Add(h);
         }
     }
 
@@ -921,28 +985,33 @@ else
     {
         if (Service?.Hospitals == null || weekDays.Count == 0) return new List<Upcoming>();
 
-        var dayDate = weekDays[Math.Clamp(idx, 0, weekDays.Count - 1)].Date;
+        var dayDate = weekDays[Math.Clamp(idx, 0, weekDays.Count - 1)].Date.Date;
         var docsById = Service.Doctors?.ToDictionary(d => d.Id) ?? new Dictionary<int, Doctor>();
 
-        _weekAppointments.TryGetValue(dayDate, out var matches);
-        matches = (matches ?? new List<Hospital>())
-            .OrderBy(h => h.StartTime)
-            .ToList();
+        // Real bookings for the picked date only.
+        if (!upcomingByDate.TryGetValue(dayDate, out var matches) || matches == null)
+            return new List<Upcoming>();
 
-        return matches.Select(h =>
-        {
-            var doc = docsById.TryGetValue(h.DoctorId, out var d) ? d : null;
-            var status = (doc?.Availability ?? "busy").ToLowerInvariant();
-            return new Upcoming
+        return matches
+            .OrderBy(h => h.StartTime)
+            .Select(h =>
             {
-                Name = h.Name,
-                Time = h.StartTime.ToString("h:mmtt").ToLower(),
-                Dept = h.DepartmentName,
-                StatusText = status == "available" ? "Online" : "Offline",
-                StatusClass = status == "available" ? "online" : "offline",
-                Initial = GetInitials(h.Name)
-            };
-        }).ToList();
+                var doc = docsById.TryGetValue(h.DoctorId, out var d) ? d : null;
+                var status = (doc?.Availability ?? "busy").ToLowerInvariant();
+                return new Upcoming
+                {
+                    HospitalId = h.Id,
+                    Name = h.Name,
+                    Time = h.StartTime.ToString("h:mmtt").ToLower(),
+                    Dept = h.DepartmentName,
+                    StatusText = status == "available" ? "Online" : "Offline",
+                    StatusClass = status == "available" ? "online" : "offline",
+                    Initial = GetInitials(h.Name),
+                    // Shared state with the patients grid — checking in or completing
+                    // in either panel updates both.
+                    IsCheckedIn = checkedInUpcomingIds.Contains(h.Id) || completedUpcomingIds.Contains(h.Id)
+                };
+            }).ToList();
     }
 
     private void BuildWeek()
@@ -984,6 +1053,8 @@ else
     // ---- Patients table ----
     public class PatientRow
     {
+        /// <summary>Id of the underlying appointment (Service.Hospitals) — links grid row to the upcoming list.</summary>
+        public int HospitalId { get; set; }
         public string Name { get; set; }
         public string Initial { get; set; }
         public int Age { get; set; }
@@ -1039,7 +1110,11 @@ else
             if (!string.IsNullOrWhiteSpace(searchText))
                 q = q.Where(p => p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) || p.Reason.Contains(searchText, StringComparison.OrdinalIgnoreCase));
 
-            return q.OrderByDescending(p => p.AppointmentDate);
+            // Apply the shared check-in / completed state (tracked by appointment Id)
+            // so the grid rows always agree with the Upcoming panel.
+            var result = q.OrderByDescending(p => p.AppointmentDate).ToList();
+            result.ForEach(ApplyRowState);
+            return result;
         }
     }
 
@@ -1058,31 +1133,49 @@ else
     // ---- Build dynamic datasets from service ----
     private void BuildPatients()
     {
-        if (Service?.Patients == null) return;
+        // Grid rows are built from the REAL appointments (Service.Hospitals).
+        // Previously rows were fabricated per Service.Patients entry with a
+        // synthetic date pattern, so the grid and the Upcoming panel (which
+        // reads the same Hospitals list) showed DIFFERENT patients "for the
+        // same date". Joining on the same source and PatientId keeps both
+        // panels consistent for any given date.
+        if (Service?.Hospitals == null) { allPatients = new List<PatientRow>(); return; }
 
-        var weekStart = Today.AddDays(-(int)Today.DayOfWeek + (int)DayOfWeek.Monday);
-        var rng = new Random(Today.Year * 100 + (int)Today.DayOfWeek + Service.Patients.Count);
+        var patientsById = Service.Patients?
+            .GroupBy(p => p.Id)
+            .ToDictionary(g => g.Key, g => g.First())
+            ?? new Dictionary<int, Patient>();
 
-        allPatients = Service.Patients.Select((p, idx) =>
-        {
-            int dayOffset;
-            if (idx < 3)            dayOffset = -7 + (idx % 7);
-            else if (idx < 21)      dayOffset = (idx - 3) % 7;
-            else                    dayOffset = 7 + (idx % 5);
-
-            var apptDate = weekStart.AddDays(dayOffset)
-                                    .AddHours(9 + (p.Id % 8))
-                                    .AddMinutes((p.Id * 13) % 60);
-            return new PatientRow
+        allPatients = Service.Hospitals
+            .OrderBy(h => h.StartTime)
+            .Select(h =>
             {
-                Name = p.Name,
-                Initial = GetInitials(p.Name),
-                Age = GetAge(p.DOB),
-                AppointmentDate = apptDate,
-                DateTime = apptDate.ToString("d MMM yyyy · h:mm tt"),
-                Reason = p.Disease
-            };
-        }).ToList();
+                patientsById.TryGetValue(h.PatientId, out var patient);
+                var matched = patient ?? Service.Patients?.FirstOrDefault(p => p.Name == h.Name);
+                return new PatientRow
+                {
+                    HospitalId = h.Id,
+                    Name = h.Name,
+                    Initial = GetInitials(h.Name),
+                    Age = matched == null ? 0 : GetAge(matched.DOB),
+                    AppointmentDate = h.StartTime,
+                    DateTime = h.StartTime.ToString("d MMM yyyy · h:mm tt"),
+                    Reason = h.Disease
+                };
+            })
+            .ToList();
+    }
+
+    /// <summary>Single source of truth for check-in / completed state per appointment Id.</summary>
+    private readonly HashSet<int> checkedInUpcomingIds = new();
+    private readonly HashSet<int> completedUpcomingIds = new();
+
+    /// <summary>Applies tracked check-in / completed state to a grid row.</summary>
+    private void ApplyRowState(PatientRow row)
+    {
+        if (row == null) return;
+        row.IsCheckedIn = checkedInUpcomingIds.Contains(row.HospitalId);
+        row.IsCompleted = completedUpcomingIds.Contains(row.HospitalId);
     }
 
     private void BuildDailyAppointments()
@@ -1136,26 +1229,36 @@ else
             .GroupBy(p => GetAgeBucket(GetAge(p.DOB)))
             .ToDictionary(g => g.Key, g => g.Count());
 
-        var palette = new (string Cat, string Color)[]
+        var palette = new (string Cat, string Color, string Rng)[]
         {
-            ("Child",  "#0a8a8a"),
-            ("Teen",   "#f59e0b"),
-            ("Adult",  "#ec4899"),
-            ("Older",  "#a855f7"),
+            ("Child",  "#0a8a8a", "0–12 yrs"),
+            ("Teen",   "#f59e0b", "13–19 yrs"),
+            ("Adult",  "#ec4899", "20–39 yrs"),
+            ("Older",  "#a855f7", "40+ yrs"),
         };
-        donutData = palette.Select(p => new DonutSlice
+        var temp = palette.Select(p => new DonutSlice
         {
             Category = p.Cat,
             Color = p.Color,
+            AgeRange = p.Rng,
             Value = groups.TryGetValue(p.Cat, out var c) ? c : 0
         }).ToList();
 
+        // Live-compute shares now that we know the totals, so the legend,
+        // ring labels and central badge all read from a single source.
+        var total = temp.Sum(d => d.Value);
+        foreach (var d in temp) d.Share = total > 0 ? (int)Math.Round(d.Value * 100.0 / total) : 0;
+        donutData = temp;
+
         if (donutTotal == 0)
         {
+            // Avoid a fully blank ring — render a 1:1:1:1 placeholder so the
+            // chart structure stays visible without misleading the viewer.
             donutData = palette.Select(p => new DonutSlice
             {
                 Category = p.Cat,
                 Color = p.Color,
+                AgeRange = p.Rng,
                 Value = 1
             }).ToList();
         }

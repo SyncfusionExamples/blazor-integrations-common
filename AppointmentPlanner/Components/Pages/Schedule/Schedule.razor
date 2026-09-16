@@ -216,7 +216,7 @@ else if (isDataLoaded)
                             </span>
 
                         </div>
-                        <SfSchedule ID="schedule" TValue="Hospital" @ref="scheduleObj" Width="100%" Height="800" CssClass="doctor-appointment-planner" ShowWeekend="false" StartHour="@startHour" EndHour="@endHour" @bind-SelectedDate="@currentDate" WorkDays="@workDay" FirstDayOfWeek="@calendarDayOfWeek" @bind-CurrentView="@sceduleView">
+                        <SfSchedule ID="schedule" TValue="Hospital" @ref="scheduleObj" Width="100%" Height="700" CssClass="doctor-appointment-planner" ShowWeekend="false" StartHour="@startHour" EndHour="@endHour" @bind-SelectedDate="@currentDate" WorkDays="@workDay" FirstDayOfWeek="@calendarDayOfWeek" @bind-CurrentView="@sceduleView">
                             <ScheduleEvents TValue="Hospital" OnPopupOpen="OnPopupOpen" OnPopupClose="OnPopupClose" OnActionBegin="OnActionBegin"></ScheduleEvents>
                             <ScheduleWorkHours Start="08:00" End="21:00"></ScheduleWorkHours>
                             <ScheduleEventSettings DataSource="@scheduleEventData" ResourceColorField="@resourceColorField" AllowEditFollowingEvents="@editUpcoming">
