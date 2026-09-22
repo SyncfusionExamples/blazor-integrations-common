@@ -1,0 +1,118 @@
+﻿@page "/about"
+
+@if (isDataLoaded)
+{
+<div id="@aboutId" class="about-container">
+    <header class="about-header">
+        <div class="module-title">
+            <h1 class='title'>About Appointment Planner</h1>
+            <div class='underline'></div>
+        </div>
+        <span class="showcase-count">@showcaseComponents.Count components</span>
+    </header>
+    <div class="about-hero">
+        <div class="hero-copy">
+            <span class="eyebrow">SYNCFUSION BLAZOR SHOWCASE</span>
+            <h2>Real clinic workflows, built with composable UI.</h2>
+            <p>This example clinic brings scheduling, patient management, doctor availability, and operational insights together in one working application.</p>
+            <div class="hero-actions">
+                <a class="e-btn e-primary" href="https://github.com/syncfusion/blazor-showcase-appointment-planner" target="_blank" rel="noopener">View source code</a>
+                <a class="e-btn e-outline" href="https://blazor.syncfusion.com/" target="_blank" rel="noopener">Explore Syncfusion Blazor</a>
+            </div>
+        </div>
+
+    </div>
+    <div class="component-heading">
+        <div><h2>Components in this sample</h2><p>See how each control supports a real workflow.</p></div>
+    </div>
+    <div class="about-component-groups">
+        @foreach (var group in showcaseComponents.GroupBy(item => item.Category))
+        {
+            <section class="component-group">
+                <h3>@group.Key</h3>
+                <div class="component-grid">
+                    @foreach (var item in group)
+                    {
+                        <SfCard CssClass="showcase-component-card">
+                            <CardContent>
+                                <span class="@item.Icon e-sb-icon control-icon"></span>
+                                <div class="component-card-copy"><strong>@item.Name</strong><span>@item.Description</span></div>
+                                <a class="component-link" href="@item.Url" target="_blank" rel="noopener" aria-label="Open @item.Name documentation">Docs <span class="e-icons e-arrow-right"></span></a>
+                            </CardContent>
+                        </SfCard>
+                    }
+                </div>
+            </section>
+        }
+    </div>
+</div>
+}
+else
+{
+    <div class="about-container">
+        <div class="module-title">
+            <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="15px" Width="20%"></SfSkeleton>
+            <br/>
+        </div>
+        <div class="about-descrip-skeleton">
+            <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="15px" Width="97%"></SfSkeleton>
+            <br/>
+            <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="15px" Width="74%"></SfSkeleton>
+        </div>
+        <br/>
+        <div class="about-component">
+            @for(int i=0; i<14; i++){
+            <div class="control-item">
+                <span>
+                    <SfSkeleton Shape="Syncfusion.Blazor.Notifications.SkeletonType.Rectangle" Height="15px" Width="75%"></SfSkeleton>
+                </span>
+            </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private bool isDataLoaded;
+    private string aboutId;
+
+    private readonly List<ShowcaseComponent> showcaseComponents = new()
+    {
+        new("Scheduling", "Schedule", "sfimage-schedule", "Resource-based appointment planning.", "https://blazor.syncfusion.com/documentation/scheduler/getting-started-with-server-app"),
+        //new("Scheduling", "TreeView", "sfimage-treeview", "Drag patients into available slots.", "https://blazor.syncfusion.com/documentation/treeview/getting-started-with-server-app"),
+        new("Data and analytics", "Grid", "sfimage-grid", "Searchable patient administration.", "https://blazor.syncfusion.com/documentation/datagrid/getting-started-with-server-app"),
+        new("Data and analytics", "Chart", "sfimage-chart", "Visual appointment trends.", "https://blazor.syncfusion.com/documentation/chart/getting-started"),
+       // new("Data and analytics", "ListView", "sfimage-listview", "Compact operational lists.", "https://blazor.syncfusion.com/documentation/listview/getting-started-with-server-app"),
+        new("Forms and input", "DropDownList", "sfimage-dropdownlist", "Fast filtering and configuration.", "https://blazor.syncfusion.com/documentation/dropdown-list/getting-started-with-server-app"),
+        new("Forms and input", "DatePicker", "sfimage-datepicker", "Date-aware appointment forms.", "https://blazor.syncfusion.com/documentation/datepicker/getting-started-with-server-app"),
+       // new("Forms and input", "TimePicker", "sfimage-timepicker", "Time selection for clinic hours.", "https://blazor.syncfusion.com/documentation/timepicker/getting-started"),
+        new("Forms and input", "TextBox", "sfimage-textboxes", "Validated patient and doctor fields.", "https://blazor.syncfusion.com/documentation/textbox/getting-started-with-server-app"),
+        //new("Forms and input", "CheckBox", "sfimage-checkbox", "Simple preference toggles.", "https://blazor.syncfusion.com/documentation/check-box/getting-started-with-server-app"),
+        new("Dialogs and feedback", "Dialog", "sfimage-dialog", "Focused add, edit, and review flows.", "https://blazor.syncfusion.com/documentation/dialog/getting-started-with-server-app"),
+        new("Dialogs and feedback", "Predefined Dialogs", "sf-icon-predefineddialogs", "Clear confirmation workflows.", "https://blazor.syncfusion.com/documentation/predefined-dialogs/getting-started-with-server-app"),
+        //new("Dialogs and feedback", "Toast", "sfimage-toast", "Immediate operation feedback.", "https://blazor.syncfusion.com/documentation/toast/getting-started"),
+        new("Dialogs and feedback", "Message", "sf-icon-message", "Inline status communication.", "https://blazor.syncfusion.com/documentation/message/getting-started-with-server-app"),
+        new("Navigation and layout", "Sidebar", "sfimage-sidebar", "Persistent application navigation.", "https://blazor.syncfusion.com/documentation/sidebar/getting-started"),
+        //new("Navigation and layout", "AppBar", "sf-icon-appbar", "Application-level identity and actions.", "https://blazor.syncfusion.com/documentation/appbar/getting-started-with-server-app"),
+        new("Navigation and layout", "Button", "sfimage-button", "Explicit workflow actions.", "https://blazor.syncfusion.com/documentation/button/getting-started-with-server-app"),
+        new("Loading", "Skeleton", "sf-icon-skeleton", "Comfortable loading transitions.", "https://blazor.syncfusion.com/documentation/skeleton/getting-started")
+    };
+
+    private async Task LoadData()
+    {
+        this.aboutId = "about";
+        await Task.Delay(100);
+        isDataLoaded = true;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadData();
+        }
+    }
+
+    private sealed record ShowcaseComponent(string Category, string Name, string Icon, string Description, string Url);
+}

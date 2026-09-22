@@ -1,0 +1,1380 @@
+﻿@page "/"
+@page "/dashboard"
+
+@using AppointmentPlanner.Data;
+@using AppointmentPlanner.Models;
+@using System;
+@using System.Linq;
+@using System.Threading;
+@implements IDisposable
+
+@if (isDataLoaded)
+{
+    <div id="dashboard-modern" class="dashboard-container" @onclick="CloseMonthPicker">
+
+        <!-- ============ Top header =========== -->
+              <header class="page-header">
+            <div class="page-title-wrap">
+                @* <span class="page-eyebrow">Clinical Operations Center</span> *@
+                <h6>Good Morning, Admin</h6>
+                <span class="page-meta"><p class="page-meta-text">Last refreshed @lastUpdated · data updates live</p></span>
+            </div>
+
+            <div class="page-header-actions">
+                <span class="global-search-wrap">
+                    <span class="e-icons e-search search-icon" aria-hidden="true"></span>
+                    <input type="text"
+                           placeholder="Search patients, reasons…"
+                           aria-label="Search patients or appointment reasons"
+                           @bind="searchText"
+                           @bind:event="oninput"
+                           role="searchbox"
+                           aria-describedby="search-help" />
+                </span>
+                <span id="search-help" style="display:none;">Filter patients and appointment reasons in real time</span>
+
+                <button type="button" class="ai-button" aria-label="Open AI assistant for clinical briefing"
+                        @onclick=@(() => showAI = true)>
+                    <span class="e-icons e-assist" aria-hidden="true"></span>
+                    Ask AI
+                </button>
+            </div>
+        </header>
+         @if (CriticalPatients > 0)
+        {
+            <div class="critical-banner" role="alert">
+                <span class="banner-icon e-icons e-status-info" aria-hidden="true"></span>
+                <div class="banner-text">
+                    <strong>@CriticalPatients critical patient@(CriticalPatients == 1 ? "" : "s") need immediate attention</strong>
+                    <span class="banner-meta">Last check @lastUpdated · highest priority first</span>
+                </div>
+                <button type="button" class="banner-cta" @onclick=@(() => { severityFilter = "Critical"; activeTab = "Daily"; })>Triage queue</button>
+            </div>
+        }
+
+
+      <!-- ============ Primary CTA strip (P0: dashboard must be action-oriented) ============ -->
+        <div class="cta-strip" role="toolbar" aria-label="Quick actions">
+            <div class="cta-wrap" style="position:relative;">
+                <button type="button" class="cta-primary" @onclick="StartNextConsultation">
+                    <span class="e-icons e-plus" style="font-size:14px;" aria-hidden="true"></span>
+                    Start next consultation
+                </button>
+            </div>
+            <div class="cta-wrap" style="position:relative;">
+                <button type="button" class="cta-secondary" aria-expanded="@showScheduleCalendar"
+                        @onclick="ToggleScheduleCalendar">
+                    <span class="e-icons e-icon-calendar" style="font-size:14px;" aria-hidden="true"></span>
+                    Schedule appointment
+                </button>
+
+                @if (showScheduleCalendar)
+                {
+                    <div class="schedule-popup" role="dialog" aria-label="Pick a date for the appointment">
+                        <div class="schedule-popup-head">Schedule on a date</div>
+                        <SfCalendar TValue="DateTime?"
+                                    Min="@calendarMin"
+                                    Max="@calendarMax"
+                                    Value="@Today">
+                            <CalendarEvents TValue="DateTime?" ValueChange="OnScheduleDatePicked"></CalendarEvents>
+                        </SfCalendar>
+                    </div>
+                }
+            </div>
+            <div class="cta-live" aria-live="polite">
+                <span class="pulse-dot" aria-hidden="true"></span>
+                <span>Live — @ConsultationCount doctors available</span>
+            </div>
+        </div>
+
+
+        <!-- ============ Two-column hero: left = 4 KPI cards + 2 charts, right = Patient Overview ============ -->
+        <div class="dash-hero">
+            <div class="dash-hero-left">
+                <!-- 4-card colored metric strip -->
+                <div class="dashboard-kpi-strip">
+                    <SfCard CssClass="modern-kpi" ID="active-patients-card">
+                <CardContent>
+
+                    <div class="kpi-header">
+                        <span class="kpi-title">Active Patients</span>
+                        <span class="kpi-icon kpi-patient" aria-hidden="true">
+                            <span class="e-icons e-people"></span>
+                        </span>
+                    </div>
+
+                    <div class="kpi-value" role="text" aria-label="Active patients: @totalPatients">@totalPatients</div>
+
+                    <div class="kpi-trend @(totalPatientsTrend < 0 ? "negative" : totalPatientsTrend > 0 ? "positive" : "neutral")" title="vs previous week" aria-label="@(totalPatientsTrend < 0 ? "Down" : totalPatientsTrend > 0 ? "Up" : "No change") @Math.Abs(totalPatientsTrend)% this week">
+                        @(totalPatientsTrend < 0 ? "↓" : totalPatientsTrend > 0 ? "↑" : "→") @Math.Abs(totalPatientsTrend)% <span class="kpi-trend-meta">this week</span>
+                    </div>
+
+                    <SfSparkline TValue="TrendPoint"
+                                Height="45px"
+                                DataSource="@patientSpark"
+                                aria-label="Active patients trend, last 7 days">
+                        <SparklineValueType ValueType="SparklineValueType.Numeric">
+                        </SparklineValueType>
+                    </SfSparkline>
+
+                </CardContent>
+            </SfCard>
+
+            <SfCard CssClass="modern-kpi" ID="waiting-patients-card">
+                <CardContent>
+
+                    <div class="kpi-header">
+                        <span class="kpi-title">Waiting</span>
+                        <span class="kpi-icon kpi-waiting" aria-hidden="true">
+                            <span class="e-icons e-clock"></span>
+                        </span>
+                    </div>
+
+                    <div class="kpi-value" role="text" aria-label="Patients waiting: @WaitingCount">@WaitingCount</div>
+
+                    <div class="kpi-trend @(WaitingCount == 0 ? "neutral" : "positive")">
+                        @TotalPatientsInPeriod in active view
+                    </div>
+
+                    <div class="kpi-meter" role="img" aria-label="Waiting share of active view: @waitingShare%">
+                        <span style="width:@(waitingShare)%"></span>
+                    </div>
+
+                </CardContent>
+            </SfCard>
+
+            <SfCard CssClass="modern-kpi" ID="doctors-available-card">
+                <CardContent>
+
+                    <div class="kpi-header">
+                        <span class="kpi-title">Doctors Available</span>
+                        <span class="kpi-icon kpi-available" aria-hidden="true">
+                            <span class="e-icons e-user"></span>
+                        </span>
+                    </div>
+
+                    <div class="kpi-value" role="text" aria-label="Doctors available: @ConsultationCount of @doctorCount">@ConsultationCount<span class="kpi-sub">/@doctorCount</span></div>
+
+                    <div class="kpi-trend neutral">
+                        @doctorUtilization% utilisation now
+                    </div>
+
+                    <div class="kpi-meter" role="img" aria-label="Doctor utilisation: @doctorUtilization%">
+                        <span style="width:@(doctorUtilization)%"></span>
+                    </div>
+
+                </CardContent>
+            </SfCard>
+
+            <SfCard CssClass="modern-kpi" ID="completed-visits-card">
+                <CardContent>
+
+                    <div class="kpi-header">
+                        <span class="kpi-title">Completed Visits</span>
+                        <span class="kpi-icon kpi-completed" aria-hidden="true">
+                            <span class="e-icons e-check"></span>
+                        </span>
+                    </div>
+
+                    <div class="kpi-value" role="text" aria-label="Completed visits: @CompletedCount of @TotalPatientsInPeriod in active view">@CompletedCount<span class="kpi-sub">/@TotalPatientsInPeriod</span></div>
+
+                    <div class="kpi-trend @(appointmentsTrend < 0 ? "negative" : appointmentsTrend > 0 ? "positive" : "neutral")" title="vs previous week" aria-label="@(appointmentsTrend < 0 ? "Down" : appointmentsTrend > 0 ? "Up" : "No change") @Math.Abs(appointmentsTrend)% throughput">
+                        @(appointmentsTrend < 0 ? "↓" : appointmentsTrend > 0 ? "↑" : "→") @Math.Abs(appointmentsTrend)% <span class="kpi-trend-meta">throughput</span>
+                    </div>
+
+                    <div class="kpi-meter" role="img" aria-label="Completion rate: @completionRate%">
+                        <span style="width:@(completionRate)%"></span>
+                    </div>
+
+                </CardContent>
+            </SfCard>
+
+
+                    @* <div class="metric-tile metric-blue" role="group" aria-label="Total patients">
+                        <span class="metric-icon" aria-hidden="true">
+                            <span class="e-icons e-people"></span>
+                        </span>
+                        <div class="metric-text">
+                            <span class="metric-label">Total Patients</span>
+                            <div class="metric-value-row">
+                                <span class="metric-value">@FormatCount(totalPatients)</span><sup class="metric-plus">+</sup>
+                            </div>
+                            <span class="metric-trend up" aria-label="Up @totalPatientsTrend%">
+                                <span class="trend-arrow">↗</span> @totalPatientsTrend%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="metric-tile metric-pink" role="group" aria-label="Old patients">
+                        <span class="metric-icon" aria-hidden="true">
+                            <span class="e-icons e-user"></span>
+                        </span>
+                        <div class="metric-text">
+                            <span class="metric-label">Old Patients</span>
+                            <div class="metric-value-row">
+                                <span class="metric-value">@FormatCount(oldPatients)</span><sup class="metric-plus">+</sup>
+                            </div>
+                            <span class="metric-trend down" aria-label="Down @oldPatientsTrend%">
+                                <span class="trend-arrow">↘</span> @oldPatientsTrend%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="metric-tile metric-green" role="group" aria-label="New patients">
+                        <span class="metric-icon" aria-hidden="true">
+                            <span class="e-icons e-plus"></span>
+                        </span>
+                        <div class="metric-text">
+                            <span class="metric-label">New Patients</span>
+                            <div class="metric-value-row">
+                                <span class="metric-value">@FormatCount(newPatients)</span><sup class="metric-plus">+</sup>
+                            </div>
+                            <span class="metric-trend up" aria-label="Up @newPatientsTrend%">
+                                <span class="trend-arrow">↗</span> @newPatientsTrend%
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="metric-tile metric-orange" role="group" aria-label="Appointments">
+                        <span class="metric-icon" aria-hidden="true">
+                            <span class="e-icons e-icon-calendar"></span>
+                        </span>
+                        <div class="metric-text">
+                            <span class="metric-label">Appointments</span>
+                            <div class="metric-value-row">
+                                <span class="metric-value">@FormatCount(appointmentsCount)</span><sup class="metric-plus">+</sup>
+                            </div>
+                            <span class="metric-trend down" aria-label="Down @appointmentsTrend%">
+                                <span class="trend-arrow">↘</span> @appointmentsTrend%
+                            </span>
+                        </div>
+                    </div> *@
+
+                </div>
+
+                <!-- Bar + Line charts row -->
+                <div class="dash-row-2col">
+                    <!-- Daily Appointment Stats (bar chart with tooltip) -->
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <h3 class="dash-card-title">Daily Appointment Stats</h3>
+                            <button class="dash-card-actions" title="More" aria-label="More">⋯</button>
+                        </div>
+                        <SfChart Height="220px" Width="100%">
+                            <ChartArea><ChartAreaBorder Width="0"></ChartAreaBorder></ChartArea>
+                            <ChartPrimaryXAxis ValueType="@Syncfusion.Blazor.Charts.ValueType.Category" Interval="1">
+                                <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+                                <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                                <ChartAxisLabelStyle Color="#94a3b8" Size="11px"></ChartAxisLabelStyle>
+                            </ChartPrimaryXAxis>
+                            <ChartPrimaryYAxis Minimum="0" Maximum="@dailyYMax" Interval="@dailyYInterval">
+                                <ChartAxisMajorGridLines Color="#eef2f7" Width="1"></ChartAxisMajorGridLines>
+                                <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                                <ChartAxisLabelStyle Color="#94a3b8" Size="11px"></ChartAxisLabelStyle>
+                            </ChartPrimaryYAxis>
+                            <ChartLegendSettings Visible="true" Position="@Syncfusion.Blazor.Charts.LegendPosition.Top"
+                                                 Alignment="Syncfusion.Blazor.Charts.Alignment.Center"></ChartLegendSettings>
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@dailyAppointments"
+                                             Type="Syncfusion.Blazor.Charts.ChartSeriesType.Column"
+                                             XName="Day" YName="Clinic" Name="Clinic"
+                                             Fill="#0a8a8a" ColumnSpacing="0.35">
+                                    <ChartCornerRadius TopLeft="6" TopRight="6"></ChartCornerRadius>
+                                </ChartSeries>
+                                <ChartSeries DataSource="@dailyAppointments"
+                                             Type="Syncfusion.Blazor.Charts.ChartSeriesType.Column"
+                                             XName="Day" YName="Online" Name="Online"
+                                             Fill="#94a3b8" ColumnSpacing="0.35">
+                                    <ChartCornerRadius TopLeft="6" TopRight="6"></ChartCornerRadius>
+                                </ChartSeries>
+                            </ChartSeriesCollection>
+                        </SfChart>
+                    </div>
+
+                    <!-- Appointment Stats (line/spline) -->
+                    <div class="dash-card">
+                        <div class="dash-card-header">
+                            <h3 class="dash-card-title">Appointment Stats</h3>
+                            <button class="dash-card-actions" title="More" aria-label="More">⋯</button>
+                        </div>
+                        <SfChart Height="220px" Width="100%">
+                            <ChartArea><ChartAreaBorder Width="0"></ChartAreaBorder></ChartArea>
+                            <ChartPrimaryXAxis ValueType="@Syncfusion.Blazor.Charts.ValueType.Category" Interval="1">
+                                <ChartAxisMajorGridLines Width="0"></ChartAxisMajorGridLines>
+                                <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                                <ChartAxisLabelStyle Color="#94a3b8" Size="11px"></ChartAxisLabelStyle>
+                            </ChartPrimaryXAxis>
+                            <ChartPrimaryYAxis Minimum="0" Maximum="@trendYMax" Interval="@trendYInterval">
+                                <ChartAxisMajorGridLines Color="#eef2f7" Width="1"></ChartAxisMajorGridLines>
+                                <ChartAxisMajorTickLines Width="0"></ChartAxisMajorTickLines>
+                                <ChartAxisLabelStyle Color="#94a3b8" Size="11px"></ChartAxisLabelStyle>
+                            </ChartPrimaryYAxis>
+                            <ChartLegendSettings Visible="false"></ChartLegendSettings>
+                            <ChartSeriesCollection>
+                                <ChartSeries DataSource="@appointmentTrend"
+                                             Type="Syncfusion.Blazor.Charts.ChartSeriesType.Spline"
+                                             XName="Day" YName="Value"
+                                             Fill="#0a8a8a">
+                                    <ChartSeriesBorder Width="3" Color="#0a8a8a"></ChartSeriesBorder>
+                                    <ChartMarker Visible="true" Width="6" Height="6" Fill="#0a8a8a" Shape="Syncfusion.Blazor.Charts.ChartShape.Circle">
+                                    </ChartMarker>
+                                </ChartSeries>
+                            </ChartSeriesCollection>
+                        </SfChart>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side: Patient Overview (spans both rows of the hero) -->
+            <div class="dash-hero-right">
+                <div class="dash-card donut-card">
+                    <div class="dash-card-header">
+                        <h3 class="dash-card-title">Patient Overview</h3>
+                        <div class="donut-header-meta">
+                            @if (dominantSegment != null)
+                            {
+                                <span class="donut-delta @(dominantShare >= 50 ? "down" : "")"
+                                      title="Largest cohort">
+                                    @dominantSegment.Category @dominantShare%
+                                </span>
+                            }
+                            <button class="dash-card-actions" title="More" aria-label="More">⋯</button>
+                        </div>
+                    </div>
+                    <div class="donut-wrap">
+                        <SfAccumulationChart Width="100%" Height="100%">
+                            <AccumulationChartSeriesCollection>
+                                <AccumulationChartSeries
+                                    DataSource="@donutData"
+                                    XName="Category"
+                                    YName="Value"
+                                    InnerRadius="62%"
+                                    Type="Syncfusion.Blazor.Charts.AccumulationType.Pie"
+                                    PointColorMapping="Color"
+                                    Explode="false">
+                                    <AccumulationDataLabelSettings Visible="false"></AccumulationDataLabelSettings>
+                                </AccumulationChartSeries>
+                            </AccumulationChartSeriesCollection>
+                            <AccumulationChartLegendSettings Visible="false"></AccumulationChartLegendSettings>
+                        </SfAccumulationChart>
+                        <div class="donut-center" aria-label="Total patients: @donutTotal">
+                            <div class="donut-total">@donutTotal</div>
+                            <div class="donut-sub">Patients</div>
+                        </div>
+                        @foreach (var seg in donutData)
+                        {
+                            var idx = donutData.IndexOf(seg);
+                            var segShare = donutTotal > 0
+                                ? (int)Math.Round(seg.Value * 100.0 / Math.Max(1, donutTotal))
+                                : 0;
+                            <div class="donut-label donut-label-@idx" style="color:@seg.Color"
+                                 title="@seg.Category: @seg.Value patients (@segShare%)">
+                                <span class="donut-num">@seg.Value</span>
+                                <span class="donut-cat">@seg.Category</span>
+                                <span class="donut-pct">@segShare%</span>
+                            </div>
+                        }
+                    </div>
+
+                    @* <!-- Legend strip: makes every slice self-explanatory without hovering the chart -->
+                    <div class="donut-legend" role="list" aria-label="Patient age cohorts">
+                        @foreach (var seg in donutData)
+                        {
+                            var segShare = donutTotal > 0
+                                ? (int)Math.Round(seg.Value * 100.0 / Math.Max(1, donutTotal))
+                                : 0;
+                            <div class="donut-legend-chip"
+                                 role="listitem"
+                                 tabindex="0"
+                                 data-tip="@seg.Category · @seg.AgeRange">
+                                <span class="donut-legend-swatch" style="background:@seg.Color" aria-hidden="true"></span>
+                                <span class="donut-legend-text">
+                                    <span class="donut-legend-cat">@seg.Category</span>
+                                    <span class="donut-legend-meta">
+                                        <strong>@seg.Value</strong> · @segShare% &middot; @seg.AgeRange
+                                    </span>
+                                </span>
+                            </div>
+                        }
+                    </div> *@
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ Bottom row: Patients table + Upcoming Appointments ============ -->
+        <div class="dash-row-bottom">
+            <div class="dash-card-grid">
+                <div class="dash-card-header">
+                    <h3 class="dash-card-title">Patients</h3>
+                    <div class="dash-tabs" role="tablist" aria-label="Queue period">
+                        @foreach (var t in patientTabs)
+                        {
+                            var tabName = t;
+                            <button type="button" role="tab" aria-selected="@(activeTab == tabName)"
+                                    class="dash-tab @(activeTab == tabName ? "active" : "")"
+                                    @onclick="@(() => activeTab = tabName)">@tabName</button>
+                        }
+                    </div>
+                </div>
+                <div class="patients-grid">
+                       @if (filteredPatients.Count() == 0)
+                    {
+                        <div class="patients-empty" role="status">
+                            <strong>No patients in this @activeTab view.</strong><br />
+                            Try switching the period tabs or <button type="button" class="link-btn" @onclick=@(() => severityFilter = null)>clear the severity filter</button>.
+                        </div>
+                    }
+                    <SfGrid @ref="grid"
+                            DataSource="@filteredPatients"
+                            Height="340px"
+                            Width="100%"
+                            AllowPaging="false"
+                            AllowSorting="true"
+                            GridLines="Syncfusion.Blazor.Grids.GridLine.None"
+                            RowHeight="52" AllowTextWrap="true">
+                             
+                        <GridColumns> 
+                            <GridColumn Field="Name" HeaderText="Name"  Width="110" >
+                                <Template>
+                                    @{
+                                        var row = (context as PatientRow);
+                                    }
+                                    <span class="pname">
+                                        <span class="pavatar">@row.Initial</span>
+                                        @row.Name
+                                    </span>
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="Age" HeaderText="Age" Width="80" >
+                                <Template>
+                                    @{
+                                        var row = (context as PatientRow);
+                                    }
+                                    @row.Age years
+                                </Template>
+                            </GridColumn>
+                            <GridColumn Field="AppointmentDate" HeaderText="Date &amp; Time" Width="180" Format="d MMM yyyy · h:mm tt" Type="Syncfusion.Blazor.Grids.ColumnType.DateTime" />
+                            <GridColumn Field="Reason" Width="120" HeaderText="Appointed For" />
+                            @* <GridColumn HeaderText="Status" Width="120" >
+                                <Template>
+                                    @{ var row = (context as PatientRow); }
+                                    @if (row.IsCompleted)
+                                    {
+                                        <span class="status-done" title="This patient's appointment is completed">
+                                            Completed
+                                        </span>
+                                    }
+                                    else if (row.IsCheckedIn)
+                                    {
+                                        <span class="status-checkedin" title="Patient is currently in consultation">
+                                            In consultation
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        var statusText = GetStatus(row);
+                                        <span class="@GetStatusClass(row)" title="@statusText">
+                                            <span class="chip-dot" aria-hidden="true"></span>@statusText
+                                        </span>
+                                    }
+                                </Template>
+                            </GridColumn> *@
+                            <GridColumn HeaderText="Priority"  Width="100">
+                                <Template>
+                                    @{
+                                        var prow = (context as PatientRow);
+                                        var priorityText = GetPriority(prow);
+                                    }
+                                    <span class="@GetPriorityClass(prow)" title="@priorityText">@priorityText</span>
+                                </Template>
+                            </GridColumn>
+                        <GridColumn HeaderText="Actions" Width="250">
+                            <Template>
+                                @{
+                                    var arow = (context as PatientRow);
+                                }
+                                @if (arow.IsCompleted)
+                                {
+                                    <span class="status-done" title="This appointment is completed">Completed</span>
+                                }
+                                else if (arow.IsCheckedIn)
+                                {
+                                    <span class="status-checkedin" title="Patient is in consultation">In consultation</span>
+                                    <button type="button" class="row-action-btn ghost"
+                                            @onclick=@(() => CompletePatient(arow))
+                                            aria-label="Mark @arow.Name as completed">Complete</button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="row-action-btn"
+                                            @onclick=@(() => CheckInPatient(arow))
+                                            aria-label="Check in @arow.Name">Check In</button>
+                                    <button type="button" class="row-action-btn ghost"
+                                            @onclick=@(() => CompletePatient(arow))
+                                            aria-label="Mark @arow.Name as completed">Complete</button>
+                                }
+                            </Template>
+                        </GridColumn>
+                        </GridColumns>
+                    </SfGrid>
+                </div>
+            </div>
+
+            <!-- Upcoming Appointments -->
+            <div class="dash-card upcoming-card">
+                <div class="dash-card-header">
+                    <h3 class="dash-card-title">Upcoming Appointments</h3>
+                    <div class="upcoming-month">
+                        <button class="nav-btn" @onclick="PrevWeek" aria-label="Previous week">‹</button>
+                        <span class="month-label">@currentMonthLabel</span>
+                        <button class="nav-btn" @onclick="NextWeek" aria-label="Next week">›</button>
+                    </div>
+                </div>
+                <div class="upcoming-week">
+                    @{
+                        var hasFutureDay = weekDays.Any(d => d.Date.Date >= Today.Date);
+                    }
+                    @if (!hasFutureDay)
+                    {
+                        <div class="upcoming-empty" style="grid-column: span 7;">No upcoming days in this week.</div>
+                    }
+                    else
+                    {
+                        @for (int i = 0; i < weekDays.Count; i++)
+                        {
+                            // Capture the loop index in a local: a lambda closing over the
+                            // "for" variable always reads its FINAL value, so every button
+                            // would otherwise open the same (last) day's appointments.
+                            var dayIndex = i;
+                            var d = weekDays[dayIndex];
+                            var isPast = d.Date.Date < Today.Date;
+                            if (isPast) continue;
+                            <button class="day @(selectedDayIndex == dayIndex ? "selected" : "")"
+                                    @onclick="@(() => SelectDay(dayIndex))"
+                                    aria-label="@d.Short, @d.Number"
+                                    aria-pressed="@(selectedDayIndex == dayIndex)">
+                                @d.Short
+                                <span class="dnum">@d.Number</span>
+                            </button>
+                        }
+                    }
+                </div>
+                <div class="upcoming-list">
+                    @if (upcomingAppointments.Count == 0)
+                    {
+                        <div class="upcoming-empty" role="status">
+                            <strong>No appointments for this day.</strong>
+                            Pick another day or use › to move to next week.
+                        </div>
+                    }
+                    else
+                    {
+                        @* Plain loop — ListView with a duplicate Id="Initial" key broke its diff engine,
+                           causing overlapping rows. Each item is unique + keyed by index. *@
+                        <ul class="upcoming-listview" role="list">
+                            @for (var idx = 0; idx < upcomingAppointments.Count; idx++)
+                            {
+                                var a = upcomingAppointments[idx];
+                                var itemKey = idx;
+                                <li class="upcoming-item" key="@itemKey">
+                                    <div class="uavatar" aria-hidden="true">@a.Initial</div>
+                                    <div class="uinfo">
+                                        <div class="uname">@a.Name</div>
+                                        <div class="utime">@a.Time · @a.Dept</div>
+                                    </div>
+                                    <div class="appointment-actions">
+                                        @if (a.IsCheckedIn)
+                                        {
+                                            <span class="checkedin-tag" title="Patient has been checked in">✓ Checked in</span>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="row-action-btn"
+                                                    @onclick="@(() => CheckInUpcoming(a))"
+                                                    aria-label="Check in @a.Name for @a.Dept appointment">Check-In</button>
+                                        }
+                                        @* <button type="button" class="row-action-btn ghost"
+                                                @onclick="@(() => CallUpcoming(a))"
+                                                aria-label="Call @a.Name for consultation">
+                                            <span class="e-icons e-phone" aria-hidden="true"></span> Call
+                                        </button> *@
+                                    </div>
+                                    @* <span class="ustatus @a.StatusClass" title="Status: @a.StatusText">@a.StatusText</span> *@
+                                </li>
+                            }
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+     <!-- Call feedback toast -->
+    @if (callingName != null)
+    {
+        <div class="call-toast" role="status" aria-live="polite">
+            <span class="e-icons e-phone" aria-hidden="true"></span>
+            Connecting call to <strong>@callingName</strong>…
+        </div>
+    }
+    @if (showAI)
+    {
+        @* Self-contained briefing panel — no external AI service required.
+             (SfAIAssistView silently crashes when no service is registered, killing the circuit) *@
+        <div class="ai-panel" role="dialog" aria-label="AI assistant briefing">
+            <div class="ai-panel-header">
+                <span class="e-icons e-assist ai-panel-icon" aria-hidden="true"></span>
+                <div class="ai-panel-title">
+                    <strong>AI Briefing</strong>
+                    <span>Generated from live clinic data</span>
+                </div>
+                <button type="button" class="ai-panel-close" aria-label="Close AI panel" @onclick="@(() => showAI = false)">✕</button>
+            </div>
+
+            <div class="ai-panel-body">
+                <div class="ai-insight">
+                    <span class="ai-insight-dot danger"></span>
+                    <strong>@CriticalPatients critical patients</strong> aged 65+ are waiting — assign to the first available doctor.
+                </div>
+                <div class="ai-insight">
+                    <span class="ai-insight-dot warning"></span>
+                    <strong>@WaitingCount patients waiting</strong> across @ConsultationCount available doctors — current load @doctorUtilization%.
+                </div>
+                <div class="ai-insight">
+                    <span class="ai-insight-dot success"></span>
+                    <strong>@CompletedCount visits completed</strong> of @TotalPatientsInPeriod in the active view — @completionRate% completion rate.
+                </div>
+                <div class="ai-insight">
+                    <span class="ai-insight-dot info"></span>
+                    Busiest day is <strong>@BusiestDay</strong> — consider opening an extra online slot.
+                </div>
+            </div>
+
+            <div class="ai-panel-footer">
+                <span>Suggested follow-ups:</span>
+                <div class="ai-suggestions">
+                    <button type="button" class="ai-suggestion-chip" @onclick="@(() => { severityFilter = "Critical"; showAI = false; })">Triage critical</button>
+                    <button type="button" class="ai-suggestion-chip" @onclick="@(() => { activeTab = "Weekly"; showAI = false; })">View weekly load</button>
+                    <button type="button" class="ai-suggestion-chip" @onclick="@(() => { searchText = ""; severityFilter = null; showAI = false; })">Clear filters</button>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="dash-skeleton">
+        <div class="sk-row">
+            <div class="sk-block"></div>
+            <div class="sk-block"></div>
+            <div class="sk-block"></div>
+            <div class="sk-block"></div>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Inject]
+    protected AppointmentService Service { get; set; }
+
+    [Inject]
+    protected NavigationManager Urihelper { get; set; }
+    string lastUpdated => DateTime.Now.ToString("hh:mm:ss tt");
+    private bool showAI;
+
+    // ---- Today (live system date) ----
+    private DateTime _today = DateTime.Today;
+    private DateTime Today
+    {
+        get => _today;
+        set
+        {
+            if (value < new DateTime(1900, 1, 1)) value = new DateTime(1900, 1, 1);
+            if (value > new DateTime(2999, 12, 1)) value = new DateTime(2999, 12, 1);
+            _today = value;
+        }
+    }
+    private string currentMonthShort => Today.ToString("MMM yyyy");
+    private string currentMonthLabel => weekAnchor.ToString("MMMM");
+
+     public class TrendPoint
+    {
+        public int Value { get; set; }
+    }
+
+    private List<TrendPoint> patientSpark =
+    [
+        new(){Value=10},
+        new(){Value=14},
+        new(){Value=8},
+        new(){Value=16},
+        new(){Value=18},
+        new(){Value=22},
+        new(){Value=27}
+    ];
+
+     private void CallUpcoming(Upcoming a)
+    {
+        if (a == null) return;
+        callingName = a.Name;
+        // Hide the toast after 3 seconds
+        _ = Task.Run(async () => { await Task.Delay(3000); callingName = null; await InvokeAsync(StateHasChanged); });
+        StateHasChanged();
+    }
+
+    private string callingName;
+
+      private void StartNextConsultation()
+    {
+        var next = allPatients
+            .Where(p => p.AppointmentDate.Date == Today.Date)
+            .Where(p => !checkedInUpcomingIds.Contains(p.HospitalId) && !completedUpcomingIds.Contains(p.HospitalId))
+            .OrderBy(p => p.AppointmentDate)
+            .FirstOrDefault();
+
+        if (next != null)
+        {
+            CheckInPatient(next);
+            callingName = next.Name;   // reuse the toast as a status confirmation
+            _ = Task.Run(async () => { await Task.Delay(3000); callingName = null; await InvokeAsync(StateHasChanged); });
+        }
+        activeTab = "Daily";
+    }
+
+    private int CriticalPatients =>
+        Service?.Patients?
+            .Count(p => GetAge(p.DOB) >= 65)
+        ?? 0;
+
+    private int WaitingCount =>
+    //     // Only patients who have not been checked in / completed are actually
+    //     // "waiting". Previously this counted every row in the active view, which
+    //     // made the Waiting KPI and its share meter always read 100%.
+         filteredPatients.Count(p => !p.IsCheckedIn && !p.IsCompleted);
+
+    private int CriticalCount =>
+        filteredPatients.Count(p => p.Age >= 60);
+
+    private int ConsultationCount =>
+        Service?.Doctors?.Count(d =>
+            d.Availability?.ToLower() == "available") ?? 0;
+
+    private int CompletedCount =>
+        // Visits actually marked completed in the active view. The old formula
+        // (hospitals total − waiting) mixed unrelated datasets and invented a
+        // "47/50" figure regardless of real check-in state.
+        filteredPatients.Count(p => p.IsCompleted);
+
+     /// <summary>Moves a queued patient into consultation — primary row action.</summary>
+    private void CheckInPatient(PatientRow row)
+    {
+        if (row == null || row.IsCheckedIn) return;
+        row.IsCheckedIn = true;
+        // Shared state (by appointment Id) so the Upcoming panel stays in sync.
+        if (row.HospitalId > 0) checkedInUpcomingIds.Add(row.HospitalId);
+        RefreshPatientsPanels();
+    }
+
+    /// <summary>Marks a patient's visit completed — secondary row action.</summary>
+    private void CompletePatient(PatientRow row)
+    {
+        if (row == null || row.IsCompleted) return;
+        row.IsCheckedIn = true;
+        row.IsCompleted = true;
+        // Shared state (by appointment Id) so the Upcoming panel stays in sync.
+        if (row.HospitalId > 0)
+        {
+            checkedInUpcomingIds.Add(row.HospitalId);
+            completedUpcomingIds.Add(row.HospitalId);
+        }
+        RefreshPatientsPanels();
+    }
+
+    /// <summary>Re-syncs the day's upcoming list with shared state and refreshes both panels.</summary>
+    private void RefreshPatientsPanels()
+    {
+        // Upcoming list is rebuilt from tracked state so both views agree.
+        SelectDay(selectedDayIndex);
+        grid?.Refresh();
+        StateHasChanged();
+    }
+
+    /// <summary>Checks an upcoming-appointment patient in (list on the right).</summary>
+    private void CheckInUpcoming(Upcoming a)
+    {
+        if (a == null || a.IsCheckedIn) return;
+        a.IsCheckedIn = true;
+        // Track by appointment Id so the state survives re-querying the day's list
+        // and is reflected in the patients grid as well.
+        if (a.HospitalId > 0) checkedInUpcomingIds.Add(a.HospitalId);
+        RefreshPatientsPanels();
+    }
+
+    // /// <summary>Places/sets up a call for an upcoming-appointment patient.</summary>
+    // private void CallUpcoming(Upcoming a)
+    // {
+    //     if (a == null) return;
+    //     callingName = a.Name;
+    //     // Hide the toast after 3 seconds
+    //     _ = Task.Run(async () => { await Task.Delay(3000); callingName = null; await InvokeAsync(StateHasChanged); });
+    //     StateHasChanged();
+    // }
+
+   // private string callingName;
+    private SfGrid<PatientRow> grid;
+
+
+    // ---- CTA strip actions ----
+     private bool showScheduleCalendar { get; set; }
+
+    private void ToggleScheduleCalendar()
+    {
+        showScheduleCalendar = !showScheduleCalendar;
+        if (showScheduleCalendar) StateHasChanged();
+    }
+
+     private void OnScheduleDatePicked(Syncfusion.Blazor.Calendars.ChangedEventArgs<DateTime?> args)
+    {
+        if (args?.Value == null) return;
+        showScheduleCalendar = false;
+        // Re-anchor the board on the chosen date and open the weekly view
+        Today = args.Value.Value;
+        weekAnchor = Today.AddDays(-(int)Today.DayOfWeek + (int)DayOfWeek.Monday);
+        BuildWeek();
+        BuildWeekAppointments();
+        BuildPatients();
+        BuildDailyAppointments();
+        BuildAppointmentTrend();
+        BuildDonut();
+        activeTab = "Weekly";
+        // "Schedule appointment" → open the Schedule module for real booking
+        //scheduleObj.OpenEditorAsync(data, CurrentAction.Add);
+        Urihelper.NavigateTo("schedule");
+    }
+
+    // ---- Calendar bounds: past days are disabled — only Today and forward can be picked ----
+    private DateTime calendarMin => Today.Date;
+    private int TotalPatientsInPeriod => filteredPatients.Count();
+    private int waitingShare =>
+        TotalPatientsInPeriod == 0 ? 0 : (int)Math.Round(WaitingCount * 100.0 / TotalPatientsInPeriod);
+    private int doctorUtilization =>
+        doctorCount == 0 ? 0 : (int)Math.Round((double)ConsultationCount * 100 / doctorCount);
+    private int completionRate =>
+        TotalPatientsInPeriod == 0 ? 0 : (int)Math.Round((double)CompletedCount * 100 / TotalPatientsInPeriod);
+
+        private string BusiestDay =>
+        dailyAppointments.Count == 0 ? "—" :
+        dailyAppointments.OrderByDescending(d => d.Clinic + d.Online).First().Day;
+
+    private bool IsInCurrentWeek(DateTime date)
+    {
+        var weekStart = Today.AddDays(-(int)Today.DayOfWeek + (int)DayOfWeek.Monday).Date;
+        var weekEnd = weekStart.AddDays(7);
+        return date.Date >= weekStart && date.Date < weekEnd;
+    }
+
+    private string severityFilter { get; set; }
+
+    private void ToggleSeverity(string sev)
+        => severityFilter = severityFilter == sev ? null : sev;
+
+    private DateTime calendarMax
+    {
+        get
+        {
+            var safeYear = Math.Min(Today.Year, 2998);
+            var candidate = new DateTime(safeYear, Today.Month, 1).AddMonths(7).AddDays(-1);
+            if (candidate > new DateTime(2999, 12, 31)) candidate = new DateTime(2999, 12, 31);
+            return candidate;
+        }
+    }
+
+    // ---- KPI: dynamic metrics derived from service data ----
+    private int totalPatients => Service?.Patients?.Count ?? 0;
+    private int oldPatients => Service?.Patients?.Count(p => GetAge(p.DOB) >= 40) ?? 0;
+    private int newPatients => Service?.Patients?.Count(p => GetAge(p.DOB) < 25) ?? 0;
+    private int appointmentsCount => Service?.Hospitals?.Count ?? 0;
+    private int doctorCount => Service?.Doctors?.Count ?? 0;
+
+    // Trend percentages – signed week-over-week change computed from real rows
+    private int totalPatientsTrend => PeriodChange(appointmentsThisWeek, appointmentsLastWeek);
+    private int oldPatientsTrend => PeriodChange(oldPatients, appointmentsCount);
+    private int newPatientsTrend => PeriodChange(newPatients, doctorCount);
+    private int appointmentsTrend => PeriodChange(appointmentsThisWeek, appointmentsLastWeek);
+
+    private int PeriodChange(int current, int previous)
+    {
+        var cur = Math.Max(1, current);
+        var prev = Math.Max(1, previous);
+        return Math.Clamp((int)Math.Round((cur - prev) * 100.0 / prev), -99, 99);
+    }
+
+    private bool IsInPreviousWeek(DateTime date)
+    {
+        var weekStart = Today.AddDays(-(int)Today.DayOfWeek + (int)DayOfWeek.Monday).AddDays(-7).Date;
+        var weekEnd = weekStart.AddDays(7);
+        return date.Date >= weekStart && date.Date < weekEnd;
+    }
+
+    // ---- Daily Appointment Stats (Clinic vs Online) ----
+    public class DayAppt { public string Day { get; set; } public double Clinic { get; set; } public double Online { get; set; } }
+    private List<DayAppt> dailyAppointments = new();
+    private double dailyYMax => NiceMax(dailyAppointments.Count == 0 ? 10 : dailyAppointments.Max(d => Math.Max(d.Clinic, d.Online)));
+    private double dailyYInterval => Math.Max(1, Math.Round(dailyYMax / 4, 0));
+
+    // ---- Appointment Trend (spline) ----
+    public class DayPoint { public string Day { get; set; } public double Value { get; set; } }
+    private List<DayPoint> appointmentTrend = new();
+    private double trendYMax => NiceMax(appointmentTrend.Count == 0 ? 10 : appointmentTrend.Max(d => d.Value));
+    private double trendYInterval => Math.Max(1, Math.Round(trendYMax / 5, 0));
+
+    // ---- Donut: Patient Overview (Child/Teen/Adult/Older) ----
+    public class DonutSlice
+    {
+        public string Category { get; set; }
+        public double Value { get; set; }
+        public string Color { get; set; }
+        /// <summary>Human-readable age span this cohort covers.</summary>
+        public string AgeRange { get; set; }
+        /// <summary>Live-computed share of the total, 0-100.</summary>
+        public int Share { get; set; }
+    }
+    private List<DonutSlice> donutData = new();
+    private int donutTotal => (int)donutData.Sum(d => d.Value);
+    private DonutSlice dominantSegment => donutTotal > 0
+        ? donutData.OrderByDescending(d => d.Value).FirstOrDefault()
+        : null;
+    private int dominantShare => (int)Math.Round(dominantSegment.Value * 100.0 / Math.Max(1, donutTotal));
+
+    // ---- Upcoming appointments ----
+    public class WeekDay { public string Short { get; set; } public int Number { get; set; } public DateTime Date { get; set; } }
+    public class Upcoming { public int HospitalId { get; set; } public string Name { get; set; } public string Time { get; set; } public string Dept { get; set; } public string StatusText { get; set; } public string StatusClass { get; set; } public string Initial { get; set; } public bool IsCheckedIn { get; set; } }
+
+    private DateTime weekAnchor = DateTime.Today;
+    private List<WeekDay> weekDays = new();
+    private int selectedDayIndex = 4;
+    private List<Upcoming> upcomingAppointments = new();
+
+    private Dictionary<DateTime, List<Hospital>> upcomingByDate = new();
+
+    /// <summary>
+    /// Indexes the REAL appointments (Service.Hospitals) by their booked date.
+    /// ApplyDynamicDates already assigns each appointment a live StartTime from
+    /// today onward, so every calendar date resolves to its own distinct set.
+    /// Previously this fabricated a cycling patient list, which made every day
+    /// (and every week) render the exact same rows.
+    /// </summary>
+    private void BuildWeekAppointments()
+    {
+        upcomingByDate = new Dictionary<DateTime, List<Hospital>>();
+        if (Service?.Hospitals == null) return;
+
+        foreach (var h in Service.Hospitals)
+        {
+            var date = h.StartTime.Date;
+            if (!upcomingByDate.TryGetValue(date, out var list))
+            {
+                list = new List<Hospital>();
+                upcomingByDate[date] = list;
+            }
+            list.Add(h);
+        }
+    }
+
+    private List<Upcoming> GetUpcomingForDay(int idx)
+    {
+        if (Service?.Hospitals == null || weekDays.Count == 0) return new List<Upcoming>();
+
+        var dayDate = weekDays[Math.Clamp(idx, 0, weekDays.Count - 1)].Date.Date;
+        var docsById = Service.Doctors?.ToDictionary(d => d.Id) ?? new Dictionary<int, Doctor>();
+
+        // Real bookings for the picked date only.
+        if (!upcomingByDate.TryGetValue(dayDate, out var matches) || matches == null)
+            return new List<Upcoming>();
+
+        return matches
+            .OrderBy(h => h.StartTime)
+            .Select(h =>
+            {
+                var doc = docsById.TryGetValue(h.DoctorId, out var d) ? d : null;
+                var status = (doc?.Availability ?? "busy").ToLowerInvariant();
+                return new Upcoming
+                {
+                    HospitalId = h.Id,
+                    Name = h.Name,
+                    Time = h.StartTime.ToString("h:mmtt").ToLower(),
+                    Dept = h.DepartmentName,
+                    StatusText = status == "available" ? "Online" : "Offline",
+                    StatusClass = status == "available" ? "online" : "offline",
+                    Initial = GetInitials(h.Name),
+                    // Shared state with the patients grid — checking in or completing
+                    // in either panel updates both.
+                    IsCheckedIn = checkedInUpcomingIds.Contains(h.Id) || completedUpcomingIds.Contains(h.Id)
+                };
+            }).ToList();
+    }
+
+    private void BuildWeek()
+    {
+        weekDays = Enumerable.Range(0, 7)
+            .Select(i =>
+            {
+                var d = weekAnchor.AddDays(i);
+                return new WeekDay { Short = d.ToString("ddd").Substring(0, 3), Number = d.Day, Date = d };
+            })
+            .ToList();
+    }
+
+    private void SelectDay(int idx)
+    {
+        selectedDayIndex = idx;
+        upcomingAppointments = GetUpcomingForDay(idx);
+    }
+
+    private void PrevWeek()
+    {
+        var candidate = weekAnchor.AddDays(-7);
+        if (candidate.AddDays(6).Date < Today.Date) return;
+        weekAnchor = candidate;
+        BuildWeek();
+        BuildWeekAppointments();
+        var firstFuture = weekDays.FindIndex(d => d.Date.Date >= Today.Date);
+        SelectDay(firstFuture < 0 ? 0 : firstFuture);
+    }
+
+    private void NextWeek()
+    {
+        weekAnchor = weekAnchor.AddDays(7);
+        BuildWeek();
+        BuildWeekAppointments();
+        SelectDay(0);
+    }
+
+    // ---- Patients table ----
+    public class PatientRow
+    {
+        /// <summary>Id of the underlying appointment (Service.Hospitals) — links grid row to the upcoming list.</summary>
+        public int HospitalId { get; set; }
+        public string Name { get; set; }
+        public string Initial { get; set; }
+        public int Age { get; set; }
+        public DateTime AppointmentDate { get; set; }
+        public string DateTime { get; set; }
+        public string Reason { get; set; }
+        public bool IsCheckedIn { get; set; }
+        public bool IsCompleted { get; set; }
+    }
+
+    private string[] patientTabs = new[] { "Daily", "Weekly", "Monthly", "Yearly" };
+    private string activeTab = "Daily";
+    private string searchText { get; set; } = string.Empty;
+    private bool monthPickerOpen { get; set; }
+
+    private void ToggleMonthPicker() => monthPickerOpen = !monthPickerOpen;
+
+    private void CloseMonthPicker()
+    {
+        if (monthPickerOpen) monthPickerOpen = false;
+    }
+
+    private void OnMonthPicked(DateTime? picked)
+    {
+        if (!picked.HasValue) { monthPickerOpen = false; return; }
+        Today = picked.Value;
+        monthPickerOpen = false;
+        weekAnchor = Today.AddDays(-(int)Today.DayOfWeek + (int)DayOfWeek.Monday);
+        BuildWeek();
+        BuildWeekAppointments();
+        BuildPatients();
+        BuildDailyAppointments();
+        BuildAppointmentTrend();
+        BuildDonut();
+        var firstFuture = weekDays.FindIndex(d => d.Date.Date >= Today.Date);
+        SelectDay(firstFuture < 0 ? 0 : firstFuture);
+    }
+
+    private List<PatientRow> allPatients = new();
+    private IEnumerable<PatientRow> filteredPatients
+    {
+        get
+        {
+            IEnumerable<PatientRow> q = activeTab switch
+            {
+                "Daily"   => allPatients.Where(p => p.AppointmentDate.Date == Today.Date),
+                "Weekly"  => allPatients.Where(p => IsInCurrentWeek(p.AppointmentDate)),
+                "Monthly" => allPatients.Where(p => p.AppointmentDate.Year == Today.Year && p.AppointmentDate.Month == Today.Month),
+                "Yearly"  => allPatients.Where(p => p.AppointmentDate.Year == Today.Year),
+                _         => allPatients
+            };
+
+            if (!string.IsNullOrWhiteSpace(searchText))
+                q = q.Where(p => p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) || p.Reason.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+
+            // Apply the shared check-in / completed state (tracked by appointment Id)
+            // so the grid rows always agree with the Upcoming panel.
+            var result = q.OrderByDescending(p => p.AppointmentDate).ToList();
+            result.ForEach(ApplyRowState);
+            return result;
+        }
+    }
+
+    // private bool IsInCurrentWeek(DateTime date)
+    // {
+    //     var weekStart = Today.AddDays(-(int)Today.DayOfWeek + (int)DayOfWeek.Monday).Date;
+    //     var weekEnd = weekStart.AddDays(7);
+    //     return date.Date >= weekStart && date.Date < weekEnd;
+    // }
+
+    private int appointmentsThisWeek =>
+        allPatients.Count(p => IsInCurrentWeek(p.AppointmentDate));
+    private int appointmentsLastWeek =>
+        allPatients.Count(p => IsInPreviousWeek(p.AppointmentDate));
+
+    // ---- Build dynamic datasets from service ----
+    private void BuildPatients()
+    {
+        // Grid rows are built from the REAL appointments (Service.Hospitals).
+        // Previously rows were fabricated per Service.Patients entry with a
+        // synthetic date pattern, so the grid and the Upcoming panel (which
+        // reads the same Hospitals list) showed DIFFERENT patients "for the
+        // same date". Joining on the same source and PatientId keeps both
+        // panels consistent for any given date.
+        if (Service?.Hospitals == null) { allPatients = new List<PatientRow>(); return; }
+
+        var patientsById = Service.Patients?
+            .GroupBy(p => p.Id)
+            .ToDictionary(g => g.Key, g => g.First())
+            ?? new Dictionary<int, Patient>();
+
+        allPatients = Service.Hospitals
+            .OrderBy(h => h.StartTime)
+            .Select(h =>
+            {
+                patientsById.TryGetValue(h.PatientId, out var patient);
+                var matched = patient ?? Service.Patients?.FirstOrDefault(p => p.Name == h.Name);
+                return new PatientRow
+                {
+                    HospitalId = h.Id,
+                    Name = h.Name,
+                    Initial = GetInitials(h.Name),
+                    Age = matched == null ? 0 : GetAge(matched.DOB),
+                    AppointmentDate = h.StartTime,
+                    DateTime = h.StartTime.ToString("d MMM yyyy · h:mm tt"),
+                    Reason = h.Disease
+                };
+            })
+            .ToList();
+    }
+
+    /// <summary>Single source of truth for check-in / completed state per appointment Id.</summary>
+    private readonly HashSet<int> checkedInUpcomingIds = new();
+    private readonly HashSet<int> completedUpcomingIds = new();
+
+    /// <summary>Applies tracked check-in / completed state to a grid row.</summary>
+    private void ApplyRowState(PatientRow row)
+    {
+        if (row == null) return;
+        row.IsCheckedIn = checkedInUpcomingIds.Contains(row.HospitalId);
+        row.IsCompleted = completedUpcomingIds.Contains(row.HospitalId);
+    }
+
+    private void BuildDailyAppointments()
+    {
+        if (Service?.Hospitals == null) return;
+        var byDow = Service.Hospitals
+            .GroupBy(h => h.StartTime.DayOfWeek)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var order = new[]
+        {
+            DayOfWeek.Saturday, DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday,
+            DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday
+        };
+        var labels = new[] { "Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri" };
+
+        dailyAppointments = order.Select((dow, i) =>
+        {
+            var total = byDow.TryGetValue(dow, out var c) ? c : 0;
+            var clinic = Math.Round(total * 0.6, 0);
+            var online = total - clinic;
+            return new DayAppt { Day = labels[i], Clinic = clinic, Online = online };
+        }).ToList();
+    }
+
+    private void BuildAppointmentTrend()
+    {
+        if (Service?.Hospitals == null) return;
+        var byDow = Service.Hospitals
+            .GroupBy(h => h.StartTime.DayOfWeek)
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var order = new[]
+        {
+            DayOfWeek.Saturday, DayOfWeek.Sunday, DayOfWeek.Monday, DayOfWeek.Tuesday,
+            DayOfWeek.Wednesday, DayOfWeek.Thursday, DayOfWeek.Friday
+        };
+        var labels = new[] { "Sat", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri" };
+
+        appointmentTrend = order.Select((dow, i) => new DayPoint
+        {
+            Day = labels[i],
+            Value = byDow.TryGetValue(dow, out var c) ? c : 0
+        }).ToList();
+    }
+
+    private void BuildDonut()
+    {
+        if (Service?.Patients == null) return;
+        var groups = Service.Patients
+            .GroupBy(p => GetAgeBucket(GetAge(p.DOB)))
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var palette = new (string Cat, string Color, string Rng)[]
+        {
+            ("Child",  "#0a8a8a", "0–12 yrs"),
+            ("Teen",   "#f59e0b", "13–19 yrs"),
+            ("Adult",  "#ec4899", "20–39 yrs"),
+            ("Older",  "#a855f7", "40+ yrs"),
+        };
+        var temp = palette.Select(p => new DonutSlice
+        {
+            Category = p.Cat,
+            Color = p.Color,
+            AgeRange = p.Rng,
+            Value = groups.TryGetValue(p.Cat, out var c) ? c : 0
+        }).ToList();
+
+        // Live-compute shares now that we know the totals, so the legend,
+        // ring labels and central badge all read from a single source.
+        var total = temp.Sum(d => d.Value);
+        foreach (var d in temp) d.Share = total > 0 ? (int)Math.Round(d.Value * 100.0 / total) : 0;
+        donutData = temp;
+
+        if (donutTotal == 0)
+        {
+            // Avoid a fully blank ring — render a 1:1:1:1 placeholder so the
+            // chart structure stays visible without misleading the viewer.
+            donutData = palette.Select(p => new DonutSlice
+            {
+                Category = p.Cat,
+                Color = p.Color,
+                AgeRange = p.Rng,
+                Value = 1
+            }).ToList();
+        }
+    }
+
+    // ---- Helpers ----
+    private int GetAge(DateTime? dob)
+    {
+        if (!dob.HasValue) return 0;
+        var age = Today.Year - dob.Value.Year;
+        if (dob.Value.Date > Today.AddYears(-age)) age--;
+        return Math.Max(0, age);
+    }
+
+    private string GetAgeBucket(int age) => age switch
+    {
+        <= 12 => "Child",
+        <= 19 => "Teen",
+        <= 39 => "Adult",
+        _ => "Older"
+    };
+
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name)) return "?";
+        var parts = name.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1) return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
+        return (parts[0][0].ToString() + parts[1][0].ToString()).ToUpperInvariant();
+    }
+
+    private string FormatCount(int n)
+    {
+        if (n >= 1000) return (n / 1000.0).ToString("0.#") + "K";
+        return n.ToString();
+    }
+
+    private double NiceMax(double v)
+    {
+        if (v <= 0) return 10;
+        var pow = Math.Pow(10, Math.Floor(Math.Log10(v)));
+        var n = v / pow;
+        double nice = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
+        return nice * pow;
+    }
+
+     private string GetStatus(PatientRow row)
+        {
+            if (row == null)
+                return "Waiting";
+
+            if (row.Age >= 65)
+                return "Critical";
+
+            if (row.Age >= 40)
+                return "Moderate";
+
+            return "Waiting";
+        }
+
+        private string GetStatusClass(PatientRow row)
+        {
+            if (row == null)
+                return "waiting-chip";
+
+            if (row.Age >= 65)
+                return "critical-chip";
+
+            if (row.Age >= 40)
+                return "warning-chip";
+
+            return "waiting-chip";
+        }
+
+        private string GetPriority(PatientRow row)
+        {
+            if (row == null) return "Normal";
+            if (row.Age >= 65) return "Urgent";
+            if (row.Age >= 40) return "High";
+            return "Normal";
+        }
+
+        private string GetPriorityClass(PatientRow row)
+        {
+            if (row == null) return "priority-normal-chip";
+            if (row.Age >= 65) return "priority-urgent-chip";
+            if (row.Age >= 40) return "priority-high-chip";
+            return "priority-normal-chip";
+        }
+
+    // ---- Lifecycle ----
+    private bool isDataLoaded;
+    //private SfGrid<PatientRow> grid;
+
+    protected override void OnInitialized()
+    {
+        weekAnchor = Today.AddDays(-(int)Today.DayOfWeek + (int)DayOfWeek.Monday);
+        BuildWeek();
+        BuildWeekAppointments();
+        BuildPatients();
+        BuildDailyAppointments();
+        BuildAppointmentTrend();
+        BuildDonut();
+        var firstFuture = weekDays.FindIndex(d => d.Date.Date >= Today.Date);
+        selectedDayIndex = firstFuture < 0 ? 0 : firstFuture;
+        SelectDay(selectedDayIndex);
+    }
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(120);
+            isDataLoaded = true;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose() { }
+}

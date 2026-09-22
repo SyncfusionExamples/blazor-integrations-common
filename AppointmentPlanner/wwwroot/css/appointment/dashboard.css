@@ -1,0 +1,2839 @@
+﻿/* =====================================================================
+   Appointment Planner — Clinical Operations Dashboard (2026)
+   Enterprise-ready stylesheet
+   ---------------------------------------------------------------------
+   Design tokens   : colours, spacing, typography, radii, shadows
+   Accessibility   : AA contrast, visible focus rings, 44px touch targets
+   Structure       : appbar → alert banner → CTA strip → KPI row →
+                     alert chips → charts → queue table → upcoming list
+   ===================================================================== */
+
+/* ---------------------------------------------------------------
+   1. Design tokens
+   --------------------------------------------------------------- */
+:root {
+    /* Brand */
+    --ap-brand-900: #0a4d4a;
+    --ap-brand-700: #0a8a8a;
+    --ap-brand-050: #e6f4f4;
+
+    /* Brand: accessible text fg on light surfaces (4.7:1 on white) */
+    --ap-brand-text: #066b6b;
+
+    /* Surfaces */
+    --ap-surface: #ffffff;
+    --ap-surface-alt: #f6f8fc;
+    --ap-border: #e2e8f0;
+    --ap-border-strong: #cbd5e1;
+
+    /* Text (all AA on white) */
+    --ap-text: #0f172a;
+    --ap-text-secondary: #334155;   /* 10.3:1 */
+    --ap-text-muted: #475569;       /* 7.4:1  - replaces failing #94a3b8 */
+    --ap-text-inverse: #ffffff;
+
+    /* Semantic */
+    --ap-danger: #b91c1c;
+    --ap-danger-bg: #fee2e2;
+    --ap-warning: #b45309;
+    --ap-warning-bg: #fef3c7;
+    --ap-success: #15803d;
+    --ap-success-bg: #dcfce7;
+    --ap-info: #1d4ed8;
+    --ap-info-bg: #dbeafe;
+
+    /* Spacing scale (4px base) */
+    --ap-s1: 4px;
+    --ap-s2: 8px;
+    --ap-s3: 12px;
+    --ap-s4: 16px;
+    --ap-s5: 20px;
+    --ap-s6: 24px;
+    --ap-s8: 32px;
+
+    /* Radii */
+    --ap-r-sm: 8px;
+    --ap-r-md: 12px;
+    --ap-r-lg: 16px;
+    --ap-r-pill: 999px;
+
+    /* Shadows */
+    --ap-shadow-1: 0 1px 2px rgba(15, 23, 42, .05), 0 2px 8px rgba(15, 23, 42, .05);
+    --ap-shadow-2: 0 4px 16px rgba(15, 23, 42, .08);
+
+    /* Touch target */
+    --ap-touch: 44px;
+}
+
+/* ---------------------------------------------------------------
+   2. Base shell
+   --------------------------------------------------------------- */
+#dashboard-modern {
+    padding: var(--ap-s6) var(--ap-s8) var(--ap-s8);
+    background: var(--ap-surface-alt);
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    min-height: 100%;
+    box-sizing: border-box;
+    font-size: 14px;              /* readable base */
+    color: var(--ap-text);
+    line-height: 1.5;
+    /* Hard guard: never let the dashboard itself trigger a page-level
+       horizontal scrollbar. Children are allowed to scroll INSIDE their
+       cards (ie, the patients table) but the page must stay within
+       100vw at every breakpoint. */
+    max-width: 100%;
+    overflow-x: hidden;
+}
+.dashboard-container { max-width: 100%; min-width: 0; }
+
+/* Skip to main content link (accessibility) */
+#dashboard-modern .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--ap-brand-900);
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 0 0 4px 0;
+    font-weight: 600;
+    z-index: 9999;
+}
+#dashboard-modern .skip-link:focus {
+    top: 0;
+    outline: 3px solid var(--ap-brand-700);
+    outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------
+   3. Page header (custom, replaces Syncfusion appbar)
+   --------------------------------------------------------------- */
+.page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ap-s4);
+    margin-bottom: var(--ap-s5);
+    flex-wrap: wrap;
+}
+.page-eyebrow {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--ap-text-muted);
+    margin-bottom: 2px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+.page-title {
+    margin: 0;
+    /* font-size: 16px; */
+    /* font-weight: 400; */
+    letter-spacing: -0.3px;
+    color: var(--ap-text);
+    line-height: 1.2;
+}
+.page-title .wave {
+    display: inline-block;
+    margin-left: 4px;
+    font-size: 20px;
+    transform: translateY(-1px);
+}
+.page-meta {
+    display: block;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: var(--ap-text-muted);
+}
+.page-meta .page-meta-text {
+    margin: 0;
+    font-size: inherit;
+    color: inherit;
+}
+.page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--ap-s3);
+    flex-wrap: wrap;
+}
+
+/* Global search (functional, filters the queue) */
+.global-search-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 280px;
+    height: 42px;
+    border: 1px solid var(--ap-border);
+    border-radius: var(--ap-r-sm);
+    background: var(--ap-surface);
+    transition: border-color .15s, box-shadow .15s;
+}
+.global-search-wrap:focus-within {
+    border-color: var(--ap-brand-700);
+    box-shadow: 0 0 0 3px rgba(10, 138, 138, .14);
+}
+.global-search-wrap .search-icon {
+    position: absolute;
+    left: 12px;
+    color: var(--ap-text-muted);
+    font-size: 14px;
+    pointer-events: none;
+}
+.global-search-wrap input {
+    border: 0;
+    outline: none;
+    background: transparent;
+    width: 100%;
+    height: 100%;
+    padding: 0 12px 0 34px;
+    font-size: 13.5px;
+    color: var(--ap-text);
+    font-family: inherit;
+}
+.global-search-wrap input::placeholder { color: #64748b; }
+
+/* AI button */
+.ai-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+    padding: 0 16px;
+    border: 0;
+    background: var(--ap-brand-900); /* WCAG AA: 8.9:1 with white text */
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: var(--ap-r-sm);
+    cursor: pointer;
+    transition: filter .15s;
+    font-family: inherit;
+}
+.ai-button:hover { filter: brightness(0.92); }
+.ai-button .e-icons { font-size: 15px; }
+
+/* Bell */
+.bell-btn {
+    position: relative;
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--ap-border);
+    border-radius: 50%;
+    background: var(--ap-surface);
+    color: var(--ap-text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .15s;
+    font-size: 15px;
+}
+.bell-btn:hover { background: #f1f5f9; }
+.bell-btn .badge-dot {
+    position: absolute;
+    top: 8px;
+    right: 9px;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--ap-danger);
+    border: 2px solid #fff;
+}
+
+/* ---------------------------------------------------------------
+   4. Critical alert banner (P0: alerts must be top-of-page)
+   --------------------------------------------------------------- */
+.critical-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--ap-s3);
+    background: linear-gradient(90deg, #fef2f2, #fff5f5);
+    border: 1px solid #fecaca;
+    border-left: 4px solid var(--ap-danger);
+    border-radius: var(--ap-r-md);
+    padding: var(--ap-s3) var(--ap-s4);
+    margin-bottom: var(--ap-s4);
+}
+.critical-banner .banner-icon { color: var(--ap-danger); font-size: 18px; }
+.critical-banner .banner-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.critical-banner .banner-text strong {
+    color: var(--ap-danger);
+    font-size: 14px;
+}
+.critical-banner .banner-meta {
+    color: var(--ap-text-muted);
+    font-size: 12px;
+}
+.critical-banner .banner-cta {
+    border: 0;
+    background: var(--ap-danger);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 10px 16px;
+    min-height: 40px;
+    border-radius: var(--ap-r-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: filter .15s;
+}
+.critical-banner .banner-cta:hover { filter: brightness(0.92); }
+
+/* ---------------------------------------------------------------
+   5. CTA strip (P0: dashboards should be action-oriented)
+   --------------------------------------------------------------- */
+.cta-strip {
+    display: flex;
+    align-items: center;
+    gap: var(--ap-s3);
+    margin-bottom: var(--ap-s4);
+    flex-wrap: wrap;
+}
+.cta-strip .cta-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--ap-touch);
+    padding: 0 var(--ap-s5);
+    border: 0;
+    background: var(--ap-brand-900); /* WCAG AA: 8.9:1 with white text */
+    color: #fff;
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: var(--ap-r-sm);
+    cursor: pointer;
+    box-shadow: var(--ap-shadow-1);
+    transition: filter .15s;
+    font-family: inherit;
+}
+.cta-strip .cta-primary:hover { filter: brightness(0.92); }
+.cta-strip .cta-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: var(--ap-touch);
+    padding: 0 var(--ap-s5);
+    background: var(--ap-surface);
+    color: var(--ap-brand-900);
+    border: 1px solid var(--ap-border);
+    font-size: 13.5px;
+    font-weight: 600;
+    border-radius: var(--ap-r-sm);
+    cursor: pointer;
+    transition: background .15s;
+    font-family: inherit;
+}
+.cta-strip .cta-secondary:hover { background: #f1f5f9; }
+.cta-strip .cta-live {
+    margin-left: auto;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ap-s2);
+    font-size: 13px;
+    font-weight: 600;
+    color: #166534; /* WCAG AA: green-800 on --ap-surface-alt (5.0:1) */
+}
+
+/* Schedule-appointment calendar popup */
+.schedule-popup {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 1100;
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-border);
+    border-radius: var(--ap-r-md);
+    box-shadow: 0 16px 40px rgba(15, 23, 42, .18);
+    padding: var(--ap-s3);
+    width: 320px;
+    animation: popIn .15s ease-out;
+}
+.schedule-popup-head {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ap-text-muted);
+    margin-bottom: var(--ap-s2);
+    padding-left: 2px;
+}
+.schedule-popup .e-calendar {
+    border: 0 !important;
+    box-shadow: none !important;
+    width: 100%;
+}
+
+/* ---------------------------------------------------------------
+   6. KPI metric cards (unified system)
+   --------------------------------------------------------------- */
+.dashboard-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--ap-s5);
+    margin-bottom: var(--ap-s5);
+}
+.modern-kpi {
+    border-radius: var(--ap-r-lg);
+    border: 1px solid var(--ap-border) !important;
+    background: var(--ap-surface) !important;
+    box-shadow: var(--ap-shadow-1) !important;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.modern-kpi:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--ap-shadow-2) !important;
+}
+.modern-kpi .e-card-content { padding: var(--ap-s5); }
+#active-patients-card  {background: #e6f4f4; border-color: #0a8a8a;}
+#waiting-patients-card  {background: #f7d5f7;  border-color: #d97706;}
+#doctors-available-card {background: #dbeafe; border-color: #3b82f6;}
+#completed-visits-card {background: #dcfce7; border-color: #22c55e;}
+#care-alert-card {background: #fef2f2; border-color: #b91c1c;}
+.kpi-patient{
+color: #087c4d !important
+}
+.kpi-waiting{
+color:#de82de !important; 
+}
+.kpi-available{
+    color:#366eb9 !important;
+}
+.kpi-completed{
+    color:#34bc63 !important;
+}
+
+.kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--ap-s2);
+    padding-left: 10px;
+}
+.kpi-title {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--ap-text-muted);
+    padding-left: 10px;
+}
+.kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    /* background: var(--ap-brand-050); */
+    /* color: var(--ap-brand-700); */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 25px;
+}
+.kpi-value {
+    font-size: 40px;
+    font-weight: 800;
+    color: var(--ap-text);
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+    font-variant-numeric: tabular-nums;
+    margin: var(--ap-s1) 0;
+    padding-left: 10px;
+}
+.kpi-value .kpi-sub {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ap-text-muted);
+    margin-left: 2px;
+}
+.kpi-trend {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: var(--ap-s2);
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding-left: 10px;
+}
+.kpi-trend.positive { color: var(--ap-success); }
+.kpi-trend.negative { color: var(--ap-danger); }
+.kpi-trend.neutral  { color: var(--ap-text-muted); }
+.kpi-trend-meta { color: var(--ap-text-muted); font-weight: 500; }
+
+/* Progress meter */
+.kpi-meter {
+    height: 6px;
+    border-radius: var(--ap-r-pill);
+    background: #eef2f7;
+    overflow: hidden;
+}
+.kpi-meter span {
+    display: block;
+    height: 100%;
+    border-radius: var(--ap-r-pill);
+    background: var(--ap-brand-700);
+    transition: width .4s ease;
+}
+
+/* ---------------------------------------------------------------
+   7. Unified card system (single style for every card)
+   --------------------------------------------------------------- */
+.dash-card {
+    background: var(--ap-surface) !important;
+    border: 1px solid var(--ap-border) !important;
+    border-radius: var(--ap-r-lg) !important;
+    box-shadow: var(--ap-shadow-1) !important;
+    padding: var(--ap-s5);
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+.dash-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ap-shadow-2) !important;
+}
+.dash-card .e-card-content { padding: 0; }
+.dash-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ap-s3);
+    gap: var(--ap-s3);
+    flex-wrap: wrap;
+}
+.dash-card-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ap-text);
+    margin: 0;
+    letter-spacing: -0.2px;
+}
+.card-subtitle {
+    font-size: 12px;
+    color: var(--ap-text-muted);
+}
+.dash-card-actions {
+    color: var(--ap-text-muted);
+    cursor: pointer;
+    font-size: 16px;
+    background: transparent;
+    border: 0;
+    padding: 6px 10px;
+    border-radius: var(--ap-r-sm);
+    min-width: 36px;
+    min-height: 36px;
+}
+.dash-card-actions:hover { background: #f1f5f9; color: var(--ap-text); }
+
+/* Rows */
+.insights-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--ap-s5);
+    margin-bottom: var(--ap-s5);
+}
+.dash-row-3col {
+    display: grid;
+    grid-template-columns: 1.1fr 1.1fr 0.9fr;
+    gap: var(--ap-s5);
+    margin-bottom: var(--ap-s5);
+}
+.dash-row-2col {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    gap: var(--ap-s5);
+    margin-bottom: var(--ap-s5);
+}
+/* Overflow guard: grid/flex children must be allowed to shrink below
+   their intrinsic (content) width, else 1fr tracks can never collapse
+   and the page overflows horizontally at every breakpoint. */
+.dash-row-2col > *,
+.dash-row-3col > *,
+.dash-row-bottom > *,
+.dash-hero > *,
+.dash-hero-left > *,
+.insights-row > *,
+.dashboard-kpi-grid > * {
+    min-width: 0;
+}
+/* Syncfusion grid/table forces an intrinsic width inside grid children;
+   constrain it to the card so tracks can collapse on narrow screens. */
+.dash-card .e-grid,
+.dash-card .e-grid .e-gridcontent,
+.dash-card .e-grid table {
+    max-width: 100%;
+}
+.dash-card .e-grid .e-content {
+    overflow-x: auto;  /* queue rows become horizontally scrollable, not the page */
+}
+
+/* ---------------------------------------------------------------
+   8. Care Alert chips (filterable, icon + text = not colour-only)
+   --------------------------------------------------------------- */
+.alert-chips {
+    display: flex;
+    align-items: center;
+    gap: var(--ap-s3);
+    flex-wrap: wrap;
+}
+.alert-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ap-s2);
+    border: 1px solid transparent;
+    font-size: 13px;
+    font-weight: 600;
+    min-height: 40px;
+    padding: 8px var(--ap-s4);
+    border-radius: var(--ap-r-pill);
+    cursor: pointer;
+    transition: transform .12s, box-shadow .12s, filter .12s;
+}
+.alert-chip:hover { filter: brightness(0.96); }
+.alert-chip.selected {
+    box-shadow: 0 0 0 3px rgba(10, 138, 138, .35);
+    border-color: var(--ap-brand-700);
+}
+.alert-chip .chip-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex: 0 0 9px;
+}
+.alert-chip.critical { background: var(--ap-danger-bg);  color: var(--ap-danger);  }
+.alert-chip.critical .chip-dot { background: var(--ap-danger); }
+.alert-chip.warning  { background: var(--ap-warning-bg); color: var(--ap-warning); }
+.alert-chip.warning .chip-dot { background: var(--ap-warning); }
+.alert-chip.success  { background: var(--ap-success-bg); color: var(--ap-success); }
+.alert-chip.success .chip-dot { background: var(--ap-success); }
+.alert-chip.clear {
+    background: transparent;
+    border: 1px dashed var(--ap-border-strong);
+    color: var(--ap-text-muted);
+}
+
+/* ---------------------------------------------------------------
+   9. Donut
+   ---------------------------------------------------------------
+   Active definitions live further down (see "Donut chart"). The earlier
+   legacy block was removed to avoid conflicting heights/cascade noise.
+   --------------------------------------------------------------- */
+
+/* ---------------------------------------------------------------
+   10. Tabs (period switcher)
+   --------------------------------------------------------------- */
+.dash-tabs {
+    display: inline-flex;
+    background: #f1f5f9;
+    border-radius: var(--ap-r-sm);
+    padding: var(--ap-s1);
+    gap: 2px;
+}
+.dash-tab {
+    border: 0;
+    background: transparent;
+    color: var(--ap-text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px var(--ap-s4);
+    min-height: 36px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.dash-tab:hover { background: #e2e8f0; color: var(--ap-text); }
+.dash-tab.active {
+    background: var(--ap-brand-700);
+    color: #fff;
+}
+
+/* ---------------------------------------------------------------
+   11. Patient queue table
+   --------------------------------------------------------------- */
+.patients-grid {
+    margin: 0;
+    width: 100%;
+    overflow: visible;
+}
+.patients-empty {
+    padding: var(--ap-s4);
+    color: var(--ap-text-muted);
+    font-size: 13px;
+    text-align: center;
+    border: 1px dashed var(--ap-border-strong);
+    border-radius: var(--ap-r-md);
+    margin-bottom: var(--ap-s2);
+    background: #fafbfc;
+}
+.patients-empty strong { color: var(--ap-text-secondary); }
+.link-btn {
+    border: 0;
+    background: transparent;
+    color: var(--ap-brand-700);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 13px;
+    padding: 0;
+}
+.patients-grid .e-grid {
+    border: 0 !important;
+    background: transparent !important;
+    border-radius: var(--ap-r-md) !important;
+    font-family: inherit !important;
+    width: 100% !important;
+    overflow: visible !important;
+}
+.patients-grid .e-grid table {
+    width: 100% !important;
+    /* The 800px minimum was forcing the surrounding card to overflow on
+       tablet sizes, which then produced a page-level horizontal scrollbar.
+       Keep the layout rectangular above ~900px where the 800px lock still
+       fits, but allow it to shrink for narrower viewports so the card
+       wraps its inner scroll instead of pushing the whole page sideways. */
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: auto;
+}
+.patients-grid .e-grid .e-headercell,
+.patients-grid .e-grid .e-rowcell {
+    background: var(--ap-surface) !important;
+    border-color: #f1f5f9 !important;
+    overflow: visible !important;
+}
+.patients-grid .e-grid .e-headercell {
+    color: var(--ap-text-muted) !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: .06em !important;
+    font-weight: 700 !important;
+    background: #fafbfc !important;
+    white-space: normal !important;
+}
+.patients-grid .e-grid .e-rowcell {
+    font-size: 13.5px !important;
+    color: var(--ap-text-secondary) !important;
+    padding: 12px !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+    word-wrap: break-word !important;
+}
+.patients-grid .e-grid .e-row:hover .e-rowcell { background: #fafbfc !important; }
+.patients-grid .e-grid .e-row:focus .e-rowcell { outline: 2px solid var(--ap-brand-700); outline-offset: -2px; }
+.patients-grid .e-grid .e-row:focus .e-rowcell { outline: 0; }
+.patients-grid .e-grid .e-headercontent {
+    border-bottom: 1px solid #eef2f7 !important;
+}
+.patients-grid .e-grid .e-content {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+}
+
+.pname {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ap-s2);
+    font-weight: 600;
+    color: var(--ap-text);
+}
+.pavatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #64748b, #475569);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex: 0 0 32px;
+}
+
+/* Status chips (grid) - Enhanced with clear text labels */
+.chip-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.chip-status .chip-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 8px;
+}
+
+/* Chip-based status spans (replacing SfChip component) */
+.critical-chip,
+.warning-chip,
+.waiting-chip,
+.priority-urgent-chip,
+.priority-high-chip,
+.priority-medium-chip,
+.priority-low-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid;
+}
+
+/* Critical status - always includes text label */
+.critical-chip {
+    background: var(--ap-danger-bg) !important;
+    color: var(--ap-danger) !important;
+    border-color: var(--ap-danger) !important;
+}
+.critical-chip .chip-dot {
+    background: var(--ap-danger) !important;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 8px;
+}
+
+/* Warning status - always includes text label */
+.warning-chip {
+    background: var(--ap-warning-bg) !important;
+    color: var(--ap-warning) !important;
+    border-color: var(--ap-warning) !important;
+}
+.warning-chip .chip-dot {
+    background: var(--ap-warning) !important;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 8px;
+}
+
+/* Waiting status - always includes text label */
+.waiting-chip {
+    background: var(--ap-info-bg) !important;
+    color: var(--ap-info) !important;
+    border-color: var(--ap-info) !important;
+}
+.waiting-chip .chip-dot {
+    background: var(--ap-info) !important;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 8px;
+}
+
+/* Status labels outside chips - for non-chip status displays */
+.status-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ap-success);
+    font-weight: 600;
+    font-size: 12.5px;
+}
+.status-done::before {
+    content: '✓';
+    font-weight: 700;
+    font-size: 14px;
+}
+
+.status-checkedin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ap-info);
+    font-weight: 600;
+    font-size: 12.5px;
+}
+.status-checkedin::before {
+    content: '●';
+    font-size: 8px;
+}
+
+/* Priority chips */
+.priority-urgent-chip,
+.priority-high-chip,
+.priority-normal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid;
+}
+
+.priority-urgent-chip {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    font-weight: 700 !important;
+    border-color: #dc2626 !important;
+}
+.priority-urgent-chip::before {
+    content: '🔴 ';
+}
+
+.priority-high-chip {
+    background: #ffedd5 !important;
+    color: #9a3412 !important;
+    font-weight: 600 !important;
+    border-color: #ea580c !important;
+}
+.priority-high-chip::before {
+    content: '🟠 ';
+}
+
+.priority-normal-chip {
+    background: var(--ap-success-bg) !important;
+    color: #166534 !important;
+    border-color: #16a34a !important;
+}
+.priority-normal-chip::before {
+    content: '🟢 ';
+}
+
+/* Inline row actions */
+.row-action-btn {
+    border: 1px solid var(--ap-brand-700);
+    background: var(--ap-brand-700);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    min-height: 34px;
+    padding: 6px 12px;
+    border-radius: var(--ap-r-sm);
+    cursor: pointer;
+    margin-right: 6px;
+    transition: filter .12s;
+}
+.row-action-btn:hover { filter: brightness(0.92); }
+.row-action-btn.ghost {
+    background: transparent;
+    color: var(--ap-brand-700);
+}
+
+/* ---------------------------------------------------------------
+   12. Upcoming appointments
+   --------------------------------------------------------------- */
+.upcoming-card { padding-bottom: var(--ap-s4); }
+.upcoming-month {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: var(--ap-s1) 0 var(--ap-s3) 0;
+}
+.upcoming-month .nav-btn {
+    border: 0;
+    background: transparent;
+    color: var(--ap-text-muted);
+    width: 36px;
+    height: 36px;
+    border-radius: var(--ap-r-sm);
+    cursor: pointer;
+    font-size: 16px;
+    transition: background .15s;
+}
+.upcoming-month .nav-btn:hover { background: #f1f5f9; }
+.upcoming-month .month-label {
+    font-weight: 700;
+    color: var(--ap-text);
+    font-size: 13px;
+}
+.upcoming-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: var(--ap-s4);
+}
+.upcoming-week .day {
+    background: #f8fafc;
+    border-radius: var(--ap-r-sm);
+    text-align: center;
+    padding: var(--ap-s2) var(--ap-s1);
+    font-size: 11px;
+    color: var(--ap-text-muted);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .15s;
+    font-weight: 500;
+    min-height: var(--ap-touch);
+}
+.upcoming-week .day:hover { background: var(--ap-brand-050); }
+.upcoming-week .day .dnum {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ap-text);
+    margin-top: 2px;
+}
+.upcoming-week .day.selected {
+    background: var(--ap-brand-700);
+    border-color: var(--ap-brand-900);
+    color: #fff;
+}
+.upcoming-week .day.selected .dnum { color: #fff; }
+
+.upcoming-list {
+    display: flex;
+    flex-direction: column;
+    max-height: 360px;
+    overflow-y: auto;
+    padding: var(--ap-s1) 2px 0;
+}
+.upcoming-empty {
+    padding: var(--ap-s6) var(--ap-s1);
+    text-align: center;
+    color: var(--ap-text-muted);
+    font-size: 13px;
+    border: 1px dashed var(--ap-border);
+    border-radius: var(--ap-r-md);
+    background: #fafbfc;
+}
+.upcoming-listview {
+    border: 0 !important;
+    background: transparent !important;
+    display: block !important;
+}
+
+/* ---------------------------------------------------------------
+   13. Loading skeleton (with shimmer)
+   --------------------------------------------------------------- */
+.dash-skeleton { padding: var(--ap-s6) var(--ap-s8); }
+.dash-skeleton .sk-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--ap-s5);
+}
+.dash-skeleton .sk-block {
+    height: 140px;
+    border-radius: var(--ap-r-lg);
+    background: linear-gradient(90deg, #eef2f7 25%, #f8fafc 50%, #eef2f7 75%);
+    background-size: 200% 100%;
+    animation: skShimmer 1.4s infinite;
+}
+@keyframes skShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ---------------------------------------------------------------
+   14. Focus visibility (WCAG 2.4.7) — global
+   --------------------------------------------------------------- */
+#dashboard-modern :is(button, a, input, [tabindex]):focus-visible {
+    outline: 3px solid var(--ap-brand-700) !important;
+    outline-offset: 2px !important;
+    border-radius: 2px !important;
+}
+#dashboard-modern :is(button, a, input, [tabindex]):focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+/* High contrast mode support (WCAG compliance) */
+@media (prefers-contrast: more) {
+    :root {
+        --ap-text: #000000;
+        --ap-text-secondary: #000000;
+        --ap-text-muted: #333333;
+        --ap-brand-900: #004d4a;
+        --ap-brand-700: #007a7a;
+    }
+    #dashboard-modern :is(button, a, input, [tabindex]):focus-visible {
+        outline-width: 4px;
+    }
+}
+
+/* Forced colors mode (Windows high contrast) */
+@media (forced-colors: active) {
+    #dashboard-modern,
+    .dashboard-kpi-grid,
+    .dash-card,
+    .alert-chip,
+    button {
+        border-color: CanvasText;
+        color: CanvasText;
+    }
+    .alert-chip.selected {
+        border-color: Highlight;
+    }
+    #dashboard-modern :is(button, a, input, [tabindex]):focus-visible {
+        outline: 3px solid Highlight;
+    }
+}
+
+/* ---------------------------------------------------------------
+   15. Responsive (Mobile-First, 2026 Standards)
+   --------------------------------------------------------------- */
+@media (max-width: 1200px) {
+    .dashboard-kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .dash-row-3col { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .dash-row-3col > .dash-card:nth-child(3) { grid-column: span 2; }
+    .page-header { flex-direction: column; align-items: stretch; }
+    .page-header-actions { width: 100%; }
+}
+
+@media (max-width: 1000px) {
+    #dashboard-modern { padding: var(--ap-s5); }
+    .dash-row-2col { grid-template-columns: minmax(0, 1fr); }
+    .dash-row-3col { grid-template-columns: minmax(0, 1fr); }
+    .dash-row-3col > .dash-card:nth-child(3) { grid-column: auto; }
+    .global-search-wrap { width: 200px; }
+}
+
+@media (max-width: 768px) {
+    /* Tablet adjustments */
+    #dashboard-modern { padding: var(--ap-s4) var(--ap-s4); }
+    .dashboard-kpi-grid { grid-template-columns: 1fr 1fr; gap: var(--ap-s4); }
+    .page-header { gap: var(--ap-s3); margin-bottom: var(--ap-s4); }
+    .page-title { font-size: 20px; }
+    .page-header-actions { gap: var(--ap-s2); }
+    .global-search-wrap { width: 150px; }
+
+    /* Improve touch targets on tablet */
+    button { min-height: var(--ap-touch); }
+    .cta-strip { gap: var(--ap-s2); }
+    .alert-chip { min-height: 44px; padding: 10px var(--ap-s4); }
+
+    /* Better table visibility on tablet */
+    .patients-grid .e-grid .e-rowcell { padding: 14px 10px !important; }
+    .upcoming-week { grid-template-columns: repeat(5, 1fr); }
+    .upcoming-item { min-height: 60px; padding: 12px 4px; }
+}
+
+@media (max-width: 640px) {
+    /* Mobile optimizations */
+    #dashboard-modern { padding: var(--ap-s3) var(--ap-s3); }
+    .dashboard-kpi-grid { grid-template-columns: 1fr; gap: var(--ap-s3); }
+    .dashboard-kpi-strip { grid-template-columns: 1fr 1fr; }
+    .dash-tabs { width: 100%; overflow-x: auto; flex-wrap: nowrap; }
+    .global-search-wrap { width: 100%; order: 10; }
+    .cta-strip { flex-direction: column; align-items: stretch; gap: var(--ap-s2); }
+    .cta-strip .cta-live { margin-left: 0; justify-content: center; }
+    .cta-strip .cta-primary,
+    .cta-strip .cta-secondary { width: 100%; }
+
+    /* Page header responsive */
+    .page-header { flex-direction: column; gap: var(--ap-s2); }
+    .page-title { font-size: 20px; margin-bottom: var(--ap-s2); }
+    .page-header-actions { flex-direction: column; width: 100%; gap: var(--ap-s2); }
+    .global-search-wrap { width: 100%; }
+
+    /* KPI cards more readable */
+    .kpi-value { font-size: 32px; margin: 6px 0; }
+    .kpi-value .kpi-sub { font-size: 16px; }
+
+    /* Cards full width */
+    .dash-row-2col { grid-template-columns: 1fr; }
+    .dash-row-3col { grid-template-columns: 1fr; }
+    .dash-card { padding: var(--ap-s4); }
+
+    /* Table improvements for mobile */
+    .patients-grid .e-grid .e-headercell,
+    .patients-grid .e-grid .e-rowcell {
+        padding: 10px 8px !important;
+        font-size: 12px !important;
+    }
+    .patients-grid .e-grid { height: auto !important; }
+    .patients-grid .e-content {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Upcoming appointments mobile */
+    .upcoming-week { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+    .upcoming-week .day {
+        padding: 6px 2px;
+        min-height: 48px;
+        font-size: 10px;
+    }
+    .upcoming-week .day .dnum { font-size: 12px; }
+    .upcoming-item {
+        gap: var(--ap-s2);
+        min-height: 56px;
+        padding: 10px 4px;
+        flex-wrap: wrap;
+    }
+    .upcoming-item .uinfo   { flex: 1 1 calc(100% - 50px); min-width: 0; }
+    .upcoming-item .appointment-actions {
+        flex: 1 1 100%;
+        flex-direction: row;
+        gap: 4px;
+        margin-top: 4px;
+    }
+    .appointment-actions .row-action-btn {
+        width: 100%;
+        margin-right: 0;
+        min-height: 40px;
+    }
+    .upcoming-item .ustatus {
+        display: none;
+    }
+}
+
+/* Tablet (640-900px): keep the upcoming row layout, just shrink type/space
+   so the card doesn't push the page past the viewport. The "Wed 16" pill
+   must stay visible without horizontal swipe. */
+@media (min-width: 641px) and (max-width: 900px) {
+    .upcoming-item { flex-wrap: wrap; padding: 10px 6px; }
+    .upcoming-item .uinfo { flex: 1 1 0; min-width: 0; }
+    .upcoming-item .appointment-actions { width: 100%; margin-top: 6px; }
+    .appointment-actions .row-action-btn { flex: 1 1 0; }
+}
+
+    /* Alert banner mobile */
+    .critical-banner {
+        flex-wrap: wrap;
+        gap: var(--ap-s2);
+    }
+    .critical-banner .banner-text {
+        order: 1;
+        width: 100%;
+    }
+    .critical-banner .banner-cta {
+        order: 2;
+        width: 100%;
+        text-align: center;
+    }
+
+    /* Charts responsive */
+    .dash-card SfChart,
+    .dash-card .e-chart {
+        width: 100% !important;
+    }
+
+    /* Donut legend on mobile */
+    .donut-legend {
+        grid-template-columns: 1fr;
+        gap: var(--ap-s2) var(--ap-s3);
+    }
+}
+
+/* ---------------------------------------------------------------
+   16. Reduced motion respect
+   --------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .modern-kpi, .dash-card { transition: none; }
+    .modern-kpi:hover, .dash-card:hover { transform: none; }
+    .dash-skeleton .sk-block { animation: none; }
+    .pulse-dot { animation: none; }
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ---------------------------------------------------------------
+   17. Live indicator
+   --------------------------------------------------------------- */
+.pulse-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: #10b981;
+    animation: pulse 2s infinite;
+    display: inline-block;
+}
+@keyframes pulse {
+    0%   { transform: scale(1);    opacity: 1; }
+    50%  { transform: scale(1.45); opacity: .7; }
+    100% { transform: scale(1);    opacity: 1; }
+}
+
+/* ---------------------------------------------------------------
+   18. Upcoming appointment list (plain HTML — ListView removed
+        because duplicate Ids corrupted its rendering)
+   --------------------------------------------------------------- */
+.upcoming-listview {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: var(--ap-s3);
+    padding: 14px 4px;
+    min-height: 68px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.upcoming-item:last-child { border-bottom: 0; }
+.upcoming-item .uavatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #64748b, #475569);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex: 0 0 40px;
+}
+.upcoming-item .uinfo {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.upcoming-item .uname {
+    font-weight: 600;
+    color: var(--ap-text);
+    font-size: 13px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.upcoming-item .utime {
+    color: var(--ap-text-muted);
+    font-size: 12px;
+    line-height: 1.3;
+}
+.upcoming-item .ustatus {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: var(--ap-r-pill);
+    white-space: nowrap;
+    flex: 0 0 auto;
+}
+
+/* ---------------------------------------------------------------
+   19. Print styles (for clinical records/reports)
+   --------------------------------------------------------------- */
+@media print {
+    #dashboard-modern {
+        padding: 0;
+        background: white;
+    }
+    .cta-strip,
+    .page-header-actions,
+    .nav-btn,
+    .dash-card-actions,
+    .row-action-btn,
+    .bell-btn,
+    .ai-button {
+        display: none;
+    }
+    .dash-card,
+    .modern-kpi {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    .patients-grid .e-grid .e-row:hover .e-rowcell {
+        background: white !important;
+    }
+    .upcoming-item {
+        page-break-inside: avoid;
+    }
+}
+.upcoming-item .ustatus.online { color: var(--ap-success); background: var(--ap-success-bg); }
+.upcoming-item .ustatus.offline { color: var(--ap-text-secondary); background: #e2e8f0; }
+
+/* Checked-in / completed states */
+.status-checkedin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ap-info);
+    background: var(--ap-info-bg);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--ap-r-pill);
+    white-space: nowrap;
+}
+.status-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--ap-success);
+    background: var(--ap-success-bg);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--ap-r-pill);
+    white-space: nowrap;
+}
+.checkedin-tag {
+    color: var(--ap-success);
+    background: var(--ap-success-bg);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--ap-r-pill);
+    white-space: nowrap;
+}
+.upcoming-item .appointment-actions { flex: 0 0 auto; }
+.upcoming-item .u-status { flex: 0 0 auto; }
+
+/* ---------------------------------------------------------------
+   19. AI briefing panel (slides in top-right, no external service)
+   --------------------------------------------------------------- */
+.ai-panel {
+    position: fixed;
+    top: 76px;
+    right: 24px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
+    background: var(--ap-surface);
+    border: 1px solid var(--ap-border);
+    border-radius: var(--ap-r-lg);
+    box-shadow: 0 20px 50px rgba(15, 23, 42, .25);
+    z-index: 1200;
+    animation: aiSlideIn .2s ease-out;
+}
+@keyframes aiSlideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.ai-panel-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ap-s3);
+    padding: var(--ap-s4) var(--ap-s5);
+    border-bottom: 1px solid var(--ap-border);
+    background: linear-gradient(135deg, var(--ap-brand-050), #f8fafc);
+    border-radius: var(--ap-r-lg) var(--ap-r-lg) 0 0;
+}
+.ai-panel-icon {
+    font-size: 20px;
+    color: var(--ap-brand-700);
+}
+.ai-panel-title {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.ai-panel-title strong {
+    font-size: 14.5px;
+    color: var(--ap-text);
+}
+.ai-panel-title span {
+    font-size: 12px;
+    color: var(--ap-text-muted);
+}
+.ai-panel-close {
+    border: 0;
+    background: transparent;
+    color: var(--ap-text-muted);
+    font-size: 15px;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--ap-r-sm);
+    cursor: pointer;
+}
+.ai-panel-close:hover { background: #eef2f7; color: var(--ap-text); }
+
+.ai-panel-body {
+    padding: var(--ap-s4) var(--ap-s5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ap-s3);
+}
+.ai-insight {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ap-s2);
+    font-size: 13px;
+    color: var(--ap-text-secondary);
+    line-height: 1.55;
+    padding: var(--ap-s2) var(--ap-s3);
+    background: #fafbfc;
+    border-radius: var(--ap-r-sm);
+    border: 1px solid #f1f5f9;
+}
+.ai-insight-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 8px;
+    margin-top: 6px;
+}
+.ai-insight-dot.danger  { background: var(--ap-danger); }
+.ai-insight-dot.warning { background: var(--ap-warning); }
+.ai-insight-dot.success { background: var(--ap-success); }
+.ai-insight-dot.info    { background: var(--ap-info); }
+.ai-insight strong { color: var(--ap-text); }
+
+.ai-panel-footer {
+    padding: var(--ap-s3) var(--ap-s5) var(--ap-s4);
+    border-top: 1px solid var(--ap-border);
+}
+.ai-panel-footer > span {
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 700;
+    color: var(--ap-text-muted);
+    display: block;
+    margin-bottom: var(--ap-s2);
+}
+.ai-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ap-s2);
+}
+.ai-suggestion-chip {
+    border: 1px solid var(--ap-border);
+    background: var(--ap-surface);
+    color: var(--ap-brand-900);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--ap-r-pill);
+    cursor: pointer;
+    min-height: 36px;
+    transition: background .15s;
+    font-family: inherit;
+}
+.ai-suggestion-chip:hover { background: var(--ap-brand-050); }
+
+/* ---------------------------------------------------------------
+   20. Call toast
+   --------------------------------------------------------------- */
+.call-toast {
+    position: fixed;
+    top: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ap-s2);
+    background: #0f172a;
+    color: #fff;
+    font-size: 13.5px;
+    padding: 12px 20px;
+    border-radius: var(--ap-r-pill);
+    box-shadow: 0 12px 32px rgba(15, 23, 42, .35);
+    z-index: 1300;
+    animation: aiSlideIn .2s ease-out;
+}
+.call-toast .e-icons { color: #4ade80; }
+.call-toast strong { color: #fff; }
+
+@media (max-width: 640px) {
+    .ai-panel { right: 12px; top: 64px; }
+    .upcoming-item .appointment-actions { flex-direction: column; gap: 4px; align-items: stretch; }
+    .upcoming-item { flex-wrap: wrap; }
+}
+
+/* ============================================================
+   NEW LAYOUT: Dashboard with Sidebar (2-Column)
+   ============================================================ */
+
+/* Dashboard Grid Layout - KPI Cards + Charts + Table */
+.dashboard-grid-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--ap-s6);
+    margin-top: var(--ap-s6);
+}
+
+.dashboard-left-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ap-s6);
+}
+
+.dashboard-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ap-s6);
+}
+
+/* KPI Cards Row */
+.kpi-cards-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--ap-s4);
+    margin-bottom: var(--ap-s4);
+}
+
+/* Syncfusion Card - KPI */
+.kpi-cards-row .e-card {
+    background: white;
+    border-radius: var(--ap-r-md);
+    border: 1px solid var(--ap-border);
+    box-shadow: var(--ap-shadow-1);
+    transition: all 0.2s ease;
+    padding: 0;
+}
+
+.kpi-cards-row .e-card:hover {
+    box-shadow: var(--ap-shadow-2);
+    border-color: var(--ap-brand-700);
+}
+
+.kpi-cards-row .e-card-content {
+    padding: var(--ap-s4) !important;
+}
+
+.kpi-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--ap-s3);
+}
+
+.kpi-card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ap-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.kpi-card-icon {
+    font-size: 20px;
+    color: var(--ap-brand-700);
+}
+
+.kpi-card-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--ap-text);
+    margin: var(--ap-s2) 0;
+}
+
+.kpi-card-sub {
+    font-size: 12px;
+    color: var(--ap-text-muted);
+}
+
+.kpi-card-trend {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: var(--ap-s2);
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.kpi-card-trend.positive {
+    color: var(--ap-success);
+    background: var(--ap-success-bg);
+}
+
+.kpi-card-trend.negative {
+    color: var(--ap-danger);
+    background: var(--ap-danger-bg);
+}
+
+.kpi-card-trend.neutral {
+    color: var(--ap-text-muted);
+    background: #f1f5f9;
+}
+
+/* Chart Containers */
+.chart-card,
+.upcoming-section,
+.patients-section {
+    background: white;
+    border-radius: var(--ap-r-md);
+    box-shadow: var(--ap-shadow-1);
+    border: 1px solid var(--ap-border);
+}
+
+/* Syncfusion Card - Chart */
+.chart-card.e-card,
+.upcoming-section.e-card,
+.patients-section.e-card {
+    background: white;
+    border-radius: var(--ap-r-md);
+    border: 1px solid var(--ap-border);
+    box-shadow: var(--ap-shadow-1);
+    padding: 0;
+}
+
+.chart-card .e-card-content,
+.upcoming-section .e-card-content,
+.patients-section .e-card-content {
+    padding: var(--ap-s6) !important;
+}
+
+.chart-card-header,
+.upcoming-section-header,
+.patients-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--ap-s4);
+    padding-bottom: var(--ap-s3);
+    border-bottom: 1px solid var(--ap-border);
+}
+
+.chart-card-title,
+.upcoming-section-title,
+.patients-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ap-text);
+    margin: 0;
+}
+
+.chart-card-menu {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: var(--ap-text-muted);
+    padding: 0;
+}
+
+.chart-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+}
+
+.patients-filters {
+    display: flex;
+    gap: var(--ap-s3);
+}
+
+.filter-button {
+    padding: 6px 12px;
+    border: 1px solid var(--ap-border);
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ap-text-secondary);
+    transition: all 0.2s ease;
+}
+
+.filter-button:hover {
+    border-color: var(--ap-brand-700);
+    color: var(--ap-brand-700);
+}
+
+.filter-button.active {
+    background: var(--ap-brand-700);
+    color: white;
+    border-color: var(--ap-brand-700);
+}
+
+/* Upcoming Appointments Section */
+.upcoming-section {
+    background: white;
+    border-radius: var(--ap-r-md);
+    box-shadow: var(--ap-shadow-1);
+    border: 1px solid var(--ap-border);
+}
+
+.upcoming-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--ap-s4);
+    padding-bottom: var(--ap-s3);
+    border-bottom: 1px solid var(--ap-border);
+}
+
+.upcoming-section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ap-text);
+    margin: 0;
+}
+
+.upcoming-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ap-s4);
+}
+
+.appointment-item {
+    padding: var(--ap-s4);
+    border: 1px solid var(--ap-border);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: var(--ap-s4);
+    transition: all 0.2s ease;
+}
+
+.appointment-item:hover {
+    border-color: var(--ap-brand-700);
+    box-shadow: var(--ap-shadow-1);
+}
+
+.appointment-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a8a8a, #0d6d6d);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.appointment-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.appointment-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ap-text);
+    margin: 0 0 2px 0;
+}
+
+.appointment-time {
+    font-size: 12px;
+    color: var(--ap-text-muted);
+    margin: 0;
+}
+
+.appointment-status {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.appointment-status.online {
+    background: var(--ap-success-bg);
+    color: var(--ap-success);
+}
+
+.appointment-status.offline {
+    background: #f1f5f9;
+    color: var(--ap-text-muted);
+}
+
+.appointment-action {
+    padding: 6px 12px;
+    background: var(--ap-brand-700);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.appointment-action:hover {
+    background: var(--ap-brand-900);
+}
+
+/* Responsive: Tablet */
+@media (max-width: 1200px) {
+    .dashboard-grid-wrapper {
+        grid-template-columns: 1fr;
+        gap: var(--ap-s4);
+    }
+
+    .kpi-cards-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Responsive: Mobile */
+@media (max-width: 768px) {
+    .kpi-cards-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--ap-s3);
+    }
+
+    .chart-card {
+        padding: var(--ap-s4);
+    }
+
+    .chart-container {
+        min-height: 200px;
+    }
+
+    .patients-section,
+    .upcoming-section {
+        padding: var(--ap-s4);
+    }
+}
+
+@media (max-width: 640px) {
+    .dashboard-content {
+        padding: var(--ap-s4);
+    }
+
+    .kpi-cards-row {
+        grid-template-columns: 1fr;
+        gap: var(--ap-s3);
+    }
+
+    .kpi-card {
+        padding: var(--ap-s3);
+    }
+
+    .kpi-card-value {
+        font-size: 24px;
+    }
+
+    .chart-card,
+    .patients-section,
+    .upcoming-section {
+        padding: var(--ap-s4);
+        border-radius: var(--ap-r-sm);
+    }
+
+    .appointment-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .appointment-status,
+    .appointment-action {
+        align-self: flex-start;
+    }
+}
+
+/* =====================================================================
+   HELANTHUS ALIGNMENT OVERRIDES (appended)
+   Re-skin of the dashboard to match the Helanthus reference image.
+   ===================================================================== */
+
+/* ---- 19. Top header: welcome + search + month pill + bell + avatar ---- */
+#dashboard-modern {
+    padding: 24px 28px 32px 28px;
+}
+
+.page-header {
+    align-items: center;
+    margin-bottom: 22px;
+}
+.page-eyebrow {
+    color: #64748b;
+    font-size: 13px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+.page-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.page-title .wave {
+    display: inline-block;
+    margin-left: 4px;
+    transform: translateY(1px);
+    font-size: 20px;
+}
+.page-header-actions {
+    gap: 12px;
+    flex-wrap: nowrap;
+}
+.global-search-wrap {
+    width: 240px;
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+}
+.global-search-wrap input { font-size: 14px; padding-left: 36px; }
+.global-search-wrap .search-icon { font-size: 14px; }
+
+/* Month pill */
+.month-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    height: 40px;
+    padding: 0 14px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    color: #0f172a;
+    font-size: 13.5px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+    font-family: inherit;
+}
+.month-pill:hover { background: #f8fafc; border-color: #cbd5e1; }
+.month-pill .caret { font-size: 10px; color: #64748b; }
+.month-pill .e-icon-calendar { font-size: 14px; color: #64748b; }
+
+/* Calendar popup below the month pill */
+.dash-month-popup {
+    position: absolute;
+    top: 56px;
+    right: 0;
+    z-index: 1100;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, .18);
+    padding: 8px;
+    animation: popIn .15s ease-out;
+}
+.dash-month-popup .e-calendar { border: 0 !important; box-shadow: none !important; width: 100%; }
+@keyframes popIn { from { transform: translateY(-4px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* Icon-only buttons (bell, search button variant) */
+.icon-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border-radius: 10px;
+    color: #475569;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.icon-btn:hover { background: #f8fafc; border-color: #cbd5e1; color: #0f172a; }
+.icon-btn .e-bell { font-size: 15px; }
+
+/* Avatar circle button */
+.avatar-btn {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+    border-radius: 50%;
+    overflow: hidden;
+}
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #0a8a8a 0%, #0a4d4a 100%);
+    letter-spacing: 0.5px;
+}
+
+/* ---- 20. KPI strip (4 colored metric tiles) ---- */
+.dashboard-kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.metric-tile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 12px;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    min-height: 78px;
+    position: relative;
+    overflow: hidden;
+}
+.metric-tile.metric-blue   { background: #e0f2fe; border-color: #bae6fd; }
+.metric-tile.metric-pink   { background: #fce7f3; border-color: #fbcfe8; }
+.metric-tile.metric-green  { background: #dcfce7; border-color: #bbf7d0; }
+.metric-tile.metric-orange { background: #ffedd5; border-color: #fed7aa; }
+
+.metric-tile .metric-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.7);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.metric-tile.metric-blue   .metric-icon { color: #0284c7; }
+.metric-tile.metric-pink   .metric-icon { color: #db2777; }
+.metric-tile.metric-green  .metric-icon { color: #16a34a; }
+.metric-tile.metric-orange .metric-icon { color: #ea580c; }
+.metric-tile .metric-icon .e-icons { font-size: 16px; }
+
+.metric-tile .metric-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.metric-tile .metric-label {
+    font-size: 12px;
+    color: #475569;
+    font-weight: 500;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.metric-tile .metric-value-row {
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+}
+.metric-tile .metric-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.05;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.3px;
+}
+.metric-tile .metric-plus {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1;
+    margin-left: 2px;
+}
+.metric-tile .metric-trend {
+    font-size: 12px;
+    font-weight: 600;
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.metric-tile .metric-trend.up   { color: #16a34a; }
+.metric-tile .metric-trend.down { color: #ef4444; }
+.metric-tile .metric-trend .trend-arrow {
+    font-size: 11px;
+    line-height: 1;
+}
+
+/* ---- 21. Hero section: 4 KPI cards + 2 charts on the left, Patient Overview on the right ---- */
+.dash-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 2.4fr) minmax(0, 1fr);
+    gap: 16px;
+    margin-bottom: 22px;
+    align-items: stretch;
+}
+.dash-hero-left {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+.dash-hero-right {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    /* Drop the fixed 375px height here so on narrow viewports the right
+       column can shrink with the donut card instead of forcing vertical
+       blank space inside a now-shallower viewport. */
+    height: 375px !important;
+    min-height: 0;
+}
+.donut-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    /* total card height ≈ header (~48) + wrap (260) + legend (~80) + padding (~40)
+       ≈ 428px → keep min/max around that band so nothing clips. */
+    min-height: 375px;
+    max-height: 470px;
+    /* Clip the Syncfusion chart wrapper so it can never overflow the card.
+       The four corner labels already have safe room inside the wrap. */
+    overflow: hidden;
+    position: relative;
+}
+.donut-card .donut-wrap {
+    flex: 1;
+    min-height: 230px;
+    max-height: 260px;
+    /* Use the card's 18px padding so corner labels stay inside the card. */
+    padding: 22px 18px;
+    box-sizing: border-box;
+}
+
+/* Charts row (2 col) */
+.dash-row-2col {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 16px;
+}
+.dash-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, .04);
+    padding: 18px 18px;
+    transition: box-shadow .2s ease, transform .2s ease;
+}
+.dash-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(15, 23, 42, .08);
+}
+.dash-card-header {
+    margin-bottom: 12px;
+    align-items: center;
+}
+.donut-card .dash-card-header {
+    /* Give the title and the dominant-cohort badge a clear 2-slot layout. */
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+.donut-card .dash-card-title { flex-shrink: 0; }
+.donut-header-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.dash-card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+    letter-spacing: -0.1px;
+}
+.dash-card-actions {
+    color: #94a3b8;
+    cursor: pointer;
+    font-size: 18px;
+    background: transparent;
+    border: 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+}
+.dash-card-actions:hover { background: #f1f5f9; color: #475569; }
+
+/* Donut chart: compact height with central stat + surrounding labels
+   plus a horizontal legend strip that adds counts, percentages, and
+   an age-range tooltip so each segment is self-explanatory. */
+.donut-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Tall enough so the four corner labels clear the slice. */
+    height: 260px;
+    min-height: 250px;
+    max-height: 270px;
+    width: 100%;
+    overflow: visible;
+}
+.donut-wrap .e-accumulationchart,
+.donut-wrap > div:first-child {
+    /* Center a SQUARE region inside the wrap so the ring stays circular at
+       every breakpoint. Keep the four corner labels (donut-label-0..3) in
+       a radius that clears the ring but stays inside the wrap. */
+    position: relative;
+    margin: 0 auto;
+    height: 100%;
+    width: auto;
+    /* The Syncfusion chart wrapper must never exceed the donut card width. */
+    max-width: 100%;
+    max-height: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+    aspect-ratio: 1 / 1;
+}
+/* Every Syncfusion layer inside the chart also has to honor the wrap bounds,
+   otherwise the SVG/canvas paints past the card edge. */
+.donut-wrap .e-accumulationchart,
+.donut-wrap .e-accumulationchart svg,
+.donut-wrap .e-accumulationchart canvas,
+.donut-wrap .e-accumulationchart > div {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden;
+}
+
+/* Syncfusion ships the chart with an inline width/height attribute on the SVG.
+   Those attributes still beat CSS for SVG, so force the SVG to scale, not clip. */
+.donut-card .e-accumulationchart svg,
+.donut-card .e-accumulationchart svg.e-svg-accumulationchart {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+    /* Make the intrinsic ratio fall back to auto so it never asserts a 600px+ size. */
+    aspect-ratio: 1 / 1;
+}
+.donut-center {
+    position: absolute;
+    text-align: center;
+    pointer-events: none;
+    z-index: 1;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(2px);
+    /* Keep the badge stack from spilling over the hole boundary */
+    max-width: 70%;
+}
+.donut-center .donut-total {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+.donut-center .donut-sub {
+    font-size: 9px;
+    color: #64748b;
+    margin-top: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+.donut-center .donut-delta,
+.donut-header-meta .donut-delta {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: #e6f4f4;
+    color: #066b6b;
+    line-height: 1.4;
+    white-space: nowrap;
+}
+.donut-delta.down {
+    background: #fee2e2 !important;
+    color: #b91c1c !important;
+}
+.donut-label {
+    /* Sit noticeably farther from the donut so the stacked number/category/%
+       never overlaps the slice edge — was 4/-8px, now -22 / -36px. */
+    position: absolute;
+    z-index: 2;
+    pointer-events: none;
+    text-align: center;
+    line-height: 1.1;
+    min-width: 64px;
+    max-width: 90px;
+    transition: transform .15s ease;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 7px 10px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+.donut-label .donut-num {
+    display: block;
+    font-size: 16px;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.2px;
+}
+.donut-label .donut-cat {
+    display: block;
+    font-size: 10.5px;
+    color: #475569;
+    margin-top: 2px;
+    font-weight: 700;
+}
+.donut-label .donut-pct {
+    display: block;
+    font-size: 9.5px;
+    color: #94a3b8;
+    margin-top: 1px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+/* Position the 4 labels around the donut. Top/bottom labels hug the wrap
+   edge; left/right labels sit INSIDE the wrap just outside the ring so the
+   card's 18px padding always keeps them clipped-to-card. */
+.donut-label-0 { top: -8px;        left: 50%;  transform: translateX(-50%); }   /* top: Child */
+.donut-label-1 { top: 50%;         right: 4px; transform: translateY(-50%); }   /* right: Teen */
+.donut-label-2 { bottom: -10px;    left: 50%;  transform: translateX(-50%); }   /* bottom: Adult */
+.donut-label-3 { top: 50%;         left: 4px;  transform: translateY(-50%); }   /* left: Older */
+@media (max-width: 1100px) {
+    .donut-label .donut-num { font-size: 14px; }
+    .donut-label .donut-cat { font-size: 9.5px;  }
+    .donut-label .donut-pct { font-size: 8.5px; }
+    .donut-label { padding: 4px 6px; }
+}
+
+/* At narrow widths the corner labels run out of horizontal room and start
+   colliding with the ring / clip outside the card. Hide them so the chart
+   reads cleanly on tablet/mobile; the badge in the donut center and the
+   values below already communicate the breakdown. */
+@media (max-width: 900px) {
+    .donut-label { display: none; }
+    .donut-wrap  { padding: 12px 12px; }
+    .donut-card  { min-height: 280px; max-height: 360px; }
+}
+
+/* Horizontal legend strip under the donut — the "more informative" layer.
+   Each chip shows the swatch, label, count, and % share so the slice
+   meaning is clear without hovering the chart. */
+.donut-legend {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed #e2e8f0;
+}
+.donut-legend-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+    font-size: 11.5px;
+    color: #334155;
+    cursor: default;
+    transition: background .15s ease, border-color .15s ease;
+    /* Allow long age ranges to wrap instead of clipping/squeezing the chip */
+    min-width: 0;
+    overflow: hidden;
+}
+.donut-legend-chip:hover {
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+.donut-legend-swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 4px;
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.7);
+}
+.donut-legend-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    line-height: 1.2;
+    min-width: 0;
+    flex: 1;
+}
+.donut-legend-cat {
+    font-weight: 700;
+    color: #0f172a;
+    font-size: 11.5px;
+}
+.donut-legend-meta {
+    color: #64748b;
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    white-space: normal;
+    word-break: break-word;
+}
+.donut-legend-meta strong {
+    color: #0a4d4a;
+    font-weight: 700;
+}
+@media (max-width: 1100px) {
+    .donut-legend { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+    .donut-legend { grid-template-columns: 1fr; }
+}
+
+/* Age-range tooltip — pure CSS, no JS, shows on hover/focus of chip */
+.donut-legend-chip[data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #0f172a;
+    color: #fff;
+    font-size: 10.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .15s ease;
+    z-index: 5;
+}
+.donut-legend-chip {
+    position: relative;
+}
+.donut-legend-chip:hover::after,
+.donut-legend-chip:focus-visible::after {
+    opacity: 1;
+}
+.donut-legend-chip:focus-visible {
+    outline: 2px solid #0a8a8a;
+    outline-offset: 1px;
+}
+
+/* ---- 22. Patients table + Upcoming card row ---- */
+.dash-row-bottom {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    /* display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr);
+    gap: 16px; */
+}
+.dash-tabs {
+    background: #f1f5f9;
+    border-radius: 10px;
+    padding: 4px;
+    gap: 2px;
+}
+.dash-tab {
+    background: transparent;
+    color: #64748b;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 14px;
+    min-height: 32px;
+    border-radius: 7px;
+    border: 0;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+}
+.dash-tab:hover { color: #0f172a; }
+.dash-tab.active {
+    background: #0a8a8a;
+    color: #fff;
+}
+.dash-card.upcoming-card {
+    width: 360px !important;
+    /* right: -100px !important; */
+    /* position: relative !important;
+    top: -110px !important; */
+    height: 555px !important;
+}
+.dash-card-grid{
+     /* width: 850px !important; */
+     flex: 1 1 auto;
+     min-width: 0;
+}
+
+/* Patients grid table tweaks */
+.patients-grid .e-grid { border: 0 !important; }
+.patients-grid .e-grid table { width: 100% !important; min-width: 0 !important; }
+.patients-grid .e-grid .e-headercell,
+.patients-grid .e-grid .e-rowcell {
+    background: #fff !important;
+    border-color: #f1f5f9 !important;
+}
+.patients-grid .e-grid .e-headercell {
+    color: #94a3b8 !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: .04em !important;
+    font-weight: 700 !important;
+}
+.patients-grid .e-grid .e-rowcell {
+    color: #334155 !important;
+    font-size: 13.5px !important;
+    padding: 10px 12px !important;
+}
+.row-report {
+    background: transparent;
+    border: 0;
+    color: #ea580c;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-size: 16px;
+}
+.row-report:hover { background: #fff7ed; }
+.view-link {
+    color: #0a8a8a;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 13.5px;
+    margin-right: 10px;
+}
+.view-link:hover { text-decoration: underline; }
+.row-action-dots {
+    background: transparent;
+    border: 0;
+    color: #94a3b8;
+    cursor: pointer;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    font-size: 18px;
+    line-height: 1;
+}
+.row-action-dots:hover { background: #f1f5f9; color: #475569; }
+
+/* Upcoming appointments card */
+.upcoming-card .dash-card-header { align-items: center; }
+.upcoming-month {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+}
+.upcoming-month .month-label {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 13px;
+    min-width: 80px;
+    text-align: center;
+}
+.upcoming-month .nav-btn {
+    border: 0;
+    background: transparent;
+    color: #94a3b8;
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+}
+.upcoming-month .nav-btn:hover { background: #f1f5f9; color: #475569; }
+
+.upcoming-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin: 4px 0 12px 0;
+}
+.upcoming-week .day {
+    background: #f8fafc;
+    border-radius: 8px;
+    text-align: center;
+    padding: 6px 4px;
+    font-size: 11px;
+    color: #64748b;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background .15s;
+    font-weight: 500;
+    min-height: 44px;
+}
+.upcoming-week .day:hover { background: #e0f2fe; }
+.upcoming-week .day .dnum {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 2px;
+}
+.upcoming-week .day.selected {
+    background: #0a8a8a;
+    color: #fff;
+}
+.upcoming-week .day.selected .dnum { color: #fff; }
+
+.upcoming-list {
+    max-height: 360px;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+.upcoming-listview { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.upcoming-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 4px;
+    border-bottom: 1px solid #f1f5f9;
+    min-height: 56px;
+    /* Keep the row inside its card: stack avatar/info/actions when very narrow. */
+    flex-wrap: wrap;
+}
+.upcoming-item:last-child { border-bottom: 0; }
+.upcoming-item .uavatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #0a8a8a, #0a4d4a);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+.upcoming-item .uinfo { flex: 1; min-width: 0; }
+.upcoming-item .uname {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.upcoming-item .utime {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 2px;
+}
+.upcoming-item .ustatus-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.upcoming-item .ustatus {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid;
+    white-space: nowrap;
+}
+.upcoming-item .ustatus.online {
+    color: #16a34a;
+    background: #dcfce7;
+    border-color: #bbf7d0;
+}
+.upcoming-item .ustatus.offline {
+    color: #475569;
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+}
+.call-btn {
+    border: 1px solid #bbf7d0;
+    background: #ffffff;
+    color: #16a34a;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+.call-btn:hover { background: #dcfce7; }
+
+/* ---- 23. Responsive for new Helanthus layout ---- */
+@media (max-width: 1200px) {
+    .dash-hero { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+    /* Slightly shrink the right column fixed heights at 1200px to leave
+       space for the corner donut labels without pushing the page down. */
+    .donut-card  { min-height: 360px; }
+    .dash-hero-right { height: auto !important; }
+}
+@media (max-width: 1000px) {
+    .dashboard-kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .dash-hero { grid-template-columns: minmax(0, 1fr); }
+    .page-header { flex-direction: row; }
+    /* Stack the bottom row BEFORE the donut collapses so the upcoming
+       list has the full card width to lay out its week + items. */
+    .dash-row-bottom { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 900px) {
+    #dashboard-modern { padding: 20px; }
+    .dash-row-2col,
+    .dash-row-3col { grid-template-columns: minmax(0, 1fr); }
+    .global-search-wrap { width: 200px; }
+    /* Upcoming card: make week pills wrap to 4 columns + items flex. */
+    .upcoming-week { grid-template-columns: repeat(7, 1fr); }
+    .upcoming-item { gap: 8px; padding: 10px; }
+}
+@media (max-width: 700px) {
+    .dashboard-kpi-strip { grid-template-columns: 1fr 1fr; }
+    .page-header { gap: 12px; }
+    .global-search-wrap { width: 160px; }
+}
+@media (max-width: 560px) {
+    .dashboard-kpi-strip { grid-template-columns: 1fr; }
+    .page-header { flex-direction: column; align-items: stretch; }
+    .page-header-actions { flex-wrap: wrap; }
+    .global-search-wrap { width: 100%; }
+    .upcoming-week { grid-template-columns: repeat(5, 1fr); }
+    .metric-tile { padding: 14px; }
+}
+.patients-grid .e-rowcell,
+.patients-grid .e-headercell {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+}
+.e-calendar .e-btn.e-today.e-flat.e-primary, .e-calendar .e-css.e-btn.e-today.e-flat.e-primary,
+.e-calendar .e-btn.e-today.e-flat.e-primary:hover, .e-calendar .e-css.e-btn.e-today.e-flat.e-primary:hover {
+    color: #fff;
+}
+@media (max-width: 1200px)
+{
+    .dash-row-bottom {
+        flex-direction: column;
+    }
+
+    .upcoming-card {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+.dash-row-bottom {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+}
+
+.dash-card-grid {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.patients-grid {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.upcoming-card {
+    flex: 0 0 350px;
+    min-width: 0;
+}
+
+.e-grid {
+    width: 100% !important;
+}
+
+.dash-row-bottom {
+    display: flex;
+    gap: 20px;
+}
+
+@media (max-width: 1200px) {
+    .dash-row-bottom {
+        flex-direction: column;
+    }
+
+    .dash-card.upcoming-card {
+        margin-top: 0;
+        transform: none;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+@media (min-width: 1201px) {
+
+.dash-card.upcoming-card {
+margin-top: -110px;
+}
+}
