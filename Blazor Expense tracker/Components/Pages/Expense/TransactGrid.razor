@@ -1,0 +1,503 @@
+﻿@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+
+@implements IDisposable;
+
+<style>
+    /* Modern Transaction Grid Styling */
+    #expense-grid-wrapper {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+    }
+
+    #expense-grid-wrapper :deep(.e-grid) {
+        border: none;
+        background: white;
+    }
+
+    #expense-grid-wrapper :deep(.e-gridheader) {
+        background: linear-gradient(135deg, rgba(26, 188, 156, 0.08) 0%, rgba(232, 248, 245, 0.4) 100%);
+    }
+
+    #expense-grid-wrapper :deep(.e-headercell) {
+        background: transparent;
+        border-color: #E0E6ED;
+        color: var(--text-primary);
+        font-weight: 600;
+        padding: 12px;
+    }
+
+    #expense-grid-wrapper :deep(.e-rowcell) {
+        border-color: #F0F0F0;
+        padding: 12px;
+        color: var(--text-primary);
+    }
+
+    #expense-grid-wrapper :deep(.e-row) {
+        background: white;
+        transition: all 0.2s ease;
+    }
+
+    #expense-grid-wrapper :deep(.e-row:hover) {
+        background: rgba(26, 188, 156, 0.05);
+    }
+
+    #expense-grid-wrapper :deep(.e-row.e-selectionbackground) {
+        background: rgba(26, 188, 156, 0.1);
+    }
+
+    /* Toolbar Styling */
+    #expense-grid-wrapper :deep(.e-toolbar) {
+        background: transparent;
+        border: none;
+        padding: 0 0 12px 0;
+    }
+
+    #expense-grid-wrapper :deep(.e-toolbar-item) {
+        margin-right: 8px;
+    }
+
+    #expense-grid-wrapper :deep(.e-tbar-btn:not(.e-tbar-btn-text)) {
+        background: transparent;
+        border: 1px solid #E0E6ED;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    #expense-grid-wrapper :deep(.e-tbar-btn:not(.e-tbar-btn-text):hover:not(.e-btn-disable)) {
+        background: rgba(26, 188, 156, 0.1);
+        border-color: #1ABC9C;
+        color: #1ABC9C;
+    }
+
+    #expense-grid-wrapper :deep(.e-tbar-btn.e-btn-disable) {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    /* Pagination Styling */
+    #expense-grid-wrapper :deep(.e-pagercontainer) {
+        background: transparent;
+        border-top: 1px solid #E0E6ED;
+        margin-top: 16px;
+        padding-top: 12px;
+    }
+
+    #expense-grid-wrapper :deep(.e-numericitem),
+    #expense-grid-wrapper :deep(.e-pageritem) {
+        background: white;
+        border: 1px solid #E0E6ED;
+        color: var(--primary-green);
+        margin: 0 4px;
+        border-radius: 4px;
+    }
+
+    #expense-grid-wrapper :deep(.e-numericitem:hover),
+    #expense-grid-wrapper :deep(.e-pageritem:hover) {
+        background: rgba(26, 188, 156, 0.1);
+        border-color: #1ABC9C;
+    }
+
+    #expense-grid-wrapper :deep(.e-numericitem.e-active),
+    #expense-grid-wrapper :deep(.e-pageritem.e-active) {
+        background: #1ABC9C; 
+        color: white;
+        border-color: #1ABC9C;
+    }
+
+    /* Checkbox Styling */
+    #expense-grid-wrapper :deep(.e-checkbox input:checked ~ .e-checkmark) {
+        background: #1ABC9C;
+        border-color: #1ABC9C;
+    }
+
+    /* Column Styling */
+    .category-icon {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+        border-radius: 6px;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .category-text {
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+
+    .description-section {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    .amt-payment {
+        font-weight: 600;
+    }
+
+    .amt-payment.Income {
+        color: #1ABC9C;
+    }
+
+    .amt-payment.Expense {
+        color: #E74C3C;
+    }
+
+    /* Responsive */
+    @@media (max-width: 768px) {
+        #expense-grid-wrapper {
+            padding: 12px;
+        }
+
+        #expense-grid-wrapper :deep(.e-rowcell),
+        #expense-grid-wrapper :deep(.e-headercell) {
+            padding: 8px;
+            font-size: 12px;
+        }
+
+        .normalRes {
+            display: none;
+        }
+
+        .mediumRes {
+            display: block;
+        }
+    }
+
+    @@media (max-width: 480px) {
+        #expense-grid-wrapper {
+            padding: 8px;
+        }
+
+        #expense-grid-wrapper :deep(.e-rowcell),
+        #expense-grid-wrapper :deep(.e-headercell) {
+            padding: 6px;
+            font-size: 11px;
+        }
+
+        .normalRes,
+        .mediumRes {
+            display: none;
+        }
+
+        .smallRes {
+            display: block;
+        }
+
+        .sm-category {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sm-icon {
+            flex-shrink: 0;
+        }
+
+        .category-content {
+            flex: 1;
+            min-width: 0;
+        }
+    }
+</style>
+
+<div id="expense-grid-wrapper">
+    @if (this.RenderGrid)
+    {
+        <SfGrid @ref="TransactGridRef" TValue="ExpenseData" Width="100%" Height="100%" AllowSelection="true" AllowPaging="true" AllowTextWrap="false" Toolbar="@Toolbaritems" DataSource="@TransactGridData">
+            <GridEvents RowSelected="@EnableToolbarItems" RowDeselected="@EnableToolbarItems" OnToolbarClick="ToolbarClickHandler" TValue="ExpenseData"></GridEvents>
+            <GridEditSettings AllowEditing="true" AllowEditOnDblClick="false"></GridEditSettings>
+            <GridPageSettings PageSize="11"></GridPageSettings>
+            <GridColumns>
+                <GridColumn Type="ColumnType.CheckBox" Width="40"></GridColumn>
+                <GridColumn Field="@nameof(ExpenseData.Category)" HeaderText="Category" Width="178" ClipMode="@ClipMode.EllipsisWithTooltip" ValidationRules="@rules">
+                    <Template>
+                        @{
+                            var expense = (context as ExpenseData);
+                            <div class="normalRes">
+                                <div class="category-icon @expense.Category"></div>
+                                <div class='category-text'>@expense.Category</div>
+                            </div>
+                            <div class="mediumRes">
+                                <div>
+                                    <div class="category-icon @expense.Category"></div>
+                                </div>
+                                <div>
+                                    <div>@expense.Category</div>
+                                    <div class="description-section"> @expense.Description </div>
+                                </div>
+                            </div>
+                            <div class="smallRes">
+                                <div class='sm-category sm-icon'><div class="category-icon @expense.Category"></div></div>
+                                <div class='sm-category category-content'>
+                                    <div> @expense.Category </div>
+                                    <div class="description-section"> @expense.Description </div>
+                                    <div> @expense.PaymentMode </div>
+                                </div>
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+                <GridColumn Field="@nameof(ExpenseData.DateTime)" HeaderText="Date" Format="d" Width="112" ValidationRules="@rules"></GridColumn>
+                <GridColumn Field="@nameof(ExpenseData.PaymentMode)" HeaderText="Payment Mode" Width="140" ValidationRules="@rules"></GridColumn>
+                <GridColumn Field="@nameof(ExpenseData.Description)" HeaderText="Description" ClipMode="@ClipMode.Ellipsis"></GridColumn>
+                <GridColumn Field="@nameof(ExpenseData.UniqueId)" HeaderText="Unique Id" IsPrimaryKey="true" Visible="false"></GridColumn>
+                <GridColumn Field="@nameof(ExpenseData.Amount)" HeaderText="Amount" Width="120" Format="C0" TextAlign="@TextAlign.Right" ValidationRules="@rules">
+                    <Template>
+                        @{
+                            var expense = (context as ExpenseData);
+                            <div class="normalRes">
+                                <div class='amt-payment @expense.TransactionType'>
+                                    <span>$</span> <span>@expense.Amount</span>
+                                </div>
+                            </div>
+                            <div class="mediumRes">
+                                <div class='amt-payment @expense.TransactionType'>
+                                    <span>$</span> <span>@expense.Amount</span>
+                                </div>
+                                <div>@expense.DateTime.ToString("dd/MM/yyyy")</div>
+                            </div>
+                            <div class="smallRes">
+                                <div class='amt-payment @expense.TransactionType'>
+                                    <span>$</span> <span>@expense.Amount</span>
+                                </div>
+                                <div>@expense.DateTime.ToString("dd/MM/yyyy")</div>
+                            </div>
+                        }
+                    </Template>
+                </GridColumn>
+            </GridColumns>
+        </SfGrid>
+    }
+</div>
+
+@code{
+    [CascadingParameter]
+    public ExpenseDataService ExpenseDataService { get; set; }
+
+    public SfGrid<ExpenseData> TransactGridRef;
+    public TransactDialog DialogRef;
+    public FilterMenu FilterRef;
+
+    public ValidationRules rules = new ValidationRules { Required = true };
+    public IEnumerable<ExpenseData> TransactGridData { get; set; } = new List<ExpenseData>();
+    public List<ItemModel> Toolbaritems = new List<ItemModel> {
+        new ItemModel() { Text = "Edit", PrefixIcon = "e-edit e-icons", TooltipText = "Edit", Id = "Edit", Disabled = true },
+        new ItemModel() { Text = "Delete", PrefixIcon = "e-delete e-icons", TooltipText = "Delete", Id = "Delete", Disabled = true }
+    };
+    private bool RenderGrid;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        this.UpdateTotalBalance();
+        // Initialize with all data
+        RenderGrid = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await base.OnAfterRenderAsync(firstRender);
+        }
+    }
+
+    internal async Task EnableToolbarItems()
+    {
+        var selectedIndexes = await TransactGridRef.GetSelectedRecordsAsync();
+        var count = selectedIndexes.Count();
+        if (count > 1)
+        {
+            Toolbaritems[0].Disabled = true;
+            Toolbaritems[1].Disabled = false;
+        }
+        else if (count == 0)
+        {
+            Toolbaritems[0].Disabled = true;
+            Toolbaritems[1].Disabled = true;
+        }
+        else if (count == 1)
+        {
+            Toolbaritems[0].Disabled = false;
+            Toolbaritems[1].Disabled = false;
+        }
+    }
+
+    /// <summary>
+    /// Show edit or alert dialog
+    ///
+    ///</summary>
+    /// <param name="args"></param>
+    public void OnGridEditBegin(ActionEventArgs<ExpenseData> args)
+    {
+        if (args.RequestType == Syncfusion.Blazor.Grids.Action.BeginEdit)
+            args.Cancel = true;
+    }
+
+    public async void ToolbarClickHandler(Syncfusion.Blazor.Navigations.ClickEventArgs args)
+    {
+        var selectedRecords = await this.TransactGridRef.GetSelectedRecordsAsync();
+
+        if (args.Item.Id == "Edit")
+        {
+            if (selectedRecords.Count() == 1)
+                await this.DialogRef.ShowEditDialog(selectedRecords[0]);
+        }
+        else if (args.Item.Id == "Delete")
+        {
+            await this.DialogRef.ShowAlertDialog(selectedRecords);
+        }
+    }
+
+    /// <summary>
+    /// Filter the grid data with search value
+    /// </summary>
+    public async Task Search(string value)
+    {
+        await this.TransactGridRef.SearchAsync(value);
+    }
+
+    /// <summary>
+    /// Update filtered data based on selected filters
+    /// </summary>
+    public async Task UpdateFilteredData(bool incomeChecked, bool expenseChecked, bool cashChecked, bool debitChecked, bool creditChecked)
+    {
+        DateTime start = ExpenseDataService.StartDate;
+        DateTime end = ExpenseDataService.EndDate;
+        var expenseData = ExpenseDataService.ExpenseData.Where(s => s.DateTime >= start && s.DateTime <= end);
+        ExpenseDataService.SetCurrentData(expenseData);
+
+        // Filter by transaction type
+        if (incomeChecked || expenseChecked)
+        {
+            if (incomeChecked && expenseChecked)
+                expenseData = expenseData.Where(s => s.TransactionType == "Income" || s.TransactionType == "Expense");
+            else if (incomeChecked)
+                expenseData = expenseData.Where(s => s.TransactionType == "Income");
+            else if (expenseChecked)
+                expenseData = expenseData.Where(s => s.TransactionType == "Expense");
+        }
+
+        // Filter by payment mode
+        if (cashChecked || creditChecked || debitChecked)
+        {
+            if (cashChecked && creditChecked && debitChecked)
+                expenseData = expenseData.Where(s => s.PaymentMode == "Cash" || s.PaymentMode == "Credit Card" || s.PaymentMode == "Debit Card");
+            else if (cashChecked && creditChecked)
+                expenseData = expenseData.Where(s => s.PaymentMode == "Cash" || s.PaymentMode == "Credit Card");
+            else if (cashChecked && debitChecked)
+                expenseData = expenseData.Where(s => s.PaymentMode == "Cash" || s.PaymentMode == "Debit Card");
+            else if (creditChecked && debitChecked)
+                expenseData = expenseData.Where(s => s.PaymentMode == "Credit Card" || s.PaymentMode == "Debit Card");
+            else if (cashChecked)
+                expenseData = expenseData.Where(s => s.PaymentMode == "Cash");
+            else if (creditChecked)
+                expenseData = expenseData.Where(s => s.PaymentMode == "Credit Card");
+            else if (debitChecked)
+                expenseData = expenseData.Where(s => s.PaymentMode == "Debit Card");
+        }
+
+        expenseData = expenseData.OrderByDescending(e => e.DateTime).ToList();
+        this.TransactGridData = expenseData;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Add record to source and refresh
+    /// </summary>
+    /// <param name="gridData"></param>
+    public void AddRecord(ExpenseData gridData)
+    {
+        ExpenseDataService.ExpenseData.Add(gridData);
+        
+        // Refresh the grid with filtered data
+        DateTime start = ExpenseDataService.StartDate;
+        DateTime end = ExpenseDataService.EndDate;
+        var filteredData = ExpenseDataService.ExpenseData.Where(s => s.DateTime >= start && s.DateTime <= end)
+            .OrderByDescending(e => e.DateTime).ToList();
+        this.GridRefresh(filteredData);
+    }
+
+    /// <summary>
+    /// Update record in source and refresh
+    /// </summary>
+    /// <param name="gridData"></param>
+    public void UpdateRecord(ExpenseData gridData)
+    {
+        foreach (var data in ExpenseDataService.ExpenseData.Where(s => s.UniqueId == gridData.UniqueId))
+        {
+            data.UniqueId = gridData.UniqueId;
+            data.TransactionType = gridData.TransactionType;
+            data.DateTime = gridData.DateTime;
+            data.Category = gridData.Category;
+            data.PaymentMode = gridData.PaymentMode;
+            data.Description = gridData.Description;
+            data.Amount = gridData.Amount;
+            data.MonthShort = gridData.MonthShort;
+            data.MonthFull = gridData.MonthFull;
+            data.FormattedDate = gridData.FormattedDate;
+        }
+        
+        // Refresh the grid with filtered data
+        DateTime start = ExpenseDataService.StartDate;
+        DateTime end = ExpenseDataService.EndDate;
+        var filteredData = ExpenseDataService.ExpenseData.Where(s => s.DateTime >= start && s.DateTime <= end)
+            .OrderByDescending(e => e.DateTime).ToList();
+        this.GridRefresh(filteredData);
+    }
+
+    /// <summary>
+    /// Removed the record from source and refresh
+    /// </summary>
+    /// <param name="uniqueIds"></param>
+    public void RemoveRecord(List<string> uniqueIds)
+    {
+        foreach (var id in uniqueIds)
+        {
+            var index = ExpenseDataService.ExpenseData.FindIndex(s => s.UniqueId == id);
+            if (index > -1)
+                ExpenseDataService.ExpenseData.RemoveAt(index);
+        }
+        
+        // Refresh the grid with filtered data
+        DateTime start = ExpenseDataService.StartDate;
+        DateTime end = ExpenseDataService.EndDate;
+        var filteredData = ExpenseDataService.ExpenseData.Where(s => s.DateTime >= start && s.DateTime <= end)
+            .OrderByDescending(e => e.DateTime).ToList();
+        this.GridRefresh(filteredData);
+    }
+
+    public void GridRefresh(IEnumerable<ExpenseData> gridData)
+    {
+        this.TransactGridData = gridData;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Update the totalBalance when grid data is updated
+    /// </summary>
+    public void UpdateTotalBalance()
+    {
+        int incomeRS = 0;
+        int expenseRS = 0;
+        List<ExpenseData> incomeD = new List<ExpenseData>();
+        List<ExpenseData> expenseD = new List<ExpenseData>();
+        var commonData = ExpenseDataService.CurrentExpenseData == null ? ExpenseDataService.ExpenseData.Where(s => s.DateTime >= ExpenseDataService.StartDate && s.DateTime <= ExpenseDataService.EndDate) :
+            ExpenseDataService.CurrentExpenseData;
+        incomeD = commonData.Where(s => s.TransactionType == "Income").ToList();
+        incomeRS = incomeD.Sum(s => Convert.ToInt32(s.Amount));
+        expenseD = commonData.Where(s => s.TransactionType == "Expense").ToList();
+        expenseRS = expenseD.Sum(s => s.Amount);
+        var totalBalance = CommonService.GetCurrencyVal(incomeRS - expenseRS);
+        ExpenseDataService.UpdateCurrentBalance(totalBalance);
+    }
+
+    public void Dispose()
+    {
+        TransactGridRef = null;
+    }
+}
