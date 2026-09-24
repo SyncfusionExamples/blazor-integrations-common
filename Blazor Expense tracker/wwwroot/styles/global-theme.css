@@ -1,0 +1,268 @@
+/* Global Theme - Green Color Scheme Applied Across All Pages */
+
+:root {
+    --primary-green: #1ABC9C;
+    --dark-green: #0E8B6F;
+    --light-green: #E8F8F5;
+    --text-primary: #3d774b;
+    --text-secondary: #208746;
+}
+
+/* Page Background */
+body {
+    background: linear-gradient(135deg, #F5F7FA 0%, #E8F8F5 100%);
+    color: var(--text-primary);
+}
+
+/* All Pages Background */
+.content.container-fluid {
+    background: linear-gradient(135deg, #F5F7FA 0%, #E8F8F5 100%);
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+/* Primary Buttons */
+button,
+.btn,
+.e-btn {
+    transition: all 0.3s ease;
+}
+
+button.e-primary,
+.btn.e-primary,
+.e-btn.e-primary,
+button[class*="primary"],
+.btn[class*="primary"],
+.e-btn[class*="primary"],
+input[type="button"].e-primary,
+input[type="submit"].e-primary {
+    background-color: var(--primary-green) !important;
+    border-color: var(--primary-green) !important;
+    color: white !important;
+}
+
+button.e-primary:hover,
+.btn.e-primary:hover,
+.e-btn.e-primary:hover,
+button[class*="primary"]:hover,
+.btn[class*="primary"]:hover,
+.e-btn[class*="primary"]:hover,
+button.e-primary:focus,
+.btn.e-primary:focus,
+.e-btn.e-primary:focus,
+input[type="button"].e-primary:hover,
+input[type="submit"].e-primary:hover {
+    background-color: var(--dark-green) !important;
+    border-color: var(--dark-green) !important;
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
+}
+
+/* Links */
+a {
+    color: var(--primary-green);
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--dark-green);
+}
+
+/* Form Controls */
+input,
+select,
+textarea,
+.form-control,
+.e-input,
+.e-input-group {
+    border-color: #E0E6ED;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.e-input:focus,
+.e-input-group:focus {
+    border-color: var(--primary-green) !important;
+    box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1) !important;
+}
+
+/* Tables */
+table {
+    background: white;
+}
+
+table thead {
+    background: rgba(26, 188, 156, 0.08);
+}
+
+table th {
+    color: var(--text-primary);
+    border-bottom: 2px solid var(--primary-green);
+}
+
+table tbody tr:hover {
+    background-color: rgba(26, 188, 156, 0.05);
+}
+
+/* Cards/Panels */
+.panel,
+.card,
+.e-card {
+    background: white;
+    border: 1px solid #E0E6ED;
+    border-top: 3px solid var(--primary-green);
+}
+
+.panel-heading,
+.card-header {
+    background: rgba(26, 188, 156, 0.08);
+    color: var(--text-primary);
+    border-bottom: 1px solid #E0E6ED;
+}
+
+/* Badges */
+.badge,
+.label,
+.e-badge {
+    background: var(--primary-green);
+    color: white;
+}
+
+.badge.badge-secondary {
+    background: #7F8C8D;
+}
+
+/* Alerts */
+.alert-success,
+.e-toast.e-success {
+    background-color: rgba(26, 188, 156, 0.1);
+    border-left: 4px solid var(--primary-green);
+    color: var(--dark-green);
+}
+
+.alert-success .close {
+    color: var(--dark-green);
+}
+
+/* Progress Bars */
+.progress-bar,
+.e-progressbar-text {
+    background-color: var(--primary-green);
+}
+
+/* Syncfusion Specific */
+.e-btn:not(.e-primary) {
+    color: var(--text-primary);
+    border-color: #E0E6ED;
+}
+
+.e-btn:not(.e-primary):hover {
+    background-color: rgba(26, 188, 156, 0.05);
+    border-color: var(--primary-green);
+    color: var(--primary-green);
+}
+
+/* Navigation */
+.nav-tabs .nav-link {
+    color: var(--text-secondary);
+    border: none;
+    border-bottom: 2px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-green);
+    border-color: var(--primary-green);
+    background: rgba(26, 188, 156, 0.05);
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: var(--primary-green);
+}
+
+
+/* Modals */
+.modal-header {
+    background: rgba(26, 188, 156, 0.08);
+    border-bottom: 2px solid var(--primary-green);
+}
+
+.modal-header .close {
+    color: var(--text-primary);
+}
+
+/* Dropdowns */
+.dropdown-menu {
+    border: 1px solid #E0E6ED;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+    background-color: rgba(26, 188, 156, 0.1);
+    color: var(--primary-green);
+}
+
+/* Pagination */
+.pagination .page-link {
+    color: var(--primary-green);
+    border-color: #E0E6ED;
+}
+
+.pagination .page-link:hover {
+    background-color: rgba(26, 188, 156, 0.1);
+    border-color: var(--primary-green);
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+}
+
+/* Spinners/Loaders */
+.spinner-border {
+    color: var(--primary-green);
+}
+
+.spinner-border-sm {
+    border-color: currentColor;
+    border-right-color: transparent;
+}
+
+/* About Page Specific */
+.about-heading {
+    color: var(--text-primary);
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.about-description {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+.list-heading {
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    margin-top: 24px;
+    margin-bottom: 16px;
+}
+
+.control-item {
+    background: white;
+    border: 1px solid #E0E6ED;
+    border-left: 4px solid var(--primary-green);
+    padding: 16px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.control-item:hover {
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.1);
+    transform: translateY(-2px);
+}
