@@ -1,0 +1,131 @@
+@* @inject IJSRuntime JS
+
+<button type="button"
+        class="theme-toggle @(Theme == "dark" ? "is-dark" : "is-light")"
+        aria-label="Toggle color theme"
+        title="@($"Switch to {(Theme == "dark" ? "light" : "dark")} theme")"
+        @onclick="OnClick">
+    <span class="theme-toggle-icon" aria-hidden="true">
+        @if (Theme == "dark")
+        {
+            <span class="e-icons e-sun"></span>
+        }
+        else
+        {
+            <span class="e-icons e-moon"></span>
+        }
+    </span>
+    <span class="theme-toggle-label">@(Theme == "dark" ? "Light" : "Dark")</span>
+</button>
+
+@code {
+    [Parameter] public string Theme { get; set; } = "light";
+
+    private async Task OnClick()
+    {
+        try
+        {
+            var next = await JS.InvokeAsync<string>("apTheme.toggle");
+            if (!string.IsNullOrEmpty(next) && next != Theme)
+            {
+                Theme = next;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (JSException) { /* apTheme not yet registered; retry on next click */ }
+        catch (JSDisconnectedException) { /* circuit closed */ }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        try
+        {
+            var current = await JS.InvokeAsync<string>("apTheme.current");
+            if (!string.IsNullOrEmpty(current) && current != Theme)
+            {
+                Theme = current;
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (JSException) { /* apTheme not yet registered */ }
+        catch (JSDisconnectedException) { /* circuit closed */ }
+    }
+} *@
+@inject IJSRuntime JS
+
+<button type="button"
+        class="theme-toggle @(Theme == "dark" ? "is-dark" : "is-light")"
+        aria-label="Toggle color theme"
+        aria-pressed="@(Theme == "dark")"
+        title="@($"Switch to {(Theme == "dark" ? "light" : "dark")} theme")"
+        @onclick="OnClick">
+    <span class="theme-toggle-icon" aria-hidden="true">
+        @if (Theme == "dark")
+        {
+            <span class="e-icons e-sun"></span>
+        }
+        else
+        {
+            <span class="e-icons e-moon"></span>
+        }
+    </span>
+
+    <span class="theme-toggle-label">
+        @(Theme == "dark" ? "Light" : "Dark")
+    </span>
+</button>
+
+@code {
+    [Parameter]
+    public string Theme { get; set; } = "light";
+
+    [Parameter]
+    public EventCallback<string> ThemeChanged { get; set; }
+
+    private async Task OnClick()
+    {
+        try
+        {
+            var next = await JS.InvokeAsync<string>("apTheme.toggle");
+
+            if (!string.IsNullOrWhiteSpace(next) && next != Theme)
+            {
+                await ThemeChanged.InvokeAsync(next);
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit has closed.
+        }
+        catch (JSException)
+        {
+            // Theme runtime isn't available.
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        try
+        {
+            var current = await JS.InvokeAsync<string>("apTheme.current");
+
+            if (!string.IsNullOrWhiteSpace(current) && current != Theme)
+            {
+                await ThemeChanged.InvokeAsync(current);
+            }
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit has closed.
+        }
+        catch (JSException)
+        {
+            // Theme runtime isn't available.
+        }
+    }
+}
