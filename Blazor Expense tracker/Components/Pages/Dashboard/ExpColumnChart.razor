@@ -7,7 +7,8 @@
                 <ChartAnnotations>
                     <ChartAnnotation X="@chartXAnnoation" Y="9%" CoordinateUnits="Units.Pixel" Region="Regions.Chart">
                         <ContentTemplate>
-                            <p style="font-family:Roboto;font-size: 16px;font-weight: 400;font-weight: 400;letter-spacing: 0.02em;line-height: 16px;color: #11a85f !important;">Income - Expense</p>
+                            <p class="chart-title" style="font-size: 16px; font-weight: 700; color: #2da75c; margin-left: 34px;
+    margin-top: 22px;">Income - Expense</p>
                         </ContentTemplate>
                     </ChartAnnotation>
                 </ChartAnnotations>
@@ -33,8 +34,8 @@
     </div>
 @code{
     [Parameter]
-    public List<ExpenseData> ColChartIncomeData { get; set; }
+    public List<ExpenseData>? ColChartIncomeData { get; set; }
     [Parameter]
-    public List<ExpenseData> ColChartExpenseData { get; set; }
+    public List<ExpenseData>? ColChartExpenseData { get; set; }
     private string chartXAnnoation = "75px";
 }

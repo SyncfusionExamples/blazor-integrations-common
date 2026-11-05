@@ -26,10 +26,10 @@
 
 @code {
     [CascadingParameter]
-    private ExpenseDataService ExpenseDataService { get; set; }
+    private ExpenseDataService ExpenseDataService { get; set; } = default!;
     
     [Parameter]
-    public IEnumerable<ExpenseData> ExpenseData { get; set; }
+    public IEnumerable<ExpenseData>? ExpenseData { get; set; }
     
     private string RemainingBudget = "$0";
     private List<CategoryLimitData> CategoryLimits = new();
@@ -85,7 +85,7 @@
         
         foreach (var group in groupedByCategory)
         {
-            var categoryName = group.Key;
+            var categoryName = group.Key ?? "";
             var spent = group.Sum(x => x.Amount);
             totalSpent += spent;
             
@@ -117,9 +117,9 @@
     
     public class CategoryLimitData
     {
-        public string Category { get; set; }
-        public string AmountUsed { get; set; }
-        public string Limit { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string AmountUsed { get; set; } = string.Empty;
+        public string Limit { get; set; } = string.Empty;
         public int PercentageUsed { get; set; }
         public int Spent { get; set; }
     }

@@ -46,7 +46,6 @@
         font-weight: 600;
         font-size: 14px;
         cursor: pointer;
-        transition: all 0.3s ease;
         display: flex;
         align-items: center;
         gap: 8px;
@@ -322,7 +321,6 @@
         border-radius: 6px;
         font-weight: 600;
         cursor: pointer;
-        transition: all 0.3s ease;
         font-size: 13px;
     }
 
@@ -486,7 +484,7 @@
             </div>
             <div class="header-actions">
                 <button class="action-btn secondary" @onclick="ExportTransactions">📥 Export</button>
-                <button class="action-btn" @onclick="@(() => this.DialogRef.ShowAddDialog())">+ Add Transaction</button>
+                <button class="action-btn" @onclick="@(async () => { if (this.DialogRef != null) await this.DialogRef.ShowAddDialog(); })">+ Add Transaction</button>
             </div>
         </div>
 
@@ -534,7 +532,7 @@
                     </div>
 
                     <div id="search" style="flex: 1; min-width: 250px;">
-                        <SfTextBox Type="InputType.Search" ShowClearButton="true" Placeholder="Search transactions..." CssClass="search txt" @bind-Value="SearchValue" ValueChange="@(async () => await this.ContentRef.Search(SearchValue))" Created="OnCreate"></SfTextBox>
+                        <SfTextBox Type="InputType.Search" ShowClearButton="true" Placeholder="Search transactions..." CssClass="search txt" @bind-Value="SearchValue" ValueChange="@(async () => { if (this.ContentRef != null) await this.ContentRef.Search(SearchValue); })" Created="OnCreate"></SfTextBox>
                     </div>
                 </div>
 
@@ -591,14 +589,14 @@ else
 
 @code{
     [CascadingParameter]
-    public ExpenseDataService ExpenseDataService { get; set; }
+    public ExpenseDataService ExpenseDataService { get; set; } = default!;
 
     [Inject]
-    private IJSRuntime JSRuntime { get; set; }
+    private IJSRuntime JSRuntime { get; set; } = default!;
 
-    public TransactDialog DialogRef;
-    public TransactGrid ContentRef;
-    public string SearchValue { get; set; }
+    public TransactDialog? DialogRef;
+    public TransactGrid? ContentRef;
+    public string SearchValue { get; set; } = string.Empty;
 
     // Statistics
     private decimal totalAmount = 0;
@@ -633,8 +631,11 @@ else
         if (isDataLoaded && firstRender)
         {
             await base.OnAfterRenderAsync(firstRender);
-            this.ContentRef.DialogRef = this.DialogRef;
-            this.DialogRef.ContentRef = this.ContentRef;
+            if (this.ContentRef != null && this.DialogRef != null)
+            {
+                this.ContentRef.DialogRef = this.DialogRef;
+                this.DialogRef.ContentRef = this.ContentRef;
+            }
             
             // Load all data into grid on first render
             await UpdateGrid();
@@ -687,7 +688,7 @@ else
             .GroupBy(x => x.Category)
             .Select(g => new ExpenseCategoryData
             {
-                Category = g.Key,
+                Category = g.Key ?? "",
                 Amount = g.Sum(x => x.Amount),
                 Count = g.Count()
             })
@@ -721,7 +722,7 @@ else
             {
                 var date = transaction.DateTime.ToString("yyyy-MM-dd HH:mm:ss");
                 var category = transaction.Category;
-                var description = transaction.Description.Replace(",", ";"); // Escape commas
+                var description = (transaction.Description ?? "").Replace(",", ";"); // Escape commas
                 var paymentMode = transaction.PaymentMode;
                 var type = transaction.TransactionType;
                 var amount = transaction.Amount;
@@ -788,7 +789,7 @@ else
 
     public class ExpenseCategoryData
     {
-        public string Category { get; set; }
+        public string Category { get; set; } = string.Empty;
         public decimal Amount { get; set; }
         public int Count { get; set; }
     }

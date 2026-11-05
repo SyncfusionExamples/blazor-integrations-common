@@ -91,336 +91,30 @@
     </div>
 </div>
 
-<style>
-    .e-message {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        width: auto;
-        max-width: 400px;
-        letter-spacing: 0.5px;
-        margin: 0;
-        font-size: 14px;
-        font-weight: 500;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 10000;
-        animation: slideIn 0.3s ease-out;
-    }
-
-    @@keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    .modern-transact-dialog :deep(.e-dialog) {
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-        overflow: hidden;
-        position: fixed !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-    }
-
-    .modern-transact-dialog :deep(.e-dlg-container) {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-    }
-
-    .modern-transact-dialog :deep(.e-dlg-header) {
-        background: linear-gradient(135deg, #1ABC9C 0%, #16A085 100%);
-        color: white;
-        border-radius: 12px 12px 0 0;
-        font-size: 18px;
-        font-weight: 600;
-        padding: 20px 24px;
-        border: none;
-    }
-
-    .modern-transact-dialog :deep(.e-dlg-header-content) {
-        color: white;
-    }
-
-    .modern-transact-dialog :deep(.e-close-icon::before) {
-        color: white;
-    }
-
-    .modern-dlg-content {
-        padding: 24px;
-        background: #ffffff;
-    }
-
-    .modern-transaction-dialog {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .form-section {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        padding: 16px;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border-left: 4px solid #1ABC9C;
-        transition: all 0.3s ease;
-    }
-
-    .form-section:hover {
-        background: #f0f2f5;
-        box-shadow: 0 2px 8px rgba(26, 188, 156, 0.1);
-    }
-
-    .section-label {
-        font-size: 12px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.6px;
-        color: #495057;
-        margin-bottom: 4px;
-    }
-
-    /* Transaction Type Section */
-    .transaction-type-section {
-        border-left-color: #1ABC9C;
-    }
-
-    .transaction-type-buttons {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-    }
-
-    .type-radio {
-        flex: 1;
-        min-width: 120px;
-    }
-
-    /* DateTime Section */
-    .datetime-section {
-        border-left-color: #16A085;
-    }
-
-    .datetime-fields {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .date-wrapper {
-        position: relative;
-    }
-
-    .time-wrapper {
-        position: relative;
-    }
-
-    /* Category & Amount Section */
-    .category-amount-section {
-        border-left-color: #13A397;
-    }
-
-    .category-amount-fields {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-
-    .category-wrapper {
-        position: relative;
-    }
-
-    .amount-wrapper {
-        position: relative;
-    }
-
-    /* Description Section */
-    .description-section {
-        border-left-color: #1ABC9C;
-    }
-
-    .description-section .field-wrapper {
-        position: relative;
-    }
-
-    /* Payment Section */
-    .payment-section {
-        border-left-color: #16A085;
-    }
-
-    .payment-options {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-    }
-
-    .payment-radio {
-        flex: 1;
-        min-width: 100px;
-    }
-
-    /* Field Wrapper */
-    .field-wrapper {
-        width: 100%;
-    }
-
-    .modern-transact-dialog :deep(.e-input-group) {
-        border-radius: 6px;
-        border: 1px solid #e0e0e0;
-        transition: all 0.3s ease;
-    }
-
-    .modern-transact-dialog :deep(.e-input-group:focus-within) {
-        border-color: #1ABC9C;
-        box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.1);
-    }
-
-    .modern-transact-dialog :deep(.e-float-input input) {
-        border: none;
-        background: transparent;
-    }
-
-    .modern-transact-dialog :deep(.e-float-line) {
-        background: #1ABC9C;
-    }
-
-    .modern-transact-dialog :deep(.e-btn.e-add) {
-        background: linear-gradient(135deg, #1ABC9C 0%, #16A085 100%);
-        border: none;
-        font-weight: 600;
-        padding: 10px 24px;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-        color: white;
-    }
-
-    .modern-transact-dialog :deep(.e-btn.e-add:hover) {
-        box-shadow: 0 4px 12px rgba(26, 188, 156, 0.4);
-        transform: translateY(-2px);
-    }
-
-    .modern-transact-dialog :deep(.e-btn.e-cancel) {
-        border: 1px solid #e0e0e0;
-        color: #495057;
-        font-weight: 600;
-        padding: 10px 24px;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-    }
-
-    .modern-transact-dialog :deep(.e-btn.e-cancel:hover) {
-        border-color: #1ABC9C;
-        color: #1ABC9C;
-        background: rgba(26, 188, 156, 0.05);
-    }
-
-    /* Responsive Design */
-    @@media (max-width: 768px) {
-        .modern-dlg-content {
-            padding: 16px;
-        }
-
-        .modern-transaction-dialog {
-            gap: 16px;
-        }
-
-        .form-section {
-            padding: 12px;
-            gap: 10px;
-        }
-
-        .datetime-fields,
-        .category-amount-fields {
-            grid-template-columns: 1fr;
-        }
-
-        .transaction-type-buttons,
-        .payment-options {
-            flex-direction: column;
-        }
-
-        .type-radio,
-        .payment-radio {
-            min-width: auto;
-            flex: auto;
-        }
-
-        .e-message {
-            top: 10px;
-            right: 10px;
-            max-width: 90vw;
-            font-size: 13px;
-        }
-
-        .modern-transact-dialog :deep(.e-dlg-header) {
-            font-size: 16px;
-            padding: 16px;
-        }
-    }
-
-    @@media (max-width: 600px) {
-        .modern-transact-dialog :deep(.e-dialog) {
-            width: 95% !important;
-            height: auto !important;
-        }
-
-        .modern-dlg-content {
-            padding: 12px;
-        }
-
-        .modern-transaction-dialog {
-            gap: 12px;
-        }
-
-        .form-section {
-            padding: 10px;
-        }
-
-        .section-label {
-            font-size: 11px;
-        }
-    }
-</style>
-
 @code{
-    public SfDialog TransactionDialog;
-    public TransactGrid ContentRef;
-    SfDropDownList<string, CategoryData> DropDownList;
+    public SfDialog? TransactionDialog;
+    public TransactGrid ContentRef { get; set; } = default!;
+    SfDropDownList<string, CategoryData>? DropDownList;
 
-    public string CategoryValue { get; set; } = null;
+    public string? CategoryValue { get; set; } = null;
     public DateTime? DateValue;
     public DateTime? TimeValue;
-    public string UniqueId { get; set; }
-    public string Description { get; set; }
+    public string UniqueId { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
     public double? Amount = 0;
-    public List<CategoryData> CategoryDataSource { get; set; }
+    public List<CategoryData> CategoryDataSource { get; set; } = new();
     [CascadingParameter]
-    public ExpenseDataService ExpenseDataService { get; set; }
+    public ExpenseDataService ExpenseDataService { get; set; } = default!;
     [Parameter]
-    public Action<List<ExpenseData>> OnGridUpdate { get; set; }
+    public Action<List<ExpenseData>>? OnGridUpdate { get; set; }
     public bool IsAdd = false;
 
     private DateTime MinDate;
     private DateTime MaxDate;
-    private ExpenseData SelectedRecord;
+    private ExpenseData? SelectedRecord;
     private string ButtonContent = "Add";
 
-    public string DialogHeader { get; set; }
+    public string DialogHeader { get; set; } = string.Empty;
     public bool CreateNewDialog = false;
     public bool ShowAddedMsg;
     public bool ShowDeleteMsg;
@@ -429,9 +123,8 @@
 
     public string PaymentMode = "Cash";
 
-    List<ExpenseData> GridSelectedRecords { get; set; }
+    List<ExpenseData> GridSelectedRecords { get; set; } = new();
     private bool ShouldShowDialog = false;
-    private bool DialogJustCreated = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -477,7 +170,6 @@
         if (this.TransactionDialog == null)
         {
             ShouldShowDialog = true;
-            DialogJustCreated = true;
             CreateNewDialog = true;
             StateHasChanged();
         }
@@ -523,7 +215,6 @@
         if (this.TransactionDialog == null)
         {
             ShouldShowDialog = true;
-            DialogJustCreated = true;
             CreateNewDialog = true;
             StateHasChanged();
         }
@@ -539,7 +230,7 @@
         this.ButtonContent = "Save";
         if (SelectedRecord != null && ExpenseDataService != null)
         {
-            this.UniqueId = SelectedRecord.UniqueId;
+            this.UniqueId = SelectedRecord.UniqueId ?? "";
             if (SelectedRecord.TransactionType == "Income")
             {
                 this.TransactionType = "Income";
@@ -551,8 +242,8 @@
                 this.CategoryDataSource = this.ExpenseDataService.CategoryExpenseData ?? new List<CategoryData>();
             }
             this.DateValue = this.TimeValue = SelectedRecord.DateTime;
-            this.PaymentMode = SelectedRecord.PaymentMode;
-            this.Description = SelectedRecord.Description;
+            this.PaymentMode = SelectedRecord.PaymentMode ?? "";
+            this.Description = SelectedRecord.Description ?? "";
             this.Amount = (double?)SelectedRecord.Amount;
             this.CategoryValue = SelectedRecord.Category;
         }
@@ -591,7 +282,7 @@
 
     public async Task DlgOverlayClicked()
     {
-        if (CreateNewDialog)
+        if (CreateNewDialog && this.TransactionDialog != null)
             await this.TransactionDialog.HideAsync();
     }
 
@@ -599,13 +290,13 @@
     {
         if (args.Value == "Income")
         {
-            this.CategoryDataSource = this.ExpenseDataService.CategoryIncomeData;
+            this.CategoryDataSource = this.ExpenseDataService.CategoryIncomeData ?? new List<CategoryData>();
         }
         else
         {
-            this.CategoryDataSource = this.ExpenseDataService.CategoryExpenseData;
+            this.CategoryDataSource = this.ExpenseDataService.CategoryExpenseData ?? new List<CategoryData>();
         }
-        this.CategoryValue = this.CategoryDataSource[0].Category;
+        this.CategoryValue = this.CategoryDataSource.Count > 0 ? this.CategoryDataSource[0].Category : "";
     }
 
     /// <summary>
@@ -683,7 +374,8 @@
                 ShowSavedMsg = true;
             }
             
-            await this.TransactionDialog.HideAsync();
+            if (this.TransactionDialog != null)
+                await this.TransactionDialog.HideAsync();
             this.ContentRef.UpdateTotalBalance();
         }
         catch (Exception ex)
@@ -700,7 +392,7 @@
     /// <param name="args"></param>
     public async Task OnClickDelete()
     {
-        var selectedIds = this.GridSelectedRecords.Select(s => s.UniqueId).ToList();
+        var selectedIds = this.GridSelectedRecords.Select(s => s.UniqueId).Where(id => id != null).Select(id => id!).ToList();
         this.ContentRef.RemoveRecord(selectedIds);
         this.ContentRef.UpdateTotalBalance();
         await ContentRef.EnableToolbarItems();

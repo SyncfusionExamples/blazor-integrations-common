@@ -23,34 +23,34 @@
                         EnableHover="false" AllowPaging="true" Width="100%">
                     <GridPageSettings PageCount="4" PageSize="8"></GridPageSettings>
                     <GridColumns>
-                        <GridColumn Field="@nameof(ExpenseData.DateTime)" HeaderText="Date" Width="140" Format="d"></GridColumn>
-                        <GridColumn Field="@nameof(ExpenseData.Category)" HeaderText="Category" Width="160">
+                        <GridColumn Field="@nameof(ExpenseData.DateTime)" HeaderText="Date" Width="22%" Format="d" ClipMode="@ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field="@nameof(ExpenseData.Category)" HeaderText="Category" Width="32%" ClipMode="@ClipMode.EllipsisWithTooltip">
                             <Template>
                                 @{
                                     var expense = (context as ExpenseData);
                                     <div class="transaction-row">
                                         <div class="transaction-icon">
-                                            <div class="category-icon @expense.Category" style="margin: 0; width: 24px; height: 24px;"></div>
+                                            <div class="category-icon @expense?.Category" style="margin: 0; width: 24px; height: 24px;"></div>
                                         </div>
                                         <div class="transaction-details">
-                                            <div class="transaction-category">@expense.Category</div>
-                                            <div class="transaction-description">@expense.Description</div>
+                                            <div class="transaction-category" title="@expense?.Category">@expense?.Category</div>
+                                            <div class="transaction-description" title="@expense?.Description">@expense?.Description</div>
                                         </div>
                                     </div>
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(ExpenseData.PaymentMode)" HeaderText="Payment Mode" Width="120"></GridColumn>
-                        <GridColumn Field="@nameof(ExpenseData.Amount)" HeaderText="Amount" Width="110" TextAlign="@TextAlign.Right">
+                        <GridColumn Field="@nameof(ExpenseData.PaymentMode)" HeaderText="Payment Mode" Width="26%" ClipMode="@ClipMode.EllipsisWithTooltip"></GridColumn>
+                        <GridColumn Field="@nameof(ExpenseData.Amount)" HeaderText="Amount" Width="20%" TextAlign="@TextAlign.Right" ClipMode="@ClipMode.EllipsisWithTooltip">
                             <Template>
                                 @{
                                     var expense = (context as ExpenseData);
-                                    <div class="transaction-amount @expense.TransactionType">
-                                        @if (expense.TransactionType == "Income")
+                                    <div class="transaction-amount @expense?.TransactionType">
+                                        @if (expense?.TransactionType == "Income")
                                         {
                                             <span>+</span>
                                         }
-                                        <span>$@expense.Amount</span>
+                                        <span>$@expense?.Amount</span>
                                     </div>
                                 }
                             </Template>
@@ -71,9 +71,9 @@
 @code
 {
     [Parameter]
-    public IEnumerable<ExpenseData> RecentExpenseData { get; set; }
+    public IEnumerable<ExpenseData>? RecentExpenseData { get; set; }
     
-    private List<ExpenseData> FilteredTransactions;
+    private List<ExpenseData> FilteredTransactions = new();
     private string SearchTerm = "";
     private string FilterType = "";
     
@@ -114,10 +114,10 @@
         if (!string.IsNullOrEmpty(SearchTerm))
         {
             filtered = filtered.Where(x => 
-                x.Category.ToLower().Contains(SearchTerm) ||
-                x.Description.ToLower().Contains(SearchTerm) ||
-                x.PaymentMode.ToLower().Contains(SearchTerm) ||
-                x.UniqueId.ToLower().Contains(SearchTerm)
+                (x.Category?.ToLower().Contains(SearchTerm) ?? false) ||
+                (x.Description?.ToLower().Contains(SearchTerm) ?? false) ||
+                (x.PaymentMode?.ToLower().Contains(SearchTerm) ?? false) ||
+                (x.UniqueId?.ToLower().Contains(SearchTerm) ?? false)
             );
         }
         

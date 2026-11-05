@@ -12,7 +12,8 @@
                 <ChartAnnotations>
                     <ChartAnnotation X="@chartXAnnoation" Y="9%" CoordinateUnits="Units.Pixel" Region="Regions.Chart">
                         <ContentTemplate>
-                            <p style="font-family:Roboto;font-size: 16px;font-weight: 400;font-weight: 400;letter-spacing: 0.02em;line-height: 16px;color: #0d8d5a !important;">Account - Balance</p>
+                            <p class="chart-title" style="font-size: 16px; font-weight: 700; color: #2da75c; margin-left: 34px;
+    margin-top: 22px;">Account - Balance</p>
                         </ContentTemplate>
                     </ChartAnnotation>
                 </ChartAnnotations>
@@ -33,6 +34,6 @@
 
 @code{
     [Parameter]
-    public List<ExpenseData> LineChartData { get; set; }
+    public List<ExpenseData> LineChartData { get; set; } = new();
     private string chartXAnnoation = "75px";
 }

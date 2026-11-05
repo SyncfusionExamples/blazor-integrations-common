@@ -34,11 +34,11 @@
 
 @code{
     [CascadingParameter]
-    private ExpenseDataService ExpenseDataService { get; set; }
+    private ExpenseDataService ExpenseDataService { get; set; } = default!;
     [Parameter]
-    public IEnumerable<ExpenseData> IncomeData { get; set; }
+    public IEnumerable<ExpenseData>? IncomeData { get; set; }
     [Parameter]
-    public IEnumerable<ExpenseData> ExpenseData { get; set; }
+    public IEnumerable<ExpenseData>? ExpenseData { get; set; }
 
     private string TotalIncome = "$0";
     private string TotalExpense = "$0";
@@ -71,13 +71,13 @@
         var expenseRS = 0;
         
         // Calculate current period totals
-        incomeRS = IncomeData.Sum(s => s.Amount);
-        expenseRS = ExpenseData.Sum(s => s.Amount);
+        incomeRS = (IncomeData ?? Enumerable.Empty<ExpenseData>()).Sum(s => s.Amount);
+        expenseRS = (ExpenseData ?? Enumerable.Empty<ExpenseData>()).Sum(s => s.Amount);
         
         TotalIncome = CommonService.GetCurrencyVal(incomeRS);
         TotalExpense = CommonService.GetCurrencyVal(expenseRS);
         TotalBalance = CommonService.GetCurrencyVal(incomeRS - expenseRS);
-        TotalTransactions = CommonService.GetNumberVal(ExpenseDataService.CurrentExpenseData.Count());
+        TotalTransactions = CommonService.GetNumberVal((ExpenseDataService.CurrentExpenseData ?? Enumerable.Empty<ExpenseData>()).Count());
         
         // Calculate trend indicators comparing to previous month
         IncomeTrend = CalculateTrend(incomeRS, PreviousIncomeAmount, "Income");
